@@ -7,7 +7,7 @@ Aapi.PeripheralSetup()
 PD = AAPI.Pertype("playerDetector")
 Playersinspawn = {}
 function PlayerFinder()
-    local players = PD.getPlayersInRange(100)¶           
+    local players = PD.getPlayersInRange(100)           
     if players then
         for i = 1, #players do
             --if players[i] ~= "Wolf_Obsidio" then
