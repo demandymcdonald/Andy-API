@@ -621,7 +621,8 @@ term.setCursorBlink( false )
 term.setCursorPos(1,1)
 end
 
-function requestObject(url,sN,mode)
+function requestObject(url, sN, mode)
+    print("test2")
     if not url then error('Incorrect statement!') end
     if not sN and mode == 'get' then error('Check mode!') end
     if mode == 'get' then
@@ -664,22 +665,24 @@ function requestObject(url,sN,mode)
     end
 end
 
-function compileURL(auth,pro,bran,pat)
+function compileURL(auth, pro, bran, pat)
+    print("test1")
     baseURL = 'https://raw.github.com/'..auth..'/'..pro..'/'..bran..'/'..pat
     return baseURL
 end
 
-local git = {}
-function git.get(auth,reps,bran,paths,sN)
+local gitapi = {}
+function gitapi.get(auth, reps, bran, paths, sN)
+    print("test0")
     if not auth or not reps or not bran or not paths or not sN then error('Attempt to compile nonexistent terms!') end
     statusCode = requestObject(compileURL(auth,reps,bran,paths),sN,'get')
     return statusCode
 end
 
-function git.view(auth,reps,bran,paths)
+function gitapi.view(auth,reps,bran,paths)
     if not auth or not reps or not bran or not paths then error('Attempt to compile nonexistent terms!') end
     statusCode = requestObject(compileURL(auth,reps,bran,paths),nil,'view')
     return statusCode
 end
 
-return git
+return gitapi
