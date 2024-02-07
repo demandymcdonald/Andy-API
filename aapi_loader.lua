@@ -3,11 +3,13 @@ F = {}
 
 function F.setVersion(version)
     BeenRun = false
-    print("[LOADER]  Version set to: " .. version)
+
     if version == "m" then
         Version = "m"
+        print("[LOADER]  Version set to: Main Release")
     elseif version == "d" then
         Version = "d"
+        print("[LOADER]  Version set to: Development Release")       
     end
 end
 function F.git()
