@@ -42,7 +42,7 @@ function F.update()
         Git.get("demandymcdonald", "Andy-API", "InDev", "git.lua", "aapi_loader_tmp.lua")
     end
     shell.run("delete aapi_loader.lua")
-    shell.run("rename /aapi_loader_tmp.lua /aapi_loader.lua")a
+    shell.run("rename /aapi_loader_tmp.lua /aapi_loader.lua")
     print("[LOADER] AAPI_Loader is Up-To-Date")
 end
 function F.core()

@@ -622,7 +622,6 @@ term.setCursorPos(1,1)
 end
 
 function requestObject(url, sN, mode)
-    print("test2")
     if not url then error('Incorrect statement!') end
     if not sN and mode == 'get' then error('Check mode!') end
     if mode == 'get' then
@@ -666,14 +665,12 @@ function requestObject(url, sN, mode)
 end
 
 function compileURL(auth, pro, bran, pat)
-    print("test1")
     baseURL = 'https://raw.github.com/'..auth..'/'..pro..'/'..bran..'/'..pat
     return baseURL
 end
 
 local gitapi = {}
 function gitapi.get(auth, reps, bran, paths, sN)
-    print("test0")
     if not auth or not reps or not bran or not paths or not sN then error('Attempt to compile nonexistent terms!') end
     statusCode = requestObject(compileURL(auth,reps,bran,paths),sN,'get')
     return statusCode
