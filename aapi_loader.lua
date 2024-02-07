@@ -1,13 +1,13 @@
 
-f = {}
-function f.setVersion(version)
+F = {}
+function F.setVersion(version)
     if version == "m" then
         Version = "m"
     elseif version == "d" then
         Version = "d"
     end
 end
-function f.git()
+function F.git()
     if fs.exists("/git.lua") then
         git = require("git")
         sleep(1)
@@ -17,12 +17,17 @@ function f.git()
         sleep(1)
         print("[SETUP]   Download Successful..")
         sleep(.5)
-        Apistartup()
     end
 end
-function f.core()
+function F.core()
     
+    F.git()
+    if Version == "m" then
+        git.get("demandymcdonald","Andy-API","main","aapi_core.lua","aapi_core.lua")
+    elseif Version == "d" then
+        git.get("demandymcdonald","Andy-API","InDev","aapi_core.lua","aapi_core.lua")
+    end
+    Aapi = require("aapi_core")
 end
 
-Apistartup()
-
+return F
