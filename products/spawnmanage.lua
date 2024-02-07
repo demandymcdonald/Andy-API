@@ -4,7 +4,7 @@ Aapi.initDebug(DebugLogFiles)
 Aapi.dbg("hello world")
 Debugmode = true
 Aapi.PeripheralSetup()
-PD = AAPI.Pertype("playerDetector")
+PD = Aapi.Pertype("playerDetector")
 Playersinspawn = {}
 function PlayerFinder()
     local players = PD.getPlayersInRange(100)           
