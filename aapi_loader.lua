@@ -44,6 +44,7 @@ function F.update()
     shell.run("delete aapi_loader.lua")
     shell.run("rename /aapi_loader_tmp.lua /aapi_loader.lua")
     shell.run("delete aapi_loader_tmp.lua")
+    print("[LOADER] AAPI_Loader is Up-To-Date")
 end
 function F.core()
     F.git()
