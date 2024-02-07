@@ -9,7 +9,9 @@ Playersinspawn = {}
 function PlayerFinder()
     local players = PD.getPlayersInRange(100)           
     if players then
+        Aapi.dbg("Players in Spawn Area:")
         for i = 1, #players do
+            Aapi.dbg(players[i])
             --if players[i] ~= "Wolf_Obsidio" then
             commands.exec("gamemode adventure " .. players[i])
             table.insert(Playersinspawn, players[i])
@@ -21,11 +23,13 @@ function PlayerFinder()
         for e = 1, #players do
             if Playersinspawn[i] == players[e] then
                 here = true
+                Aapi.dbg(players[i].." is still in spawn")
                 break
             end
         end
         if here == false then
-            commands.exec("gamemode adventure " .. Playersinspawn[i])
+            Aapi.dbg(Playersinspawn[i].." has left spawn")
+            commands.exec("gamemode survival " .. Playersinspawn[i])
             table.remove(Playersinspawn, i)
         end
     end
