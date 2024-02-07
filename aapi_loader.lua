@@ -40,9 +40,9 @@ end
 function F.update()
     F.git()
     if Version == "m" then
-        Git.get("demandymcdonald", "Andy-API", "main", "git.lua", "aapi_loader_tmp.lua")
+        Git.get("demandymcdonald", "Andy-API", "main", "aapi_loader.lua", "aapi_loader_tmp.lua")
     elseif Version == "d" then
-        Git.get("demandymcdonald", "Andy-API", "InDev", "git.lua", "aapi_loader_tmp.lua")
+        Git.get("demandymcdonald", "Andy-API", "InDev", "aapi_loader.lua", "aapi_loader_tmp.lua")
     end
     shell.run("delete aapi_loader.lua")
     shell.run("rename /aapi_loader_tmp.lua /aapi_loader.lua")
