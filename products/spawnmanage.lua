@@ -7,7 +7,10 @@ Aapi.PeripheralSetup()
 PD = Aapi.Pertype("playerDetector")
 Playersinspawn = {}
 function PlayerFinder()
-    local players = PD.getPlayersInRange(100)           
+    local players = nil
+    for a = 1,#PD do
+        players = PD[a].getPlayersInRange(100) 
+    end    
     if players then
         Aapi.dbg("Players in Spawn Area:")
         for i = 1, #players do
