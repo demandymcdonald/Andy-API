@@ -4,3 +4,4 @@ Aapi.initDebug(DebugLogFiles)
 Aapi.dbg("hello world")
 Debugmode = true
 Aapi.PeripheralSetup()
+print("test2")
