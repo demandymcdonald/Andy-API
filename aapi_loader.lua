@@ -21,7 +21,6 @@ function F.git()
             end
             shell.run("delete gitapi.lua")
             shell.run("rename /gitapi_tmp.lua /gitapi.lua")
-            shell.run("delete gitapi_tmp.lua")
             Git = require("gitapi")
             sleep(1)
         else
@@ -42,8 +41,7 @@ function F.update()
         Git.get("demandymcdonald", "Andy-API", "InDev", "git.lua", "aapi_loader_tmp.lua")
     end
     shell.run("delete aapi_loader.lua")
-    shell.run("rename /aapi_loader_tmp.lua /aapi_loader.lua")
-    shell.run("delete aapi_loader_tmp.lua")
+    shell.run("rename /aapi_loader_tmp.lua /aapi_loader.lua")a
     print("[LOADER] AAPI_Loader is Up-To-Date")
 end
 function F.core()
