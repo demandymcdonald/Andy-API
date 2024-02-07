@@ -12,7 +12,7 @@ function PlayerFinder()
         for i = 1, #players do
             --if players[i] ~= "Wolf_Obsidio" then
             commands.exec("gamemode adventure " .. players[i])
-            table.insert(Playersinspawnm, players[i])
+            table.insert(Playersinspawn, players[i])
             --end
         end
     end
