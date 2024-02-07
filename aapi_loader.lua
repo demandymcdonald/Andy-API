@@ -35,6 +35,7 @@ function F.git()
     end
 end
 function F.update()
+    F.git()
     if Version == "m" then
         Git.get("demandymcdonald", "Andy-API", "main", "git.lua", "aapi_loader_tmp.lua")
     elseif Version == "d" then
