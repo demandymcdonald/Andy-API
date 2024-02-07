@@ -23,7 +23,7 @@ function PlayerFinder()
         for e = 1, #players do
             if Playersinspawn[i] == players[e] then
                 here = true
-                Aapi.dbg(players[i].." is still in spawn")
+                Aapi.dbg(players[e].." is still in spawn")
                 break
             end
         end
