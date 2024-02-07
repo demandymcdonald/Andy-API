@@ -102,5 +102,18 @@ function F.user()
     end
     Sound = require("aapi_user")
 end
+function F.custom(path,name,isapi,apiname)
+    F.git()
+    print("[LOADER]  Initializing"..name.."...")
+    shell.run("delete "..name)
+    if Version == "m" then
+        Git.get("demandymcdonald", "Andy-API", "main", path, name)
+    elseif Version == "d" then
+        Git.get("demandymcdonald", "Andy-API", "InDev", path, name)
+    end
+    if isapi then
+        _G[apiname] = require(isapi)
+    end
+end
 local aapi_loader = F
 return aapi_loader
