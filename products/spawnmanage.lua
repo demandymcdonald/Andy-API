@@ -31,7 +31,7 @@ function PlayerFinder()
             end
         end
         if here == false then
-            Aapi.dbg(Playersinspawn[i].." has left spawn")
+            Aapi.dbg("Player: "..Playersinspawn[i].." has left spawn")
             commands.exec("gamemode survival " .. Playersinspawn[i])
             table.remove(Playersinspawn, i)
         end
