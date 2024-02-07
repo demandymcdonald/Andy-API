@@ -1,4 +1,12 @@
+
 f = {}
+function f.setVersion(version)
+    if version == "m" then
+        Version = "m"
+    elseif version == "d" then
+        Version = "d"
+    end
+end 
 function git()
     if fs.exists("/git.lua") then
         git = require("git")
@@ -13,6 +21,8 @@ function git()
     end
 end
 function f.core()
+    
 end
+
 Apistartup()
 
