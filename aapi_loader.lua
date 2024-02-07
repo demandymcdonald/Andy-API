@@ -19,6 +19,7 @@ function F.git()
             elseif Version == "d" then
                 Git.get("demandymcdonald", "Andy-API", "InDev", "git.lua", "gitapi_tmp.lua")
             end
+            print("test")
             shell.run("delete gitapi.lua")
             shell.run("rename /gitapi_tmp.lua /gitapi.lua")
             Git = require("gitapi")
