@@ -38,22 +38,24 @@ local function addObject(name, price)
     Savelist()
 end
 local function bulkaddObject()
-    for slot, item in pairs(Inv.list()) do
-        local name = nil
-        local price = nil
-        if item then
-            local slotitem = Inv.getItemDetail(slot)
-            if slotitem then 
-                print(slotitem.displayName .. " Set base price: ")
-                price = Aapi.uinput(nil, "EVE", nil, "num")
-                local nombre = name
-                name = {}
-                name["Dname"] = nombre
-                name["Price"] = price
-                name["Inf"] = 1
-                name["Num"] = 0
-                table.insert(PriceList, name)
-                Aapi.dbg(name["Dname"] .. " added at the price of " .. name["Price"])
+    if Inv.list() then
+        for slot, item in pairs(Inv.list()) do
+            local name = nil
+            local price = nil
+            if item then
+                local slotitem = Inv.getItemDetail(slot)
+                if slotitem then 
+                    print(slotitem.displayName .. " Set base price: ")
+                    price = Aapi.uinput(nil, "EVE", nil, "num")
+                    local nombre = name
+                    name = {}
+                    name["Dname"] = nombre
+                    name["Price"] = price
+                    name["Inf"] = 1
+                    name["Num"] = 0
+                    table.insert(PriceList, name)
+                    Aapi.dbg(name["Dname"] .. " added at the price of " .. name["Price"])
+                end
             end
         end
     end
