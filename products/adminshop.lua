@@ -18,7 +18,7 @@ function Startup()
         end
     end
     PriceList = Aapi.FM("initialize", "/AS")
-    if PriceList == nil thenabout:blank#blocked
+    if PriceList == nil then
         PriceList = {}
     end
 end
