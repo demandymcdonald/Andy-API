@@ -36,9 +36,9 @@ function PlayerFinder()
         end
         if here == false then
             commands.exec("gamemode survival " .. Playersinspawn[i])
-            table.remove(Playersinspawn, i)
         end
     end
+    Playersinspawn = {}
     sleep(5)
 end
 while true do
