@@ -13,13 +13,13 @@ function Startup()
             Inv = peripheral.wrap(PeripheralList[i])
         end
     end
-    PriceList = Aapi.FM("initialize", "/AS/MarketPrice")
+    PriceList = Aapi.FM("initialize", "/AS/MarketPrice.txt")
     if PriceList == nil then
         PriceList = {}
     end
 end
 function Savelist()
-    Aapi.FM("save", "/AS/MarketPrice", PriceList)
+    Aapi.FM("save", "/AS/MarketPrice.txt", PriceList)
 end
 local function addObject(name, price)
     local nombre = name
