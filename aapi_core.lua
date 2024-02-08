@@ -117,13 +117,13 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
 
     if autocomplete == true then
         if type(allow) == "table" then
-            print()
+            aapi.cprint()
             msg = read(nil, nil, function(text) return complete.choice(text, allow) end)
         else
             return
         end
     else
-        print()
+        aapi.cprint()
         msg = read()
     end
     if password == true then
