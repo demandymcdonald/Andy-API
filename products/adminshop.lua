@@ -48,7 +48,7 @@ local function bulkaddObject()
                 local slotitem = Inv.getItemDetail(slot)
                 if slotitem then 
                     Aapi.cprint(nil,"Eve",slotitem.displayName .. " Set base price: ")
-                    price = Aapi.uinput(nil, "EVE", nil, "num")
+                    price = Aapi.uinput(nil, "Eve", nil, "num")
                     local nombre = name
                     name = {}
                     name["Dname"] = nombre
