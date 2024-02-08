@@ -58,7 +58,7 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
     end
     local allowlist = {
         num = function()
-            if isint(msg) then
+            if tonumber(msg) ~= nil then
                 confo(msg)
             else
                 aapi.cprint(window,sender,"Invalid entry.. Please only use numbers",nil,speed)
