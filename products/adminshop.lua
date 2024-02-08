@@ -37,7 +37,7 @@ local function bulkaddObject()
         local name = nil
         local price = nil
         if item then
-            local slotitem = inv.getItemDetail(slot)
+            local slotitem = Inv.getItemDetail(slot)
             print(slotitem.displayName .. " Set base price: ")
             price = Aapi.uinput(nil, "EVE", nil, "num")
             local nombre = name
@@ -59,7 +59,7 @@ local function buy()
             local itemprice = 0
             local iteminf = 1
             local itemnum = 1
-            local slotitem = inv.getItemDetail(slot)
+            local slotitem = Inv.getItemDetail(slot)
             for key, item_ in pairs(PriceList) do
                 if item == item_.Dname then
                     itemprice = item_.Price
