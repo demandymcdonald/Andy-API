@@ -145,7 +145,13 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
         return(msg)
     end
 end
-function aapi.cprint(window,sender,msg,log,speed)
+function aapi.cprint(window, sender, msg, log, speed)
+    local sender_ = nil
+    if sender == nil then
+        sender_ = "null"
+    else
+        sender_ = sender 
+    end
     if window == nil then
         window = term.native()
     end
@@ -190,12 +196,12 @@ function aapi.cprint(window,sender,msg,log,speed)
     local last = term.current()
     local color = nil
     local send = nil
-    if types[string.lower(sender)][1] then 
+    if types[string.lower(sender_)][1] then 
         color = types[string.lower(sender)][1]
     else
         color = colors.white
     end
-    if types[string.lower(sender)][2] then 
+    if types[string.lower(sender_)][2] then 
         send = types[string.lower(sender)][2]
     else
         send = os.date("%R").." [MSG]   "
