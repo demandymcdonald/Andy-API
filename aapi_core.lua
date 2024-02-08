@@ -274,6 +274,9 @@ function aapi.FM(operation,file,data)
         initialize = function ()
             if fs.exists(file) then
                 local f = fs.open(file, "r")
+                if f == nil then
+                    return
+                end
                 value = f.readAll()
                 f.close()
             else
