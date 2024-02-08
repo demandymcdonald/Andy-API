@@ -43,8 +43,7 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
             return false
         else
             return true
-        end `
-        .7
+        end
     end
     local function confo(msg)
         if confirm == true then
