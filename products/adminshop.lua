@@ -30,7 +30,7 @@ local function addObject(name, price)
 end
 local function buy()
     local upforoffer = {}
-    for slot, item in pairs(inv.list()) do
+    for slot, item in pairs(Inv.list()) do
         if item then
             local itemprice = 0
             local iteminf = 1
