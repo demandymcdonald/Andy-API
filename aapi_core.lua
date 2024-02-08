@@ -275,6 +275,7 @@ function aapi.FM(operation,file,data)
             if fs.exists(file) then
                 local f = fs.open(file, "r")
                 if f == nil then
+                    aapi.dbg("Error: ".. file.." is nil")
                     return
                 end
                 value = f.readAll()
@@ -286,6 +287,10 @@ function aapi.FM(operation,file,data)
         end,
         save = function ()
             local f = fs.open(file, "w")
+            if f == nil then
+                aapi.dbg("Error: ".. file.." is nil")
+                return
+            end
             for i = 1, #data do
                 f.writeLine(data[i])
             end
@@ -294,6 +299,10 @@ function aapi.FM(operation,file,data)
         end,
         load = function()
             local f = fs.open(file, "r")
+            if f == nil then
+                aapi.dbg("Error: ".. file.." is nil")
+                return
+            end
             value = f.readAll()
             f.close()
         end,
