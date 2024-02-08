@@ -37,7 +37,6 @@ end
 function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password)
     local msg = nil
     local complete = require("cc.completion")
-    local atype = nil
     local function isint(n)
         return n == math.floor(n)
     end
@@ -62,7 +61,7 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
             if isint(msg) then
                 confo(msg)
             else
-                aapi.cprint(window,sender,"Invalid entry.. Please only use numbers between 0-9",nil,speed)
+                aapi.cprint(window,sender,"Invalid entry.. Please only use numbers",nil,speed)
                 sleep(1)
                 aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password)
             end
@@ -101,20 +100,21 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
             end
         end
     }
-    if allow == nil then
-        atype = "none"
-    elseif type(allow) == "table" then
-        atype = "tallow"
-    elseif type(allow) == "string" then
-        for key, value in pairs(allowlist) do
-            if allow == value then
-                atype = allow 
-            end
-        end
-        if atype == nil then
-            atype = "sallow"
-        end
-    end
+    --if allow == nil then
+    --     atype = "none"
+    -- elseif type(allow) == "table" then
+    --     atype = "tallow"
+    -- elseif type(allow) == "string" then
+    --     for key, value in pairs(allowlist) do
+    --         if allow == value then
+    --             atype = allow 
+    --         end
+    --     end
+    --     if atype == nil then
+    --         atype = "sallow"
+        --     end
+    --end
+
     if autocomplete == true then
         if type(allow) == "table" then
             print()
@@ -134,7 +134,9 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
         sleep(1)
         aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password)
     else
-        allowlist[atype]()
+        if allow then
+            allowlist[allow]()
+        end
         return(msg)
     end
 end

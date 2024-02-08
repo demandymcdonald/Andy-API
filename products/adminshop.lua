@@ -45,7 +45,7 @@ local function bulkaddObject()
             if item then
                 local slotitem = Inv.getItemDetail(slot)
                 if slotitem then 
-                    print(slotitem.displayName .. " Set base price: ")
+                    Aapi.cprint(nil,"Eve",slotitem.displayName .. " Set base price: ")
                     price = Aapi.uinput(nil, "EVE", nil, "num")
                     local nombre = name
                     name = {}
