@@ -19,14 +19,33 @@ function Savelist()
     Aapi.FM("save", "/AS/MarketPrice", PriceList)
 end
 local function addObject(name, price)
-        local nombre = name
-        name = {}
-        name["Dname"] = nombre    
-        name["Price"] = price
-        name["Inf"] = 1
-        name["Num"] = 0
+    local nombre = name
+    name = {}
+    name["Dname"] = nombre
+    name["Price"] = price
+    name["Inf"] = 1
+    name["Num"] = 0
     table.insert(PriceList, name)
-    Aapi.dbg(name["Dname"].." added at the price of "..name["Price"])
+    Aapi.dbg(name["Dname"] .. " added at the price of " .. name["Price"])
+end
+local function bulkaddObject()
+    for slot, item in pairs(Inv.list()) do
+        local name = nil
+        local price = nil
+        if item then
+            local slotitem = inv.getItemDetail(slot)
+            print(slotitem.displayName .. " Set base price: ")
+            price = Aapi.uinput(nil, "EVE", nil, "num")
+            local nombre = name
+            name = {}
+            name["Dname"] = nombre    
+            name["Price"] = price
+            name["Inf"] = 1
+            name["Num"] = 0
+            table.insert(PriceList, name)
+            Aapi.dbg(name["Dname"].." added at the price of "..name["Price"])
+        end    
+    end 
 end
 local function buy()
     local upforoffer = {}
@@ -57,5 +76,6 @@ local function buy()
 end
 Startup()
 addObject("minecraft:cobblestone", 0.001)
-addObject("minecraft:dirt",0.001)
+addObject("minecraft:dirt", 0.001)
+bulkaddObject()
 buy()
