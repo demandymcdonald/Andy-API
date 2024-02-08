@@ -17,14 +17,16 @@ function Startup()
             Aapi.dbg("Inv Wrapped")
         end
     end
-    PriceList = Aapi.FM("initialize", "/AS/MarketPrice.txt")
+    PriceList = Aapi.FM("initialize", "/AS")
     if PriceList == nil then
         PriceList = {}
     end
 end
 Startup()
 function Savelist()
-    Aapi.FM("save", "/AS/MarketPrice.txt", PriceList)
+    if Aapi.FM("save", "/AS/MarketPrice.txt", PriceList) == 1 then
+        return
+    end
 end
 local function addObject(name, price)
     local nombre = name
