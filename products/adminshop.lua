@@ -56,5 +56,6 @@ local function buy()
     end
 end
 Startup()
+addObject("minecraft:cobblestone", 0.001)
+addObject("minecraft:dirt",0.001)
 buy()
-addObject("minecraft:cobblestone",0.001)
