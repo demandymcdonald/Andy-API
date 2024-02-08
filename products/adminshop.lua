@@ -22,6 +22,7 @@ function Startup()
         PriceList = {}
     end
 end
+Startup()
 function Savelist()
     Aapi.FM("save", "/AS/MarketPrice.txt", PriceList)
 end
@@ -87,7 +88,7 @@ local function buy()
         end
     end
 end
-Startup()
+
 addObject("minecraft:cobblestone", 0.001)
 addObject("minecraft:dirt", 0.001)
 bulkaddObject()
