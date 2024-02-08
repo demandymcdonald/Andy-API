@@ -3,8 +3,8 @@ local DebugLogFiles = "SpawnManager/debuglogs/"
 Aapi.initDebug(DebugLogFiles)
 Debugmode = true
 PriceList = {}
-Inv = 0
-Dispose = 0
+Inv = {}
+Dispose = {}
 --Price format item {Price = price, Inf = inflation, Num = numsold}
 function Startup()
     local PeripheralList = peripheral.getNames()
