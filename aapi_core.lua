@@ -38,7 +38,13 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
     local msg = nil
     local complete = require("cc.completion")
     local function isint(n)
-        return n == math.floor(n)
+        local a = math.floor(n)
+        if a == nil then 
+            return false
+        else
+            return true
+        end `
+        .7
     end
     local function confo(msg)
         if confirm == true then
@@ -183,8 +189,18 @@ function aapi.cprint(window,sender,msg,log,speed)
         }
     }
     local last = term.current()
-    local color = types[string.lower(sender)][1]
-    local send = types[string.lower(sender)][2]
+    local color = nil
+    local send = nil
+    if types[string.lower(sender)][1] then 
+        color = types[string.lower(sender)][1]
+    else
+        color = colors.white
+    end
+    if types[string.lower(sender)][2] then 
+        send = types[string.lower(sender)][2]
+    else
+        send = os.date("%R").." [MSG]   "
+    end
     term.redirect(window)
     local x,y = term.getCursorPos()
     term.setTextColor(color)
