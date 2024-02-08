@@ -8,11 +8,11 @@ Dispose = {}
 --Price format item {Price = price, Inf = inflation, Num = numsold}
 function Startup()
     local PeripheralList = peripheral.getNames()
-    for i = 1, #PeripheralList, 1 do
-        if PeripheralList[i] == "trashcans:ultimate_trash_can_tile" then
+    for i = 1, #PeripheralList do
+        if peripheral.getType(PeripheralList[i]) == "trashcans:ultimate_trash_can_tile" then
             Dispose = peripheral.wrap(PeripheralList[i])
             Aapi.dbg("Dispose Wrapped")
-        elseif PeripheralList[i] == "sophisticatedstorage:shulker_box" then
+        elseif peripheral.getType(PeripheralList[i]) == "sophisticatedstorage:shulker_box" then
             Inv = peripheral.wrap(PeripheralList[i])
             Aapi.dbg("Inv Wrapped")
         end
