@@ -25,20 +25,21 @@ function PlayerFinder()
             commands.exec("effect give " .. players[i] .. " minecraft:regeneration 10")
             commands.exec("effect give ".. players[i].." minecraft:saturation 10")
         end
-    end
-    for i = 1, #Playersinspawn do
-        local here = false
-        for e = 1, #players do
-            if Playersinspawn[i] == players[e] then
-                here = true
-                break
+
+        for i = 1, #Playersinspawn do
+            local here = false
+            for e = 1, #players do
+                if Playersinspawn[i] == players[e] then
+                    here = true
+                    break
+                end
+            end
+            if here == false then
+                commands.exec("gamemode survival " .. Playersinspawn[i])
+                table.remove(Playersinspawn, i)
             end
         end
-        if here == false then
-            commands.exec("gamemode survival " .. Playersinspawn[i])
-        end
     end
-    Playersinspawn = {}
     sleep(5)
 end
 while true do
