@@ -9,7 +9,7 @@ function Startup()
     for i = 1, #PeripheralList, 1 do
         if PeripheralList[i] == "trashcans:ultimate_trash_can_tile" then
             Dispose = peripheral.wrap(PeripheralList[i])
-        elseif PeripheralList[i] == "sophisticatedstorage:limited_barrel" then
+        elseif PeripheralList[i] == "sophisticatedstorage:shulker_box" then
             Inv = peripheral.wrap(PeripheralList[i])
         end
     end
