@@ -19,25 +19,24 @@ function PlayerFinder()
         for i = 1, #players do
             Aapi.dbg(players[i])
             --if players[i] ~= "Wolf_Obsidio" then
-                commands.exec("gamemode adventure " .. players[i])
-                table.insert(Playersinspawn, players[i])
+            commands.exec("gamemode adventure " .. players[i])
+            table.insert(Playersinspawn, players[i])
             --end
             commands.exec("effect give " .. players[i] .. " minecraft:regeneration 10")
-            commands.exec("effect give ".. players[i].." minecraft:saturation 10")
+            commands.exec("effect give " .. players[i] .. " minecraft:saturation 10")
         end
-
-        for i = 1, #Playersinspawn do
-            local here = false
-            for e = 1, #players do
-                if Playersinspawn[i] == players[e] then
-                    here = true
-                    break
-                end
+    end
+    for i = 1, #Playersinspawn do
+        local here = false
+        for e = 1, #players do
+            if Playersinspawn[i] == players[e] then
+                here = true
+                break
             end
-            if here == false then
-                commands.exec("gamemode survival " .. Playersinspawn[i])
-                table.remove(Playersinspawn, i)
-            end
+        end
+        if here == false and Playersinspawn[i] ~= nil then
+            commands.exec("gamemode survival " .. Playersinspawn[i])
+            table.remove(Playersinspawn, i)
         end
     end
     sleep(5)
