@@ -146,12 +146,6 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
     end
 end
 function aapi.cprint(window, sender, msg, log, speed)
-    local sender_ = nil
-    if sender == nil then
-        sender_ = "null"
-    else
-        sender_ = sender 
-    end
     if window == nil then
         window = term.native()
     end
@@ -193,19 +187,47 @@ function aapi.cprint(window, sender, msg, log, speed)
             os.date("%R").." [USER]   "
         }
     }
+    local list = {
+        "api",
+        "con",
+        "net",
+        "dis",
+        "set",
+        "log",
+        "dbg",
+        "eve",
+        "user"
+    }
     local last = term.current()
     local color = nil
     local send = nil
-    if types[string.lower(sender_)][1] then 
+    local onlist = false
+    for i = 1, #list do
+        if list[i] == sender then
+            onlist = true
+        end
+    end
+    if onlist == true then
         color = types[string.lower(sender)][1]
+        send = types[string.lower(sender)][2]
+    elseif sender == nil then
+        color = colors.white
+        send = os.date("%R").." [MSG]   "
     else
         color = colors.white
+        send = os.date("%R").." ["..sender.."]   "  
     end
-    if types[string.lower(sender_)][2] then 
-        send = types[string.lower(sender)][2]
-    else
-        send = os.date("%R").." [MSG]   "
-    end
+    
+    -- if sender ~= "null" then 
+    --     color = types[string.lower(sender)][1]
+    -- else
+    --     color = colors.white
+    -- end
+    -- if types[string.lower(sender_)][2] then 
+    --     send = types[string.lower(sender)][2]
+    -- else
+    --     send = os.date("%R").." [MSG]   "
+    -- end
     term.redirect(window)
     local x,y = term.getCursorPos()
     term.setTextColor(color)
