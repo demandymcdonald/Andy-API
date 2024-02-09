@@ -62,6 +62,8 @@ local function bulkaddObject()
     Savelist()
 end
 local function scanchest()
+    local upforoffer = {}
+    local total = 0
     for slot, item in pairs(Inv.list()) do
         if item then
             local itemprice = 0
@@ -88,14 +90,22 @@ local function scanchest()
             end
         end
     end
+    for key, value in pairs(upforoffer) do
+        local lqty = value[2]
+        local lpri = value[3]
+        local stot = lqty * lpri
+        total = stot + total
+    end
+
+    return({upforoffer,total})
 end
-local function buy()
-    scanchest()
-    local upforoffer = {}
+local function sell()
+    local offer = scanchest()[1]
+    local total = scanchest()[1]   
 
 end
 
 addObject("minecraft:cobblestone", 0.001)
 addObject("minecraft:dirt", 0.001)
 bulkaddObject()
-buy()
+sell()
