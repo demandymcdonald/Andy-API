@@ -51,7 +51,8 @@ local function bulkaddObject()
                     iname["Num"] = 0
                     table.insert(PriceList, iname)
                     Aapi.dbg(iname["Dname"] .. " added at the price of " .. iname["Price"])
-                end
+                    sleep(1)   
+                    end
             end
         end
     end
@@ -71,7 +72,12 @@ local function scanchest()
                     itemprice = item_["Price"]
                     iteminf = item_["Inf"]
                     itemnum = item_["Num"]
+                    Aapi.dbg("Name: " .. item_["Name"])
+                    Aapi.dbg("Price: " .. item_["Price"])
+                    Aapi.dbg("Inflation: " .. item_["Inf"])
+                    Aapi.dbg("Qty: " .. item_["Num"])                   
                 end
+
             end
             if slotitem then
                 local lineitem = {
@@ -96,6 +102,7 @@ local function scanchest()
     return({upforoffer,total})
 end
 local function sell()
+    local msg = read()
     local offer,total = scanchest()[1],scanchest()[2]
     local function redstone()
         while true do
