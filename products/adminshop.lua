@@ -108,13 +108,13 @@ local function scanchest()
         total = stot + total
         aapi.dbg("Subtotal: " .. stot)
     end
+    disp.arrayTabulate(w_Main, upforoffer, 1)
     aapi.dbg("Total: " .. total)
-    disp.arrayTabulate(w_Main,upforoffer,1)
     return({upforoffer,total})
 end
 local function sell()
     local msg = read()
-    local offer, total = scanchest()[1], scanchest()[2]
+    local offer, total = nil,nil
     local accepted = false
     local function redstone()
         while accepted == false do
@@ -127,7 +127,7 @@ local function sell()
         while accepted == false do
             w_Main.clear()
             w_Main.setCursorPos(1,1)
-            offer, total = scanchest()[1], scanchest()[2]
+            offer, total = scanchest()
             sleep(15)
         end
     end
