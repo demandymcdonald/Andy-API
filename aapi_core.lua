@@ -232,23 +232,25 @@ function aapi.cprint(window, sender, msg, log, speed)
     local mx,my = term.getSize()
     if y == 1 then
         term.clear()
-        term.setCursorPos(1,1)
+        term.setCursorPos(1, 1)
     elseif y == my then
         term.clear()
-        term.setCursorPos(1,1)
+        term.setCursorPos(1, 1)
     end
+    local x, y = term.getCursorPos()
+    aapi.dbg("msg sent by: "..send.." Cx: "..x.." Cy: "..y)
     term.setTextColor(color)
     write(send)
     term.setTextColor(colors.white)
     if speed == nil then
         if msg == nil then
-            write("   ")
+            write(" ")
         else
             write(msg)
         end
     else
         if msg == nil then
-            write("   ")
+            write(" ")
         else
             textutils.slowWrite(msg, speed)
         end
