@@ -115,6 +115,7 @@ function aapi_display.initDisplay(setup,result,pers,displaynames,savepath)
     end
 end
 function aapi_display.addWindow(par, name, title, x, y, wid, hei, color, fs)
+    local last = term.current()
     local w, h = par.getSize()
     aapi.dbg(w)
     aapi.dbg(h)
@@ -166,6 +167,7 @@ function aapi_display.addWindow(par, name, title, x, y, wid, hei, color, fs)
     term.setCursorPos(1, 1)
     _G["w_" .. name].setTextColor(colors.white)
     --print("test test test")
+    term.redirect(last)
 end
 function aapi_display.windowArray(parent,number,namet,titlet,bcolor,fs,startx,starty,endx,endy)
     local rows = 0
