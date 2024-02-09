@@ -63,9 +63,9 @@ function F.display()
     print("[LOADER]  Initializing AAPI_Display...")
     shell.run("delete aapi_display.lua")
     if Version == "m" then
-        Git.get("demandymcdonald", "Andy-API", "main", "aapi_core.lua", "aapi_display.lua")
+        Git.get("demandymcdonald", "Andy-API", "main", "aapi_display.lua", "aapi_display.lua")
     elseif Version == "d" then
-        Git.get("demandymcdonald", "Andy-API", "InDev", "aapi_core.lua", "aapi_display.lua")
+        Git.get("demandymcdonald", "Andy-API", "InDev", "aapi_display.lua", "aapi_display.lua")
     end
     Disp = require("aapi_display")
 end
@@ -85,9 +85,9 @@ function F.sound()
     print("[LOADER]  Initializing AAPI_Sound...")
     shell.run("delete aapi_sound.lua")
     if Version == "m" then
-        Git.get("demandymcdonald", "Andy-API", "main", "aapi_net.lua", "aapi_sound.lua")
+        Git.get("demandymcdonald", "Andy-API", "main", "aapi_sound.lua", "aapi_sound.lua")
     elseif Version == "d" then
-        Git.get("demandymcdonald", "Andy-API", "InDev", "aapi_net.lua", "aapi_sound.lua")
+        Git.get("demandymcdonald", "Andy-API", "InDev", "aapi_sound.lua", "aapi_sound.lua")
     end
     Sound = require("aapi_sound")
 end
@@ -98,7 +98,7 @@ function F.user()
     if Version == "m" then
         Git.get("demandymcdonald", "Andy-API", "main", "aapi_user.lua", "aapi_user.lua")
     elseif Version == "d" then
-        Git.get("demandymcdonald", "Andy-API", "InDev", "aapi_net.lua", "aapi_user.lua")
+        Git.get("demandymcdonald", "Andy-API", "InDev", "aapi_user.lua", "aapi_user.lua")
     end
     Sound = require("aapi_user")
 end
