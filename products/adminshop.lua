@@ -31,16 +31,6 @@ function Savelist()
         return
     end
 end
-local function addObject(name, price)
-    local nobj = {}
-    nobj["Dname"] = name
-    nobj["Price"] = price
-    nobj["Inf"] = 1
-    nobj["Num"] = 0
-    table.insert(PriceList, nobj)
-    Aapi.dbg(name["Dname"] .. " added at the price of " .. name["Price"])
-    Savelist()
-end
 local function bulkaddObject()
     if Inv.list() then
         for slot, item in pairs(Inv.list()) do
@@ -48,16 +38,19 @@ local function bulkaddObject()
             local price = nil
             if item then
                 local slotitem = Inv.getItemDetail(slot)
-                if slotitem then 
+                if slotitem then
+                    local iname = slotitem.name
+                    name = slotitem.displayName
                     Aapi.cprint(nil,"Eve",slotitem.displayName .. " Set base price: ")
                     price = Aapi.uinput(nil, "Eve", nil, "num")
-                    local nobj = {}
-                    nobj["Dname"] = name
-                    nobj["Price"] = price
-                    nobj["Inf"] = 1
-                    nobj["Num"] = 0
-                    table.insert(PriceList, nobj)
-                    Aapi.dbg(name["Dname"] .. " added at the price of " .. name["Price"])
+                    iname = {}
+                    iname["Name"] = slotitem.name
+                    iname["Dname"] = name
+                    iname["Price"] = price
+                    iname["Inf"] = 1
+                    iname["Num"] = 0
+                    table.insert(PriceList, iname)
+                    Aapi.dbg(iname["Dname"] .. " added at the price of " .. iname["Price"])
                 end
             end
         end
@@ -74,10 +67,10 @@ local function scanchest()
             local itemnum = 1
             local slotitem = Inv.getItemDetail(slot)
             for key, item_ in pairs(PriceList) do
-                if item == item_.Dname then
-                    itemprice = item_.Price
-                    iteminf = item_.Inf
-                    itemnum = item_.Num
+                if item.name == item_["Name"] then
+                    itemprice = item_["Price"]
+                    iteminf = item_["Inf"]
+                    itemnum = item_["Num"]
                 end
             end
             if slotitem then
@@ -116,7 +109,5 @@ local function sell()
     end
 end
 
-addObject("minecraft:cobblestone", 0.001)
-addObject("minecraft:dirt", 0.001)
 bulkaddObject()
 sell()
