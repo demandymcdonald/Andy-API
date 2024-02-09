@@ -769,14 +769,14 @@ function aapi_display.ctrtitle(disp, msg, rate)
     disp.setCursorPos(xctr, yctr)
     textutils.slowWrite(msg, rate)
 end
-function aapi_display.arrayTabulate(window,data,starty)
+function aapi_display.arrayTabulate(disp,data,starty)
     local rowcount = 0
     local colcount = 0
     local column = {}
     local coleng = {}
     local ctleng = {}
     --setmetatable(column, {_G = _G})            
-    local dlen,dhei = window.getSize()
+    local dlen,dhei = disp.getSize()
     for key, value in pairs(data) do
         colcount = 0
         rowcount = rowcount + 1
@@ -805,11 +805,11 @@ function aapi_display.arrayTabulate(window,data,starty)
             colpos = colpos + coleng[i - 1] + 2
             ypos = starty
         end
-        window.setCursorPos(colpos, ypos)
+        disp.setCursorPos(colpos, ypos)
         for key,value in pairs(column[i]) do
-            write(" " .. string.sub(value,1, coleng[i]))
+            disp.write(" " .. string.sub(value,1, coleng[i]))
             ypos = ypos + 1
-            window.setCursorPos(colpos, ypos)            
+            disp.setCursorPos(colpos, ypos)            
         end
     end
 end
