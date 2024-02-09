@@ -771,7 +771,7 @@ function aapi_display.ctrtitle(disp, msg, rate)
     disp.setCursorPos(xctr, yctr)
     textutils.slowWrite(msg, rate)
 end
-function aapi_display.arrayTabulate(disp,data,starty)
+function aapi_display.arrayTabulate(disp,data,starty,color)
     local rowcount = 0
     local colcount = 0
     local column = {}
@@ -802,6 +802,10 @@ function aapi_display.arrayTabulate(disp,data,starty)
     -- Start Printing Table
     local colpos = 1
     local ypos = starty
+    if color == nil then
+        color = colors.white
+    end
+    disp.setTextColor(color)
     for i = 1, colcount do
         coleng[i] = (ctleng[i] / dlen) - 2
         if i ~= 1 then
