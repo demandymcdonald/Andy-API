@@ -80,22 +80,19 @@ local function scanchest()
 
             end
             if slotitem then
-                local lineitem = {
-                    Name = slotitem.displayName,
-                    Qty = slotitem.count,
-                    Price = (itemprice / iteminf),
-                    Futureinf = (iteminf + ((slotitem.count + itemnum) * .08)),
-                    NewQty = slotitem.count + itemnum
-                }
+                local lineitem = {}
+                lineitem["Name"] = slotitem.displayName
+                lineitem["Qty"] = slotitem.count
+                lineitem["Price"] = (itemprice / iteminf)
+                lineitem["Futureinf"] = (iteminf + ((slotitem.count + itemnum) * .08))
+                lineitem["NewQty"] = slotitem.count + itemnum
                 table.insert(upforoffer, lineitem)
                 textutils.tabulate(lineitem)
             end
         end
     end
     for key, value in pairs(upforoffer) do
-        local lqty = value[2]
-        local lpri = value[3]
-        local stot = lqty * lpri
+        local stot = value["Qty"] * value["Price"]
         total = stot + total
     end
 
