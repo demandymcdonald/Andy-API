@@ -1,6 +1,7 @@
-Aapi = require("aapi_core")
+local aapi = require("aapi_core")
+local disp = require("aapi_display")
 local DebugLogFiles = "SpawnManager/debuglogs/"
-Aapi.initDebug(DebugLogFiles)
+aapi.initDebug(DebugLogFiles)
 Debugmode = true
 PriceList = {}
 Inv = {}
@@ -14,27 +15,30 @@ function Startup()
     for i = 1, #PeripheralList do
         if peripheral.getType(PeripheralList[i]) == "trashcans:ultimate_trash_can_tile" then
             Dispose = peripheral.wrap(PeripheralList[i])
-            Aapi.dbg("Dispose Wrapped")
+            aapi.dbg("Dispose Wrapped")
         elseif peripheral.getType(PeripheralList[i]) == "sophisticatedstorage:shulker_box" then
             Inv = peripheral.wrap(PeripheralList[i])
-            Aapi.dbg("Inv Wrapped")
+            aapi.dbg("Inv Wrapped")
         elseif peripheral.getType(PeripheralList[i]) == "sophisticatedstorage:limited_barrel" then
             Coinbox = peripheral.wrap(PeripheralList[i])
-            Aapi.dbg("Coin Box Wrapped")
+            aapi.dbg("Coin Box Wrapped")
         elseif peripheral.getType(PeripheralList[i]) == "create:creative_crate" then
             Coinsrc = peripheral.wrap(PeripheralList[i])
-            Aapi.dbg("Coin Source")
+            aapi.dbg("Coin Source Wrapped")
+        elseif peripheral.getType(PeripheralList[i]) == "monitor" then
+            Mon = peripheral.wrap(PeripheralList[i])
+            aapi.dbg("Monitor Wrapped")
         end
     end
-    PriceList = Aapi.FM("initialize", "/AS")
+    PriceList = aapi.FM("initialize", "/AS")
     if PriceList == nil then
         PriceList = {}
     end
-
+    disp.addwindow(Mon,"Main","The Company Store",1,1,1,1,"colors:black",true)
 end
 Startup()
 function Savelist()
-    if Aapi.FM("save", "/AS/MarketPrice.txt", PriceList) == 1 then
+    if aapi.FM("save", "/AS/MarketPrice.txt", PriceList) == 1 then
         return
     end
 end
@@ -48,8 +52,8 @@ local function bulkaddObject()
                 if slotitem then
                     local iname = slotitem.name
                     name = slotitem.displayName
-                    Aapi.cprint(nil,"Eve",slotitem.displayName .. " Set base price: ")
-                    price = Aapi.uinput(nil,"Eve", nil, "num")
+                    aapi.cprint(nil,"Eve",slotitem.displayName .. " Set base price: ")
+                    price = aapi.uinput(nil,"Eve", nil, "num")
                     iname = {}
                     iname["Name"] = slotitem.name
                     iname["Dname"] = name
@@ -57,7 +61,7 @@ local function bulkaddObject()
                     iname["Inf"] = 1
                     iname["Num"] = 0
                     table.insert(PriceList, iname)
-                    Aapi.dbg(iname["Dname"] .. " added at the price of " .. iname["Price"])
+                    aapi.dbg(iname["Dname"] .. " added at the price of " .. iname["Price"])
                     sleep(1)   
                     end
             end
@@ -79,13 +83,12 @@ local function scanchest()
                     itemprice = item_["Price"]
                     iteminf = tonumber(item_["Inf"])
                     itemnum = tonumber(item_["Num"])
-                    Aapi.dbg("Name: " .. item_["Name"])
-                    Aapi.dbg("Price: " .. itemprice)
-                    Aapi.dbg("Inflation: " .. item_["Inf"])
-                    Aapi.dbg("Qty: " .. item_["Num"])
-                    sleep(1)              
+                    aapi.dbg("Name: " .. item_["Name"])
+                    aapi.dbg("Price: " .. itemprice)
+                    aapi.dbg("Inflation: " .. item_["Inf"])
+                    aapi.dbg("Qty: " .. item_["Num"])
+                    sleep(1)
                 end
-
             end
             if slotitem then
                 local lineitem = {}
@@ -98,13 +101,14 @@ local function scanchest()
             end
         end
     end
+    
     for key, value in pairs(upforoffer) do
         local stot = value["Qty"] * value["Price"]
         total = stot + total
-        Aapi.dbg("Subtotal: " .. stot)
-      
+        aapi.dbg("Subtotal: " .. stot)
+        
     end
-        Aapi.dbg("Total: " .. total)  
+        aapi.dbg("Total: " .. total)  
     return({upforoffer,total})
 end
 local function sell()
@@ -120,14 +124,17 @@ local function sell()
     end
     local function scaninv()
         while accepted == false do
+            sleep(1)
+            term.clear()
+            term.setCursorPos(1,1)
             offer, total = scanchest()[1], scanchest()[2]
             sleep(1)
         end
     end
     parallel.waitForAll(redstone, scaninv)
     print("it worked!!!")
-    Aapi.cprint(nil, "Store", "Please type in the username that you'd like to have the funds sent to: ")
-    local username = Aapi.uinput(nil, "Store", nil, nil, true)
+    aapi.cprint(nil, "Store", "Please type in the username that you'd like to have the funds sent to: ")
+    local username = aapi.uinput(nil, "Store", nil, nil, true)
     for slot, item in pairs(Inv.list()) do
         if item then
             Inv.pushItems(peripheral.getName(Dispose), slot)
