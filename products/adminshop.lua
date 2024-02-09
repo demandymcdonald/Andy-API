@@ -106,7 +106,7 @@ local function scanchest()
         local stot = value["Qty"] * value["Price"]
         total = stot + total
         aapi.dbg("Subtotal: " .. stot)
-        
+        disp.arrayTabulate(w_Main,upforoffer,1)
     end
         aapi.dbg("Total: " .. total)  
     return({upforoffer,total})
@@ -125,8 +125,8 @@ local function sell()
     local function scaninv()
         while accepted == false do
             sleep(1)
-            term.clear()
-            term.setCursorPos(1,1)
+            w_Main.clear()
+            w_Main.setCursorPos(1,1)
             offer, total = scanchest()[1], scanchest()[2]
             sleep(1)
         end

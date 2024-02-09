@@ -750,7 +750,7 @@ function aapi_display.loading(disp, num, tasks)
     disp.setCursorPos(xctr, yctr)
     disp.write("Loading...")
 end
-function aapi_display.ctrtitle(disp,msg,rate)
+function aapi_display.ctrtitle(disp, msg, rate)
     local cool = nil
     local w, h = disp.getSize()
     if disp == term.native() then
@@ -765,8 +765,52 @@ function aapi_display.ctrtitle(disp,msg,rate)
         disp.setTextScale(3)
         cool = 3
     end
-    local xctr, yctr = ((w / 2)-cool) - (string.len(msg)/2), (h / 2)
+    local xctr, yctr = ((w / 2) - cool) - (string.len(msg) / 2), (h / 2)
     disp.setCursorPos(xctr, yctr)
-    textutils.slowWrite(msg,rate)
+    textutils.slowWrite(msg, rate)
+end
+function aapi_display.arrayTabulate(window,data,starty)
+    local rowcount = 0
+    local colcount = 0
+    local column = {}
+    local coleng = {}
+    local ctleng = {}
+    --setmetatable(column, {_G = _G})            
+    local dlen,dhei = window.getSize()
+    for key, value in pairs(data) do
+        colcount = 0
+        rowcount = rowcount + 1
+        for i = 1, #value do
+            colcount = colcount + 1
+        end
+    end
+    for key, value in pairs(data) do
+        for i = 1, colcount do
+            if ctleng[i] == nil then
+                ctleng[i] = 0
+            end
+            if ctleng[i] < string.len(value[i]) then
+                ctleng[i] = math.max((string.len(value[i]) + ctleng[i]) / 2)
+            end
+            column[i] = {}
+            table.insert(column[i], value[i])
+        end
+    end
+    -- Start Printing Table
+    local colpos = 1
+    local ypos = starty
+    for i = 1, colcount do
+        coleng[i] = (ctleng[i] / dlen) - 2
+        if i ~= 1 then
+            colpos = colpos + coleng[i - 1] + 2
+            ypos = starty
+        end
+        window.setCursorPos(colpos, ypos)
+        for key,value in pairs(column[i]) do
+            write(" " .. string.sub(value,1, coleng[i]))
+            ypos = ypos + 1
+            window.setCursorPos(colpos, ypos)            
+        end
+    end
 end
 return aapi_display
