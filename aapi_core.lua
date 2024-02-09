@@ -212,7 +212,7 @@ function aapi.cprint(window, sender, msg, log, speed)
         send = types[string.lower(sender)][2]
     elseif sender == nil then
         color = colors.white
-        send = os.date("%R").." [MSG]   "
+        send = "  "
     else
         color = colors.white
         send = os.date("%R").." ["..string.upper(sender).."]   "  
@@ -234,9 +234,17 @@ function aapi.cprint(window, sender, msg, log, speed)
     write(send)
     term.setTextColor(colors.white)
     if speed == nil then
-        write(msg)
+        if msg == nil then
+            write("   ")
+        else
+            write(msg)
+        end
     else
-        textutils.slowWrite(msg, speed)
+        if msg == nil then
+            write("   ")
+        else
+            textutils.slowWrite(msg, speed)
+        end
     end
     term.setCursorPos(1,y+1)
     term.redirect(last)
