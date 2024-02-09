@@ -128,6 +128,7 @@ local function sell()
             Inv.pushItems(peripheral.getName(Dispose), slot)
         end
     end
+---@diagnostic disable-next-line: param-type-mismatch
     Coinsrc.pushItems(peripheral.getName(Coinbox), 1,total)
 end
 
