@@ -117,7 +117,7 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
     --end
     --term.redirect(window)
     local x, y = term.getCursorPos()
-    aapi.dbg("Cursor Y: "..y)
+    --aapi.dbg("Cursor Y: "..y)
     term.setCursorPos(1,y+1)   
     if autocomplete == true then
         if type(allow) == "table" then
