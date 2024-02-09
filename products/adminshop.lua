@@ -5,6 +5,9 @@ Debugmode = true
 PriceList = {}
 Inv = {}
 Dispose = {}
+sleep(1)
+term.clear()
+term.setCursorPos(1,1)
 --Price format item {Price = price, Inf = inflation, Num = numsold}
 function Startup()
     local PeripheralList = peripheral.getNames()
@@ -73,13 +76,14 @@ local function scanchest()
             local slotitem = Inv.getItemDetail(slot)
             for key, item_ in pairs(PriceList) do
                 if item.name == item_["Name"] then
-                    itemprice = tonumber(item_["Price"])
+                    itemprice = item_["Price"]
                     iteminf = tonumber(item_["Inf"])
                     itemnum = tonumber(item_["Num"])
                     Aapi.dbg("Name: " .. item_["Name"])
-                    Aapi.dbg("Price: " .. item_["Price"])
+                    Aapi.dbg("Price: " .. itemprice)
                     Aapi.dbg("Inflation: " .. item_["Inf"])
-                    Aapi.dbg("Qty: " .. item_["Num"])                   
+                    Aapi.dbg("Qty: " .. item_["Num"])
+                    sleep(1)              
                 end
 
             end
