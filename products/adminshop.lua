@@ -35,7 +35,7 @@ function Startup()
         PriceList = {}
     end
     --disp.initDisplay()
-    disp.addWindow(Mon,"Main","The Company Store",0,0,1,1,"colors:black",true)
+    disp.addWindow(Mon,"Main","The Company Store",0,0,1,1,colors.black,true)
 end
 Startup()
 function Savelist()
