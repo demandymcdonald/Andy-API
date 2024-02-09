@@ -124,7 +124,6 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
     --end
     --term.redirect(window)
     local x, y = term.getCursorPos()
-    term.setTextColor(color)
     term.setCursorPos(1,y+1)   
     if autocomplete == true then
         if type(allow) == "table" then
