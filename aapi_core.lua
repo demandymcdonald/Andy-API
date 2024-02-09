@@ -235,15 +235,15 @@ function aapi.cprint(window, sender, msg, log, speed)
     term.setTextColor(colors.white)
     if speed == nil then
         if msg == nil then
-            write("   ")
+            f_.writeLine("   ")
         else
-            write(msg)
+            f_.writeLine(msg)
         end
     else
         if msg == nil then
-            write("   ")
+            f_.writeLine("   ")
         else
-            textutils.slowWrite(msg, speed)
+            textutils.slowPrint(msg, speed)
         end
     end
     term.setCursorPos(1,y+1)

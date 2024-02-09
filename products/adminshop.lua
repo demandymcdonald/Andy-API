@@ -5,6 +5,7 @@ Debugmode = true
 PriceList = {}
 Inv = {}
 Dispose = {}
+Currency = "thermal:gold_coin{display:{Name:'[{"text":"Star Coin","italic":false,"underlined":true,"bold":true,"color":"gold"}]',Lore:['[{"text":"The official currency of the HOI Boi Server","italic":false}]']}}"
 --Price format item {Price = price, Inf = inflation, Num = numsold}
 function Startup()
     local PeripheralList = peripheral.getNames()
@@ -63,8 +64,7 @@ local function bulkaddObject()
     end
     Savelist()
 end
-local function buy()
-    local upforoffer = {}
+local function scanchest()
     for slot, item in pairs(Inv.list()) do
         if item then
             local itemprice = 0
@@ -91,6 +91,11 @@ local function buy()
             end
         end
     end
+end
+local function buy()
+    local function scanchest
+    local upforoffer = {}
+
 end
 
 addObject("minecraft:cobblestone", 0.001)
