@@ -142,8 +142,12 @@ local function sell()
 end
 local function buy()
     local itemsforsale = {}
-    local function additem(name,pysical,price)
-            
+    local function additem(name, title, physical, price, cmd)
+        itemsforsale[name] = {}
+        itemsforsale[name]["title"] = title
+        itemsforsale[name]["type"] = physical
+        itemsforsale[name]["price"] = price
+        itemsforsale[name]["cmd"] = cmd
     end
     aapi.cprint(nil, "Shop", "Please type in the number of the item you wish to purchase: ")
     local msg aapi.uinput(nil, "Shop", nil, "num")

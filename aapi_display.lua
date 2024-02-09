@@ -786,6 +786,8 @@ function aapi_display.arrayTabulate(disp,data,starty,color)
         for i = 1, #value do
             colcount = colcount + 1
         end
+        aapi.dbg("Colcount: " .. colcount)
+        aapi.dbg("Rowcount: "..rowcount)
     end
     for key, value in pairs(data) do
         for i = 1, colcount do
@@ -802,11 +804,14 @@ function aapi_display.arrayTabulate(disp,data,starty,color)
     -- Start Printing Table
     local colpos = 1
     local ypos = starty
+
     if color == nil then
         color = colors.white
     end
     disp.setTextColor(color)
     for i = 1, colcount do
+        aapi.dbg("Colpos: " .. colpos)
+        aapi.dbg("Ypos: "..colpos)
         coleng[i] = (ctleng[i] / dlen) - 2
         if i ~= 1 then
             colpos = colpos + coleng[i - 1] + 2
