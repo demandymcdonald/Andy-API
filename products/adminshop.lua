@@ -1,5 +1,6 @@
 local aapi = require("aapi_core")
 local disp = require("aapi_display")
+sleep(2)
 local DebugLogFiles = "SpawnManager/debuglogs/"
 aapi.initDebug(DebugLogFiles)
 Debugmode = true
