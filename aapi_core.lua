@@ -232,6 +232,7 @@ function aapi.cprint(window, sender, msg, log, speed)
     local mx,my = term.getSize()
     if y == 1 then
         term.clear()
+        term.setCursorPos(1,1)
     elseif y == my then
         term.clear()
         term.setCursorPos(1,1)
