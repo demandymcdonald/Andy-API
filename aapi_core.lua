@@ -119,10 +119,10 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
     --         atype = "sallow"
         --     end
     --end
-    if window == nil then
-        window = term.native()
-    end
-    term.redirect(window)
+    --if window == nil then
+    --    window = term.native()
+    --end
+    --term.redirect(window)
     local x, y = term.getCursorPos()
     term.setTextColor(color)
     term.setCursorPos(1,y+1)   

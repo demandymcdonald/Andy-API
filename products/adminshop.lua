@@ -42,7 +42,7 @@ local function bulkaddObject()
                     local iname = slotitem.name
                     name = slotitem.displayName
                     Aapi.cprint(nil,"Eve",slotitem.displayName .. " Set base price: ")
-                    price = Aapi.uinput(nil, "Eve", nil, "num")
+                    price = Aapi.uinput(nil,"Eve", nil, "num")
                     iname = {}
                     iname["Name"] = slotitem.name
                     iname["Dname"] = name
