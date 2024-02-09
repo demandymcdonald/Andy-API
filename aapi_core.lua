@@ -248,16 +248,16 @@ function aapi.cprint(window, sender, msg, log, speed)
         if msg == nil then
             write("   ")
         else
-            textutils.slowPrint(msg, speed)
+            textutils.slowWrite(msg, speed)
         end
     end
-    term.setCursorPos(1,y+1)
     term.redirect(last)
-    if log ~= nil then 
+    if log ~= nil then
         local f_ = fs.open(log, "a")
-        f_.writeLine(textutils.formatTime(os.time("local")) .. ": "..msg)
-        f_.close()  
+        f_.writeLine(textutils.formatTime(os.time("local")) .. ": " .. msg)
+        f_.close()
     end
+    term.setCursorPos(1,y+1)  
 end
 function aapi.PeripheralSetup()
     AttachedPer = {}
