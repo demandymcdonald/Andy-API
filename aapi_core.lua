@@ -235,13 +235,13 @@ function aapi.cprint(window, sender, msg, log, speed)
     term.setTextColor(colors.white)
     if speed == nil then
         if msg == nil then
-            f_.writeLine("   ")
+            write("   ")
         else
-            f_.writeLine(msg)
+            write(msg)
         end
     else
         if msg == nil then
-            f_.writeLine("   ")
+            write("   ")
         else
             textutils.slowPrint(msg, speed)
         end
