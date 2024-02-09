@@ -119,7 +119,7 @@ local function sell()
     local function redstone()
         while accepted == false do
             os.pullEvent("redstone")
-            print("A redstone input has changed!")
+            --print("A redstone input has changed!")
             accepted = true
         end
     end
