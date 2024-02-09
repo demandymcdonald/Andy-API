@@ -38,6 +38,7 @@ function Startup()
     disp.addWindow(Mon,"Main","The Company Store",0,0,1,1,colors.black,true)
 end
 Startup()
+sleep(1)
 function Savelist()
     if aapi.FM("save", "/AS/MarketPrice.txt", PriceList) == 1 then
         return
