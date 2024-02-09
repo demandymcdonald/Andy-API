@@ -15,6 +15,9 @@ function Startup()
         elseif peripheral.getType(PeripheralList[i]) == "sophisticatedstorage:shulker_box" then
             Inv = peripheral.wrap(PeripheralList[i])
             Aapi.dbg("Inv Wrapped")
+        elseif peripheral.getType(PeripheralList[i]) == "sophisticatedstorage:limited_barrel" then
+            Coinbox = peripheral.wrap(PeripheralList[i])
+            Aapi.dbg("Coin Box Wrapped")
         end
     end
     PriceList = Aapi.FM("initialize", "/AS")
@@ -100,9 +103,17 @@ local function scanchest()
     return({upforoffer,total})
 end
 local function sell()
-    local offer = scanchest()[1]
-    local total = scanchest()[1]   
-
+    local offer,total = scanchest()[1],scanchest()[2]
+    local function redstone()
+        while true do
+            os.pullEvent("redstone")
+            print("A redstone input has changed!")
+        end
+    end
+    local function scaninv()
+        offer,total = scanchest()[1],scanchest()[2]
+        sleep(5)  
+    end
 end
 
 addObject("minecraft:cobblestone", 0.001)
