@@ -69,15 +69,15 @@ local function scanchest()
     local total = 0
     for slot, item in pairs(Inv.list()) do
         if item then
-            local itemprice = 0
-            local iteminf = 1
-            local itemnum = 1
+            local itemprice = tonumber(0)
+            local iteminf = tonumber(1)
+            local itemnum = tonumber(1)
             local slotitem = Inv.getItemDetail(slot)
             for key, item_ in pairs(PriceList) do
                 if item.name == item_["Name"] then
-                    itemprice = item_["Price"]
-                    iteminf = item_["Inf"]
-                    itemnum = item_["Num"]
+                    itemprice = tonumber(item_["Price"])
+                    iteminf = tonumber(item_["Inf"])
+                    itemnum = tonumber(item_["Num"])
                     Aapi.dbg("Name: " .. item_["Name"])
                     Aapi.dbg("Price: " .. item_["Price"])
                     Aapi.dbg("Inflation: " .. item_["Inf"])
