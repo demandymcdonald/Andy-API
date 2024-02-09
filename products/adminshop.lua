@@ -118,6 +118,8 @@ local function sell()
     end
     parallel.waitForAll(redstone, scaninv)
     print("it worked!!!")
+    Aapi.cprint(nil, "Store", "Please type in the username that you'd like to have the funds sent to: ")
+    local username = Aapi.uinput(nil, "Store",nil,nil,true)
 end
 
 bulkaddObject()
