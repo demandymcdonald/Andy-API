@@ -5,7 +5,6 @@ Debugmode = true
 PriceList = {}
 Inv = {}
 Dispose = {}
-Currency = "thermal:gold_coin{display:{Name:'[{"text":"Star Coin","italic":false,"underlined":true,"bold":true,"color":"gold"}]',Lore:['[{"text":"The official currency of the HOI Boi Server","italic":false}]']}}"
 --Price format item {Price = price, Inf = inflation, Num = numsold}
 function Startup()
     local PeripheralList = peripheral.getNames()
@@ -30,13 +29,12 @@ function Savelist()
     end
 end
 local function addObject(name, price)
-    local nombre = name
-    name = {}
-    name["Dname"] = nombre
-    name["Price"] = price
-    name["Inf"] = 1
-    name["Num"] = 0
-    table.insert(PriceList, name)
+    local nobj = {}
+    nobj["Dname"] = name
+    nobj["Price"] = price
+    nobj["Inf"] = 1
+    nobj["Num"] = 0
+    table.insert(PriceList, nobj)
     Aapi.dbg(name["Dname"] .. " added at the price of " .. name["Price"])
     Savelist()
 end
@@ -50,13 +48,12 @@ local function bulkaddObject()
                 if slotitem then 
                     Aapi.cprint(nil,"Eve",slotitem.displayName .. " Set base price: ")
                     price = Aapi.uinput(nil, "Eve", nil, "num")
-                    local nombre = name
-                    name = {}
-                    name["Dname"] = nombre
-                    name["Price"] = price
-                    name["Inf"] = 1
-                    name["Num"] = 0
-                    table.insert(PriceList, name)
+                    local nobj = {}
+                    nobj["Dname"] = name
+                    nobj["Price"] = price
+                    nobj["Inf"] = 1
+                    nobj["Num"] = 0
+                    table.insert(PriceList, nobj)
                     Aapi.dbg(name["Dname"] .. " added at the price of " .. name["Price"])
                 end
             end
@@ -93,7 +90,7 @@ local function scanchest()
     end
 end
 local function buy()
-    local function scanchest
+    scanchest()
     local upforoffer = {}
 
 end
