@@ -238,7 +238,7 @@ function aapi.cprint(window, sender, msg, log, speed)
         term.setCursorPos(1, 1)
     end
     local x, y = term.getCursorPos()
-    aapi.dbg("msg sent by: "..send.." Cx: "..x.." Cy: "..y)
+    --aapi.dbg("msg sent by: "..send.." Cx: "..x.." Cy: "..y)
     term.setTextColor(color)
     write(send)
     term.setTextColor(colors.white)
