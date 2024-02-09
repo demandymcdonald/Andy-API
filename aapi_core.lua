@@ -236,7 +236,6 @@ function aapi.cprint(window, sender, msg, log, speed)
         term.clear()
         term.setCursorPos(1,1)
     end
-    
     term.setTextColor(color)
     write(send)
     term.setTextColor(colors.white)
