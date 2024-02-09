@@ -777,7 +777,7 @@ function aapi_display.arrayTabulate(disp,data,starty)
     local column = {}
     local coleng = {}
     local ctleng = {}
-    Aapi.dbg("Array Tabulating initiated...")
+    aapi.dbg("Array Tabulating initiated...")
     --setmetatable(column, {_G = _G})            
     local dlen,dhei = disp.getSize()
     for key, value in pairs(data) do
@@ -814,7 +814,7 @@ function aapi_display.arrayTabulate(disp,data,starty)
             ypos = ypos + 1
             disp.setCursorPos(colpos, ypos)
         end
-        Aapi.dbg("Line "..i.." tabulated")
+        aapi.dbg("Line "..i.." tabulated")
     end
 end
 return aapi_display
