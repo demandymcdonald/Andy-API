@@ -34,7 +34,7 @@ function Startup()
     if PriceList == nil then
         PriceList = {}
     end
-    disp.addwindow(Mon,"Main","The Company Store",1,1,1,1,"colors:black",true)
+    disp.addWindow(Mon,"Main","The Company Store",1,1,1,1,"colors:black",true)
 end
 Startup()
 function Savelist()
