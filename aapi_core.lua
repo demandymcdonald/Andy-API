@@ -47,15 +47,16 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
             else
                 aapi.cprint(window, sender, "Entries do not match.. Try again", nil, speed)
                 sleep(1)
-                aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password)
+                aapi.uinput(window, sender, speed, allow, confirm, autocomplete, password)
             end
         else
             return (msg)
         end
     end
+
     local allowlist = {
         num = function()
-            if type(msg) == 'number' then
+            if tonumber(msg) ~= nil then
                 confo(msg)
             else
                 aapi.cprint(window,sender,"Invalid entry.. Please only use numbers",nil,speed)
@@ -64,7 +65,7 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
             end
         end,
         abc = function()
-            if type(msg) == 'string' then
+            if tonumber(msg) == nil then
                 confo(msg)
             else
                 aapi.cprint(window, sender, "Invalid entry.. Please only use Letters and Symbols", nil, speed)
