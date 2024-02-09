@@ -34,8 +34,8 @@ function Startup()
     if PriceList == nil then
         PriceList = {}
     end
-    disp.initDisplay()
-    disp.addWindow(Mon,"Main","The Company Store",1,1,1,1,"colors:black",true)
+    --disp.initDisplay()
+    --disp.addWindow(Mon,"Main","The Company Store",1,1,1,1,"colors:black",true)
 end
 Startup()
 function Savelist()
@@ -107,7 +107,7 @@ local function scanchest()
         local stot = value["Qty"] * value["Price"]
         total = stot + total
         aapi.dbg("Subtotal: " .. stot)
-        disp.arrayTabulate(w_Main,upforoffer,1)
+        disp.arrayTabulate(Mon,upforoffer,1)
     end
         aapi.dbg("Total: " .. total)  
     return({upforoffer,total})
