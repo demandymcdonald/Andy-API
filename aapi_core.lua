@@ -229,9 +229,14 @@ function aapi.cprint(window, sender, msg, log, speed)
     -- end
     term.redirect(window)
     local x, y = term.getCursorPos()
+    local mx,my = term.getSize()
     if y == 1 then
-        term.clear()    
+        term.clear()
+    elseif y == my then
+        term.clear()
+        term.setCursorPos(1,1)
     end
+    
     term.setTextColor(color)
     write(send)
     term.setTextColor(colors.white)
