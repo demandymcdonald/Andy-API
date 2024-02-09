@@ -87,30 +87,37 @@ local function scanchest()
                 lineitem["Futureinf"] = (iteminf + ((slotitem.count + itemnum) * .08))
                 lineitem["NewQty"] = slotitem.count + itemnum
                 table.insert(upforoffer, lineitem)
-                textutils.tabulate(lineitem)
             end
         end
     end
     for key, value in pairs(upforoffer) do
         local stot = value["Qty"] * value["Price"]
         total = stot + total
+        Aapi.dbg("Subtotal: " .. stot)
+      
     end
-
+        Aapi.dbg("Total: " .. total)  
     return({upforoffer,total})
 end
 local function sell()
     local msg = read()
-    local offer,total = scanchest()[1],scanchest()[2]
+    local offer, total = scanchest()[1], scanchest()[2]
+    local accepted = false
     local function redstone()
         while true do
             os.pullEvent("redstone")
             print("A redstone input has changed!")
+            accepted = true
         end
     end
     local function scaninv()
-        offer,total = scanchest()[1],scanchest()[2]
-        sleep(5)  
+        while accepted == false do
+            offer, total = scanchest()[1], scanchest()[2]
+            sleep(1)
+        end
     end
+    parallel.waitForAll(redstone, scaninv)
+    print("it worked!!!")
 end
 
 bulkaddObject()
