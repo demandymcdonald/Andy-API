@@ -107,9 +107,9 @@ local function scanchest()
         local stot = value["Qty"] * value["Price"]
         total = stot + total
         aapi.dbg("Subtotal: " .. stot)
-        disp.arrayTabulate(w_Main,upforoffer,1)
     end
-        aapi.dbg("Total: " .. total)  
+    aapi.dbg("Total: " .. total)
+    disp.arrayTabulate(w_Main,upforoffer,1)
     return({upforoffer,total})
 end
 local function sell()
