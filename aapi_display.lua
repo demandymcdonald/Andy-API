@@ -1,5 +1,5 @@
 local aapi_display = {}
-aapi = require("aapi_core")
+local aapi = require("aapi_core")
 function aapi_display.initDisplay(setup,result,pers,displaynames,savepath)
     DataTableSize = {}
     Gval = 0
