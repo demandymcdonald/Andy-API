@@ -18,6 +18,9 @@ function Startup()
         elseif peripheral.getType(PeripheralList[i]) == "sophisticatedstorage:limited_barrel" then
             Coinbox = peripheral.wrap(PeripheralList[i])
             Aapi.dbg("Coin Box Wrapped")
+        elseif peripheral.getType(PeripheralList[i]) == "create:creative_crate" then
+            Coinsrc = peripheral.wrap(PeripheralList[i])
+            Aapi.dbg("Coin Source")
         end
     end
     PriceList = Aapi.FM("initialize", "/AS")
@@ -119,7 +122,13 @@ local function sell()
     parallel.waitForAll(redstone, scaninv)
     print("it worked!!!")
     Aapi.cprint(nil, "Store", "Please type in the username that you'd like to have the funds sent to: ")
-    local username = Aapi.uinput(nil, "Store",nil,nil,true)
+    local username = Aapi.uinput(nil, "Store", nil, nil, true)
+    for slot, item in pairs(Inv.list()) do
+        if item then
+            Inv.pushItems(peripheral.getName(Dispose), slot)
+        end
+    end
+    Coinsrc.pushItems(peripheral.getName(Coinbox), 1,total)
 end
 
 bulkaddObject()
