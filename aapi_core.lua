@@ -37,14 +37,6 @@ end
 function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password)
     local msg = nil
     local complete = require("cc.completion")
-    local function isint(n)
-        local a = math.floor(n)
-        if a == nil then 
-            return false
-        else
-            return true
-        end
-    end
     local function confo(msg)
         if confirm == true then
             aapi.cprint(window, sender, "Please retype your entry to confirm..", nil, speed)
@@ -63,7 +55,7 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
     end
     local allowlist = {
         num = function()
-            if isint(msg) == true then
+            if type(msg) == 'number' then
                 confo(msg)
             else
                 aapi.cprint(window,sender,"Invalid entry.. Please only use numbers",nil,speed)
@@ -72,7 +64,7 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
             end
         end,
         abc = function()
-            if isint(msg) == false then
+            if type(msg) == 'string' then
                 confo(msg)
             else
                 aapi.cprint(window, sender, "Invalid entry.. Please only use Letters and Symbols", nil, speed)
