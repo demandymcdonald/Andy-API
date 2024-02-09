@@ -104,7 +104,7 @@ local function sell()
     local offer, total = scanchest()[1], scanchest()[2]
     local accepted = false
     local function redstone()
-        while true do
+        while accepted == false do
             os.pullEvent("redstone")
             print("A redstone input has changed!")
             accepted = true
