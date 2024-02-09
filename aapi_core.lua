@@ -247,7 +247,7 @@ function aapi.cprint(window, sender, msg, log, speed)
     term.redirect(last)
     if log ~= nil then
         local f_ = fs.open(log, "a")
-        f_.writeLine(textutils.formatTime(os.time("local")) .. ": " .. msg)
+        f_.writeLine(textutils.formatTime(os.time("local"),true) .. ": " .. msg)
         f_.close()
     end
     term.setCursorPos(1,y+1)  

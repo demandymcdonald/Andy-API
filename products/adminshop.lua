@@ -27,6 +27,9 @@ function Startup()
     if PriceList == nil then
         PriceList = {}
     end
+    sleep(1)
+    term.clear()
+    term.setCursorPos(1,1)
 end
 Startup()
 function Savelist()
