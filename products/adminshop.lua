@@ -125,11 +125,10 @@ local function sell()
     end
     local function scaninv()
         while accepted == false do
-            sleep(1)
             w_Main.clear()
             w_Main.setCursorPos(1,1)
             offer, total = scanchest()[1], scanchest()[2]
-            sleep(1)
+            sleep(15)
         end
     end
     parallel.waitForAll(redstone, scaninv)

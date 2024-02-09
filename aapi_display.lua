@@ -808,11 +808,12 @@ function aapi_display.arrayTabulate(disp,data,starty)
             ypos = starty
         end
         disp.setCursorPos(colpos, ypos)
-        for key,value in pairs(column[i]) do
-            disp.write(" " .. string.sub(value,1, coleng[i]))
+        for key, value in pairs(column[i]) do
+            disp.write(" " .. string.sub(value, 1, coleng[i]))
             ypos = ypos + 1
-            disp.setCursorPos(colpos, ypos)            
+            disp.setCursorPos(colpos, ypos)
         end
+        Aapi.dbg("Line "..i.." tabulated")
     end
 end
 return aapi_display

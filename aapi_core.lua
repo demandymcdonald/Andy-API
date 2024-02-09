@@ -228,7 +228,10 @@ function aapi.cprint(window, sender, msg, log, speed)
     --     send = os.date("%R").." [MSG]   "
     -- end
     term.redirect(window)
-    local x,y = term.getCursorPos()
+    local x, y = term.getCursorPos()
+    if y == 1 then
+        term.clear()    
+    end
     term.setTextColor(color)
     write(send)
     term.setTextColor(colors.white)
@@ -251,7 +254,7 @@ function aapi.cprint(window, sender, msg, log, speed)
         f_.writeLine(textutils.formatTime(os.time("local"),true) .. ": " .. msg)
         f_.close()
     end
-    term.setCursorPos(1,y+1)  
+    term.setCursorPos(1, y + 1) 
 end
 function aapi.PeripheralSetup()
     AttachedPer = {}
