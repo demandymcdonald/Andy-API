@@ -215,7 +215,7 @@ function aapi.cprint(window, sender, msg, log, speed)
         send = os.date("%R").." [MSG]   "
     else
         color = colors.white
-        send = os.date("%R").." ["..sender.."]   "  
+        send = os.date("%R").." ["..string.upper(sender).."]   "  
     end
     
     -- if sender ~= "null" then 
