@@ -368,7 +368,7 @@ function aapi.FM(operation,file,data)
         save = function ()
             local f = fs.open(file, "w")
             for i = 1, #data do
-                f.writeLine(data[i])
+                f.writeLine(textutils.serialize(data[i]))
             end
             f.close()
             value = 1
@@ -379,8 +379,10 @@ function aapi.FM(operation,file,data)
                 aapi.dbg("Error: ".. file.." is nil")
                 return
             end
-            value = f.readAll()
+            local prevalue = f.readAll() or '"null"'
+            value = textutils.unserialize(prevalue)
             f.close()
+
         end,
     }
     ops[operation]()
