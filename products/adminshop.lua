@@ -110,6 +110,8 @@ local function scanchest()
         total = value["Subtot"] + total
     end
     local function rewrite()
+        w_Main.setCursorPos(1, 1)
+        w_Main.write("Sell List:")        
         for key, value in pairs(upforoffer) do
             local cx, cy = w_Main.getCursorPos()
             w_Main.setCursorPos(1, cy + 1)
@@ -117,6 +119,11 @@ local function scanchest()
         end
         local cx, cy = w_Main.getCursorPos()
         w_Main.setCursorPos(1, cy + 1)
+        local mx,my = w_Main.getSize()
+        for i = 1,mx do
+            w_Main.write("-")
+        end
+        w_Main.setCursorPos(1, cy + 2)
         w_Main.write("Total Payout: "..total)
     end
     --disp.arrayTabulate(w_Main, upforoffer, 1)
