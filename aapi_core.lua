@@ -173,7 +173,7 @@ function aapi.cprint(window, sender, msg, log, speed)
     if msg == nil then
         mlen = 0
     else
-        mlen = string.len(msg)
+        mlen = string.len(textutils.serialize(msg))
     end
 
     local tlen = 0
