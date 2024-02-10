@@ -35,13 +35,26 @@ function aapi.log(window, path, msg)
     aapi.cprint(window, "Log", msg, path)
 end
 function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password)
-    local msg = "nullnullnull"
+    if window == nil then
+		window = term.native()
+		term.redirect(window)
+	else 
+		term.redirect(window)
+	end
+	local msg = "nullnullnull"
     local complete = require("cc.completion")
-
+	local mx,my = term.getSize()
+    local x, y = term.getCursorPos()
+    --aapi.dbg("Cursor Y: "..y)
+    if y + 1 >= my then
+        term.scroll(1)
+		term.setCursorPos(1, my)
+    else
+		term.setCursorPos(1, y + 1)
+	end
     local function confo(msg)
         if confirm == true then
             aapi.cprint(window, sender, "Please retype your entry to confirm..", nil, speed)
-            print()
             local confi = read()
             if confi == msg then
                 return (msg)
@@ -130,18 +143,22 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
     --    window = term.native()
     --end
     --term.redirect(window)
+	local mx,my = term.getSize()
     local x, y = term.getCursorPos()
     --aapi.dbg("Cursor Y: "..y)
-    term.setCursorPos(1,y+1)   
+    if y + 1 >= my then
+        term.scroll(1)
+		term.setCursorPos(1, my)
+    else
+		term.setCursorPos(1, y + 1)
+	end
     if autocomplete == true then
         if type(allow) == "table" then
-            aapi.cprint()
             msg = read(nil, nil, function(text) return complete.choice(text, allow) end)
         else
             return
         end
     else
-        aapi.cprint()
         msg = read()
     end
     if password == true then
@@ -253,17 +270,19 @@ function aapi.cprint(window, sender, msg, log, speed)
                     lstart = lend
                     lend = lstart+mx-1
                 end
-                lline = string.sub(msg, lstart, lend) .. "-"
-                table.insert(tmsg,lline)  
+				if i<numlines then
+					lline = string.sub(msg, lstart, lend) .. "-"
+					table.insert(tmsg,lline)  
+				else
+					lline = string.sub(msg, lstart, lend)
+					table.insert(tmsg,lline)  
+				end
             end
         else
             table.insert(tmsg,msg)  
         end
     end
-    window.setCursorPos(1, y + 1)
-    if y + 1 >= my then
-        window.scroll(1)
-    end
+
     window.setTextColor(color)
     --if speed == 0 or nil then
     if msg then
@@ -296,6 +315,14 @@ function aapi.cprint(window, sender, msg, log, speed)
         f_.writeLine(textutils.formatTime(os.time("local"),true) .. ": " .. msg)
         f_.close()
     end
+
+    if y + 1 >= my then
+        window.scroll(1)
+			window.setCursorPos(1, my)
+    else
+		window.setCursorPos(1, y + 1)
+	end
+	sleep(.1)
 end
 function aapi.PeripheralSetup()
     AttachedPer = {}
