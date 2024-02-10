@@ -73,6 +73,7 @@ local function bulkaddObject()
     Savelist()
 end
 local function scanchest()
+    w_Main.clear()
     local upforoffer = {}
     local total = 0
     for slot, item in pairs(Inv.list()) do
@@ -102,7 +103,10 @@ local function scanchest()
                 lineitem["NewQty"] = slotitem.count + itemnum
                 lineitem["Subtot"] = itemprice * slotitem.count
                 table.insert(upforoffer, lineitem)
-                w_Main.write(lineitem["Qty"].."x"..lineitem["Name"].." @ "..lineitem["Price"].." | "..lineitem["Subtot"])
+                local cx, cy = w_Main.getCursorPos()
+                w_Main.setCursorPos(1,cy+1)
+                w_Main.write(lineitem["Qty"] .."x" .. lineitem["Name"] .. " @ " .. lineitem["Price"] .. " | " .. lineitem["Subtot"])
+                
             end
         end
     end
@@ -111,6 +115,8 @@ local function scanchest()
         total = value["Subtot"] + total
     end
     --disp.arrayTabulate(w_Main, upforoffer, 1)
+    local cx, cy = w_Main.getCursorPos()
+    w_Main.setCursorPos(1,cy+1)
     w_Main.write("Total Payout: "..total)
     aapi.dbg("Total: " .. total)
     return({upforoffer,total})
