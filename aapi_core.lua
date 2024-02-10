@@ -365,24 +365,29 @@ function aapi.FM(operation,file,data)
                 value = {}      
             end
         end,
-        save = function ()
+        save = function()
+            aapi.dbg("Saving "..file.."...")
             local f = fs.open(file, "w")
             for i = 1, #data do
-                f.writeLine(textutils.serialize(data[i]))
+                local tosave = textutils.serialize(data[i])
+                f.writeLine(tosave)
+                aapi.dbg(string.sub(tosave,1,15).." saved")
             end
             f.close()
             value = 1
         end,
         load = function()
+            aapi.dbg("Loading "..file.."...")
             local f = fs.open(file, "r")
             if f == nil then
-                aapi.dbg("Error: ".. file.." is nil")
+                aapi.dbg("Error: " .. file .. " is nil")
                 return
             end
+            
             local prevalue = f.readAll() or '"null"'
+            aapi.dbg(prevalue)
             value = textutils.unserialize(prevalue)
             f.close()
-
         end,
     }
     ops[operation]()

@@ -31,6 +31,7 @@ function Startup()
             aapi.dbg("Monitor Wrapped")
         end
     end
+    PriceList = {}
     PriceList = aapi.FM("load", "/AS/MarketPrice.tx")
     if PriceList == nil then
         PriceList = {}
