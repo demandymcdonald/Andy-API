@@ -98,7 +98,13 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
             end
         end,
         yn = function()
-            if string.lower(msg) == "yes" or "y" or "no" or "n" then
+            local cleaned = string.lower(msg)
+            if cleaned == "yes" or "y" or "no" or "n" then
+                if cleaned == "yes" or "y" then
+                    confo(true)
+                else
+                    confo(false)
+                end
                 confo(msg)
             else
                 aapi.cprint(window, sender, "Invalid entry.. Please respond with either: y, yes, n, or no", nil, speed)

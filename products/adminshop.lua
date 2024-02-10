@@ -60,7 +60,8 @@ local function bulkaddObject()
                             dupe = true
                             aapi.cprint("Duplicate item detected, would you like to replace the current price for: " ..
                             slotitem.name .. "?")
-                            price = aapi.uinput(nil,"Eve", nil, "num")
+                            local replace = aapi.uinput(nil, "Eve", nil, "yn")
+                            if replace == 
                         end
                     end
                     if dupe == true then
