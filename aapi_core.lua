@@ -220,7 +220,7 @@ function aapi.cprint(window, sender, msg, log, speed)
         window.scroll(1)
     end
     window.setTextColor(color)
-    if speed == 0 or nil then
+    --if speed == 0 or nil then
         if msg then
             window.write(sname)
             window.setTextColor(colors.white)
@@ -228,15 +228,15 @@ function aapi.cprint(window, sender, msg, log, speed)
         else
             return
         end
-    else
-        if msg then
-            window.write(sname)
-            window.setTextColor(colors.white)
-            window.slowWrite(msg,speed)
-        else
-            return
-        end
-    end
+    -- else
+    --     if msg then
+    --         window.write(sname)
+    --         window.setTextColor(colors.white)
+    --         window.slowWrite(msg,speed)
+    --     else
+    --         return
+    --     end
+    -- end
     if log ~= nil then
         local f_ = fs.open(log, "a")
         f_.writeLine(textutils.formatTime(os.time("local"),true) .. ": " .. msg)
