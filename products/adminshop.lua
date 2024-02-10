@@ -102,7 +102,7 @@ local function scanchest()
                 lineitem["NewQty"] = slotitem.count + itemnum
                 lineitem["Subtot"] = itemprice * slotitem.count
                 table.insert(upforoffer, lineitem)
-                aapi.cprint(w_Main,"Store",lineitem["Qty"].."x"..lineitem["Name"].." @ "..lineitem["Price"].." | "..lineitem["Subtot"])
+                w_Main.write(lineitem["Qty"].."x"..lineitem["Name"].." @ "..lineitem["Price"].." | "..lineitem["Subtot"])
             end
         end
     end
@@ -111,7 +111,7 @@ local function scanchest()
         total = value["Subtot"] + total
     end
     --disp.arrayTabulate(w_Main, upforoffer, 1)
-    aapi.cprint(w_Main,"Store","Total Payout: "..total)
+    w_Main.write("Total Payout: "..total)
     aapi.dbg("Total: " .. total)
     return({upforoffer,total})
 end
