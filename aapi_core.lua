@@ -172,45 +172,54 @@ function aapi.cprint(window, sender, msg, log, speed)
     local mlen = string.len(msg) or 0
     local tlen = 0
         local types = {
-            api = {
+        api = {
                 colors.red,
-                os.date("%R").." [AAPI]   "
+                os.date("%R") .. " [AAPI]   ",
+                "api"
             },
             con = {
                 colors.green,
-                os.date("%R").." [CONSOLE]   "
+                os.date("%R") .. " [CONSOLE]   ",
+                "con"
             },
             net = {
                 colors.blue,
-                os.date("%R").." [NETWORK]   "
+                os.date("%R").." [NETWORK]   ",
+                "net"
             },
             dis = {
                 colors.yellow,
-                os.date("%R").." [DISPLAY]   "
+                os.date("%R") .. " [DISPLAY]   ",
+                "dis"
             },
             set = {
                 colors.orange,
-                os.date("%R").." [SETUP]   "
+                os.date("%R") .. " [SETUP]   ",
+                "set"
             },
             log = {
                 colors.pink,
-                os.date("%R").." [LOG]   "
+                os.date("%R").." [LOG]   ",
+                "log"
             },
             dbg = {
                 colors.lightBlue,
-                os.date("%R").." [DEBUG]   "            
+                os.date("%R").." [DEBUG]   ",            
+                "dbg"
             },
             eve = {
                 colors.blue,
-                os.date("%R").." [EVE]   "
+                os.date("%R").." [EVE]   ",
+                "eve"
             },
             user = {
                 colors.orange,
-                os.date("%R").." [USER]   "
+                os.date("%R").." [USER]   ",
+                "user"
             },
         }
     for key, type in pairs(types) do
-        if textutils.serialize(type) == string.lower(sender) then
+        if type[3] == string.lower(sender) then
             color = type[1]
             sname = type[2]
         end
