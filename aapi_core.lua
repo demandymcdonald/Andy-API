@@ -45,6 +45,7 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
     local complete = require("cc.completion")
 	local mx,my = term.getSize()
     local x, y = term.getCursorPos()
+	local output = nil
     --aapi.dbg("Cursor Y: "..y)
     if y + 1 >= my then
         term.scroll(1)
@@ -52,19 +53,20 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
     else
 		term.setCursorPos(1, y + 1)
 	end
-    local function confo(msg)
+    local function confo(msg_)
         if confirm == true then
             aapi.cprint(window, sender, "Please retype your entry to confirm..", nil, speed)
             local confi = read()
-            if confi == msg then
-                return (msg)
+            if confi == msg_ then
+                output = msg_
             else
                 aapi.cprint(window, sender, "Entries do not match.. Try again", nil, speed)
                 sleep(1)
                 aapi.uinput(window, sender, speed, allow, confirm, autocomplete, password)
             end
         else
-            return (msg)
+			aapi.dbg("Confo OPT: "..msg_)
+            output = msg_
         end
     end
 
@@ -112,14 +114,21 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
         end,
         yn = function()
             local cleaned = string.lower(msg)
-            if cleaned == "yes" or "y" or "no" or "n" then
-                if cleaned == "yes" or "y" then
-                    confo(true)
-                else
-                    confo(false)
-                end
-                confo(msg)
-            else
+			local pass = false
+			local alist = {"yes","y","n","no"}
+			for i = 1,#alist do 
+				if cleaned == alist[i] then
+					if cleaned == "yes" then
+						confo("true")
+					elseif cleaned == "y" then
+						confo("true")
+					else
+						confo("false")
+					end
+					pass = true
+				end
+			end
+			if pass == false then
                 aapi.cprint(window, sender, "Invalid entry.. Please respond with either: y, yes, n, or no", nil, speed)
                 aapi.uinput(window, sender, speed, allow, confirm, autocomplete, password)
             end               
@@ -174,9 +183,14 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
         aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password)
     else
         if allow then
-            allowlist[allow]()
+            local ret = allowlist[allow]()
         end
-        return(msg)
+		if output == nil then
+			aapi.dbg("Uinput Output: nil")
+		else
+			aapi.dbg("Uinput Output:"..output)
+		end
+        return(output)
     end
 end
 function aapi.cprint(window, sender, msg, log, speed)
@@ -256,9 +270,9 @@ function aapi.cprint(window, sender, msg, log, speed)
     local tmsg = {}
     local x, y = window.getCursorPos()
     local mx, my = window.getSize()
-
+	local numlines = 1
     local function linebreak()
-        local numlines = 1
+        
         local lstart = 1
         local lend = 0
         if tlen > mx then
@@ -267,8 +281,8 @@ function aapi.cprint(window, sender, msg, log, speed)
             for i = 1, numlines do
                 local lline = nil
                 if i ~= 1 then
-                    lstart = lend
-                    lend = lstart+mx-1
+                    lstart = lend+1
+                    lend = lstart+mx-2
                 end
 				if i<numlines then
 					lline = string.sub(msg, lstart, lend) .. "-"
@@ -288,15 +302,22 @@ function aapi.cprint(window, sender, msg, log, speed)
     if msg then
         linebreak()
         window.write(sname)
-        if #tmsg > 1 then
-            window.setTextColor(colors.white)
-            for i = 1, #tmsg do
-                window.write(tmsg[i])
-                window.setCursorPos(1, y + i)
+        if numlines > 1 then
+            for p = 1,numlines do
+				window.setTextColor(colors.white)
+                window.write(tmsg[p])
+				local x, y = window.getCursorPos()
+				if y + 1 >= my then
+					window.scroll(1)
+						window.setCursorPos(1, my)
+				else
+					window.setCursorPos(1, y + 1)
+				end
             end
-        else   
+        elseif numlines == 1 then   
             window.setTextColor(colors.white)
             window.write(msg)
+			
         end
     else
         return
@@ -315,7 +336,7 @@ function aapi.cprint(window, sender, msg, log, speed)
         f_.writeLine(textutils.formatTime(os.time("local"),true) .. ": " .. msg)
         f_.close()
     end
-
+    local x, y = window.getCursorPos()
     if y + 1 >= my then
         window.scroll(1)
 			window.setCursorPos(1, my)
@@ -392,7 +413,7 @@ function aapi.Pertype(type)
     return (table_)
 end
 function aapi.FM(operation,file,data)
-    local value = nil
+    local value = {}
     local ops = {
         initialize = function ()
             if fs.exists(file) then
@@ -411,11 +432,12 @@ function aapi.FM(operation,file,data)
         save = function()
             aapi.dbg("Saving "..file.."...")
             local f = fs.open(file, "w")
-            for i = 1, #data do
-                local tosave = textutils.serialize(data[i])
-                f.writeLine(tosave)
-                aapi.dbg(string.sub(tosave,1,15).." saved")
-            end
+            --for i = 1, #data do
+            --    local tosave = textutils.serialize(data[i])
+            --    f.writeLine(tosave)
+            --    aapi.dbg(string.sub(tosave,1,15).." saved")
+            --end
+			f.write(textutils.serialize(data))
             f.close()
             value = 1
         end,
@@ -424,12 +446,12 @@ function aapi.FM(operation,file,data)
             local f = fs.open(file, "r")
             if f == nil then
                 aapi.dbg("Error: " .. file .. " is nil")
+				sleep(2)
                 return
             end
             
-            local prevalue = f.readAll() or '"null"'
-            aapi.dbg(prevalue)
-            value = textutils.unserialize(prevalue)
+            value = textutils.unserialize(f.readAll())
+            aapi.dbg(f.readAll())
             f.close()
         end,
     }

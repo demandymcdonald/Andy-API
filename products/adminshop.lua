@@ -23,21 +23,26 @@ function Startup()
         elseif peripheral.getType(PeripheralList[i]) == "sophisticatedstorage:limited_barrel" then
             Coinbox = peripheral.wrap(PeripheralList[i])
             aapi.dbg("Coin Box Wrapped")
+        elseif peripheral.getType(PeripheralList[i]) == "minecraft:chest" then
+            Coindep = peripheral.wrap(PeripheralList[i])
+            aapi.dbg("Coin Dep Wrapped")
         elseif peripheral.getType(PeripheralList[i]) == "create:creative_crate" then
             Coinsrc = peripheral.wrap(PeripheralList[i])
-            aapi.dbg("Coin Source Wrapped")
+            aapi.dbg("Coin Window Wrapped")
         elseif peripheral.getType(PeripheralList[i]) == "monitor" then
             Mon = peripheral.wrap(PeripheralList[i])
             aapi.dbg("Monitor Wrapped")
         end
     end
-    PriceList = aapi.FM("load", "/AS/MarketPrice.tx")
-    if PriceList == nil then
+    PriceList = aapi.FM("load", "/AS/MarketPrice.txt")
+	if PriceList == nil then
         PriceList = {}
         aapi.dbg("Nil Price List, recreating...")
     end
     --disp.initDisplay()
     disp.addWindow(Mon,"Main","The Company Store",0,0,1,1,colors.black,true)
+	w_Main.clear()
+	w_Main.setCursorPos(1,1)
 end
 Startup()
 sleep(1)
@@ -56,6 +61,10 @@ local function listPrices()
         for i = 1, mx do
             w_Main.write("-")
         end
+		--for i=1,#PriceList do
+		--		aapi.dbg(PriceList[i]["DName"])
+		--		sleep(1)
+		--end
         for key, value in pairs(PriceList) do
             local cx, cy = w_Main.getCursorPos()
             cy = cy + 1
@@ -64,14 +73,14 @@ local function listPrices()
                 cy = my
             end
             w_Main.setCursorPos(1, cy + 1)
-            w_Main.write(value["DName"] .. ": " .. value["Price"] .. "sc | Inflation:" .. value["Inf"])
+            w_Main.write(value["Dname"] .. ": " .. value["Price"] .. "sc | Inflation:" .. value["Inf"])
+			aapi.dbg(value["Dname"] .. ": " .. value["Price"] .. "sc | Inflation:" .. value["Inf"])
         end
     end
     rewrite()
 end
 local function bulkaddObject()
     if Inv.list() then
-
         for slot, item in pairs(Inv.list()) do
             local name = nil
             local price = nil
@@ -82,22 +91,17 @@ local function bulkaddObject()
                 for key, value in pairs(PriceList) do
                     if value["Name"] == slotitem.name then
                         dupe = true
-                        aapi.cprint("Duplicate item detected, would you like to replace the current price for: " ..
+                        aapi.cprint(nil, "eve",
+                            "Duplicate item detected, would you like to remove the current price for: " ..
                             slotitem.name .. "?")
                         local replace = aapi.uinput(nil, "Eve", nil, "yn")
-                        if replace == true then
+                        if replace == "true" then
                             table.remove(PriceList, key)
+                            aapi.dbg("replace = true")
                             dupe = false
-                        elseif replace == false then
-                            local iname = value["Name"]
-                            iname = {}
-                            iname["Name"] = value["Name"]
-                            iname["Dname"] = value["Dname"]
-                            iname["Price"] = value["Price"]
-                            iname["Inf"] = value["Inf"]
-                            iname["Num"] = value["Num"]
-                            table.insert(PriceList, iname)
+                        elseif replace == "false" then
                             table.insert(dupelist, value["Name"])
+                            aapi.dbg("replace = false")
                         end
                     end
                 end
@@ -119,7 +123,26 @@ local function bulkaddObject()
             end
         end
     end
+
     Savelist()
+end
+local function movemoney(dir, qty)
+    if dir == "i" then
+		aapi.dbg("Total to Deposit:"..qty)
+        if qty < 65 then
+            Coinsrc.pushItems(peripheral.getName(Coindep), nil,qty)
+        else
+            local xbigger = qty / 64
+            local rxbigger = math.floor(xbigger)
+            for i = 1, rxbigger do
+				aapi.dbg("Depositing: "..i.."/"..rxbigger)
+                Coinsrc.pushItems(peripheral.getName(Coindep), nil, 64)
+                sleep(.5)
+            end
+            Coinsrc.pushItems(peripheral.getName(Coindep), nil,64*(xbigger-rxbigger))
+        end
+    end    
+
 end
 local function scanchest()
     w_Main.clear()
@@ -159,8 +182,13 @@ local function scanchest()
         total = value["Subtot"] + total
     end
     local function rewrite()
+		local mx,my = w_Main.getSize()
         w_Main.setCursorPos(1, 1)
-        w_Main.write("Sell List:")        
+        w_Main.write("Sell List:")
+		w_Main.setCursorPos(1, 2)
+		for i = 1, mx do
+            w_Main.write("-")
+        end
         for key, value in pairs(upforoffer) do
             local cx, cy = w_Main.getCursorPos()
             w_Main.setCursorPos(1, cy + 1)
@@ -168,7 +196,6 @@ local function scanchest()
         end
         local cx, cy = w_Main.getCursorPos()
         w_Main.setCursorPos(1, cy + 1)
-        local mx,my = w_Main.getSize()
         for i = 1,mx do
             w_Main.write("-")
         end
@@ -178,12 +205,13 @@ local function scanchest()
     --disp.arrayTabulate(w_Main, upforoffer, 1)
     aapi.dbg("Total: " .. total)
     rewrite()
-    return ({ upforoffer, total })
+	
+    return (total)
 end
 local function sell()
     local msg = read()
-    local offer, total = nil,nil
     local accepted = false
+	local total = 0
     local function redstone()
         while accepted == false do
             os.pullEvent("redstone")
@@ -195,7 +223,7 @@ local function sell()
         while accepted == false do
             w_Main.clear()
             w_Main.setCursorPos(1,1)
-            offer, total = scanchest()
+            total = scanchest()
             sleep(15)
         end
     end
@@ -206,8 +234,9 @@ local function sell()
         end
     end
 ---@diagnostic disable-next-line: param-type-mismatch
-    Coinsrc.pushItems(peripheral.getName(Coinbox), 1,total)
+    movemoney("i",total)  
 end
+
 -- local function buy()
 --     local itemsforsale = {}
 --     local function additem(name, title, physical, price, cmd)
@@ -222,5 +251,5 @@ end
 
 -- end
 listPrices()
-bulkaddObject()
+--bulkaddObject()
 sell()
