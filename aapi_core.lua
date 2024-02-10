@@ -169,7 +169,7 @@ function aapi.cprint(window, sender, msg, log, speed)
     end
     local sname = os.date("%R") .. "[" .. sender .. "]   "
     local slen = 0
-    local mlen = string.len(msg)
+    local mlen = string.len(msg) or 0
     local tlen = 0
         local types = {
             api = {
