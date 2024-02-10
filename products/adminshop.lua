@@ -31,7 +31,7 @@ function Startup()
             aapi.dbg("Monitor Wrapped")
         end
     end
-    PriceList = aapi.FM("initialize", "/AS")
+    PriceList = aapi.FM("load", "/AS/MarketPrice.tx")
     if PriceList == nil then
         PriceList = {}
     end
@@ -52,6 +52,7 @@ local function bulkaddObject()
             local name = nil
             local price = nil
             local dupe = false
+            local dupelist = {}
             if item then
                 local slotitem = Inv.getItemDetail(slot)
                 if slotitem then
@@ -59,28 +60,40 @@ local function bulkaddObject()
                         if value["Name"] == slotitem.name then
                             dupe = true
                             aapi.cprint("Duplicate item detected, would you like to replace the current price for: " ..
-                            slotitem.name .. "?")
+                                slotitem.name .. "?")
                             local replace = aapi.uinput(nil, "Eve", nil, "yn")
-                            if replace == 
+                            if replace == true then
+                                table.remove(PriceList, key)
+                                dupe = false
+                            elseif replace == false then
+                                local iname = value["Name"]
+                                iname = {}
+                                iname["Name"] = value["Name"]
+                                iname["Dname"] = value["Dname"]
+                                iname["Price"] = value["Price"]
+                                iname["Inf"] = value["Inf"]
+                                iname["Num"] = value["Num"]
+                                table.insert(PriceList, iname)
+                                table.insert(dupelist, value["Name"])
+                            end
                         end
                     end
-                    if dupe == true then
-
+                    if dupe == false then
+                        local iname = slotitem.name
+                        name = slotitem.displayName
+                        aapi.cprint(nil, "Eve", slotitem.displayName .. " Set base price: ")
+                        price = aapi.uinput(nil, "Eve", nil, "num")
+                        iname = {}
+                        iname["Name"] = slotitem.name
+                        iname["Dname"] = name
+                        iname["Price"] = price
+                        iname["Inf"] = 1
+                        iname["Num"] = 0
+                        table.insert(PriceList, iname)
+                        aapi.dbg(iname["Dname"] .. " added at the price of " .. iname["Price"])
+                        sleep(1)
                     end
-                    local iname = slotitem.name
-                    name = slotitem.displayName
-                    aapi.cprint(nil,"Eve",slotitem.displayName .. " Set base price: ")
-                    price = aapi.uinput(nil,"Eve", nil, "num")
-                    iname = {}
-                    iname["Name"] = slotitem.name
-                    iname["Dname"] = name
-                    iname["Price"] = price
-                    iname["Inf"] = 1
-                    iname["Num"] = 0
-                    table.insert(PriceList, iname)
-                    aapi.dbg(iname["Dname"] .. " added at the price of " .. iname["Price"])
-                    sleep(1)   
-                    end
+                end
             end
         end
     end
