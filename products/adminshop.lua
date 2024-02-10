@@ -34,6 +34,7 @@ function Startup()
     PriceList = aapi.FM("load", "/AS/MarketPrice.tx")
     if PriceList == nil then
         PriceList = {}
+        aapi.dbg("Nil Price List, recreating...")
     end
     --disp.initDisplay()
     disp.addWindow(Mon,"Main","The Company Store",0,0,1,1,colors.black,true)
