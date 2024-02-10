@@ -164,7 +164,13 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
 end
 function aapi.cprint(window, sender, msg, log, speed)
     local color = colors.gray
+    if sender == nil then
+        sender = "MSG"
+    end
     local sname = os.date("%R") .. "[" .. sender .. "]   "
+    local slen = 0
+    local mlen = string.len(msg)
+    local tlen = 0
         local types = {
             api = {
                 colors.red,
@@ -209,25 +215,58 @@ function aapi.cprint(window, sender, msg, log, speed)
             sname = type[2]
         end
     end
+    slen = string.len(sname)
+    tlen = slen + mlen
     -- Begin Writing
     if window == nil then
         window = term.native()
     end
+    local tmsg = {}
     local x, y = window.getCursorPos()
     local mx, my = window.getSize()
+
+    local function linebreak()
+        local numlines = 1
+        local lstart = 1
+        local lend = 0
+        if tlen > mx then
+            numlines = math.max(tlen / mx)
+            lend = (mx - slen - 1)
+            for i = 1, numlines do
+                local lline = nil
+                if i ~= 1 then
+                    lstart = lend
+                    lend = lstart+mx-1
+                end
+                lline = string.sub(msg, lstart, lend) .. "-"
+                table.insert(tmsg,lline)  
+            end
+        else
+            table.insert(tmsg,msg)  
+        end
+    end
     window.setCursorPos(1, y + 1)
     if y + 1 >= my then
         window.scroll(1)
     end
     window.setTextColor(color)
     --if speed == 0 or nil then
-        if msg then
-            window.write(sname)
+    if msg then
+        linebreak()
+        window.write(sname)
+        if #tmsg > 1 then
+            window.setTextColor(colors.white)
+            for i = 1, #tmsg do
+                window.write(tmsg[i])
+                window.setCursorPos(1, y + i)
+            end
+        else   
             window.setTextColor(colors.white)
             window.write(msg)
-        else
-            return
         end
+    else
+        return
+    end
     -- else
     --     if msg then
     --         window.write(sname)
