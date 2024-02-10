@@ -210,7 +210,7 @@ function aapi.cprint(window, sender, msg, log, speed)
         },
     }
     for key, type in pairs(types) do
-        if textutils.serialize(type) == string.lower(sender) then
+        if textutils.serialize(types) == string.lower(sender) then
             color = types[1]
             sname = types[2]
         end
