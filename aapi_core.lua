@@ -245,7 +245,7 @@ function aapi.cprint(window, sender, msg, log, speed)
         local lstart = 1
         local lend = 0
         if tlen > mx then
-            numlines = math.max(tlen / mx)
+            numlines = math.ceil(tlen / mx)
             lend = (mx - slen - 1)
             for i = 1, numlines do
                 local lline = nil
