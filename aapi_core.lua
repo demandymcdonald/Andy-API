@@ -171,48 +171,48 @@ function aapi.cprint(window, sender, msg, log, speed)
     local slen = 0
     local mlen = string.len(msg) or 0
     local tlen = 0
-    local types = {
-        api = {
-            colors.red,
-            os.date("%R").." [AAPI]   "
-        },
-        con = {
-            colors.green,
-            os.date("%R").." [CONSOLE]   "
-        },
-        net = {
-            colors.blue,
-            os.date("%R").." [NETWORK]   "
-        },
-        dis = {
-            colors.yellow,
-            os.date("%R").." [DISPLAY]   "
-        },
-        set = {
-            colors.orange,
-            os.date("%R").." [SETUP]   "
-        },
-        log = {
-            colors.pink,
-            os.date("%R").." [LOG]   "
-        },
-        dbg = {
-            colors.lightBlue,
-            os.date("%R").." [DEBUG]   "            
-        },
-        eve = {
-            colors.blue,
-            os.date("%R").." [EVE]   "
-        },
-        user = {
-            colors.orange,
-            os.date("%R").." [USER]   "
-        },
-    }
+        local types = {
+            api = {
+                colors.red,
+                os.date("%R").." [AAPI]   "
+            },
+            con = {
+                colors.green,
+                os.date("%R").." [CONSOLE]   "
+            },
+            net = {
+                colors.blue,
+                os.date("%R").." [NETWORK]   "
+            },
+            dis = {
+                colors.yellow,
+                os.date("%R").." [DISPLAY]   "
+            },
+            set = {
+                colors.orange,
+                os.date("%R").." [SETUP]   "
+            },
+            log = {
+                colors.pink,
+                os.date("%R").." [LOG]   "
+            },
+            dbg = {
+                colors.lightBlue,
+                os.date("%R").." [DEBUG]   "            
+            },
+            eve = {
+                colors.blue,
+                os.date("%R").." [EVE]   "
+            },
+            user = {
+                colors.orange,
+                os.date("%R").." [USER]   "
+            },
+        }
     for key, type in pairs(types) do
-        if textutils.serialize(types) == string.lower(sender) then
-            color = types[1]
-            sname = types[2]
+        if textutils.serialize(type) == string.lower(sender) then
+            color = type[1]
+            sname = type[2]
         end
     end
     slen = string.len(sname)
