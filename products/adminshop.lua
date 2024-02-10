@@ -103,23 +103,26 @@ local function scanchest()
                 lineitem["NewQty"] = slotitem.count + itemnum
                 lineitem["Subtot"] = itemprice * slotitem.count
                 table.insert(upforoffer, lineitem)
-                local cx, cy = w_Main.getCursorPos()
-                w_Main.setCursorPos(1,cy+1)
-                w_Main.write(lineitem["Qty"] .."x" .. lineitem["Name"] .. " @ " .. lineitem["Price"] .. " | " .. lineitem["Subtot"])
-                
             end
         end
     end
-    
     for key, value in pairs(upforoffer) do
         total = value["Subtot"] + total
     end
+    local function rewrite()
+        for key, value in pairs(upforoffer) do
+            local cx, cy = w_Main.getCursorPos()
+            w_Main.setCursorPos(1, cy + 1)
+            w_Main.write(value["Qty"] .. "x" .. value["Name"] .. " @ " .. value["Price"] .. " | " .. value["Subtot"])
+        end
+        local cx, cy = w_Main.getCursorPos()
+        w_Main.setCursorPos(1, cy + 1)
+        w_Main.write("Total Payout: "..total)
+    end
     --disp.arrayTabulate(w_Main, upforoffer, 1)
-    local cx, cy = w_Main.getCursorPos()
-    w_Main.setCursorPos(1,cy+1)
-    w_Main.write("Total Payout: "..total)
     aapi.dbg("Total: " .. total)
-    return({upforoffer,total})
+    rewrite()
+    return ({ upforoffer, total })
 end
 local function sell()
     local msg = read()
