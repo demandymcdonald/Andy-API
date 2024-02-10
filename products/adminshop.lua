@@ -47,12 +47,25 @@ function Savelist()
 end
 local function bulkaddObject()
     if Inv.list() then
+
         for slot, item in pairs(Inv.list()) do
             local name = nil
             local price = nil
+            local dupe = false
             if item then
                 local slotitem = Inv.getItemDetail(slot)
                 if slotitem then
+                    for key, value in pairs(PriceList) do
+                        if value["Name"] == slotitem.name then
+                            dupe = true
+                            aapi.cprint("Duplicate item detected, would you like to replace the current price for: " ..
+                            slotitem.name .. "?")
+                            price = aapi.uinput(nil,"Eve", nil, "num")
+                        end
+                    end
+                    if dupe == true then
+
+                    end
                     local iname = slotitem.name
                     name = slotitem.displayName
                     aapi.cprint(nil,"Eve",slotitem.displayName .. " Set base price: ")

@@ -35,8 +35,9 @@ function aapi.log(window, path, msg)
     aapi.cprint(window, "Log", msg, path)
 end
 function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password)
-    local msg = nil
+    local msg = "nullnullnull"
     local complete = require("cc.completion")
+
     local function confo(msg)
         if confirm == true then
             aapi.cprint(window, sender, "Please retype your entry to confirm..", nil, speed)
@@ -86,17 +87,24 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
         end,
         tallow = function()
             local pass = false
-            for i = 1,#allow do
+            for i = 1, #allow do
                 if msg == allow[i] then
                     pass = true
-
                 end
             end
             if pass == false then
                 aapi.cprint(window, sender, "Invalid entry.. Please try again...", nil, speed)
-                aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password)
+                aapi.uinput(window, sender, speed, allow, confirm, autocomplete, password)
             end
-        end
+        end,
+        yn = function()
+            if string.lower(msg) == "yes" or "y" or "no" or "n" then
+                confo(msg)
+            else
+                aapi.cprint(window, sender, "Invalid entry.. Please respond with either: y, yes, n, or no", nil, speed)
+                aapi.uinput(window, sender, speed, allow, confirm, autocomplete, password)
+            end               
+        end,
     }
     --if allow == nil then
     --     atype = "none"
@@ -135,6 +143,10 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
     end
     if msg == nil then
         aapi.cprint(window,sender,"No input detected.. Please try again",nil,speed)
+        sleep(1)
+        aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password)
+    elseif type(msg) ~= "string" then
+        aapi.cprint("Invalid entry detected, please try again..")
         sleep(1)
         aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password)
     else
