@@ -47,6 +47,7 @@ function Savelist()
 end
 local function listPrices()
     local function rewrite()
+        local cx, cy = w_Main.getCursorPos()
         local mx, my = w_Main.getSize()
         w_Main.setCursorPos(1, 1)
         w_Main.write("Price List:")
