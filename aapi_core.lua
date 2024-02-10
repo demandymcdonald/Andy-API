@@ -162,124 +162,205 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
         return(msg)
     end
 end
+-- function aapi.cprint(window, sender, msg, log, speed)
+--     if window == nil then
+--         window = term.native()
+--     end
+--     local types = {
+--         api = {
+--             colors.red,
+--             os.date("%R").." [AAPI]   "
+--         },
+--         con = {
+--             colors.green,
+--             os.date("%R").." [CONSOLE]   "
+--         },
+--         net = {
+--             colors.blue,
+--             os.date("%R").." [NETWORK]   "
+--         },
+--         dis = {
+--             colors.yellow,
+--             os.date("%R").." [DISPLAY]   "
+--         },
+--         set = {
+--             colors.orange,
+--             os.date("%R").." [SETUP]   "
+--         },
+--         log = {
+--             colors.pink,
+--             os.date("%R").." [LOG]   "
+--         },
+--         dbg = {
+--             colors.lightBlue,
+--             os.date("%R").." [DEBUG]   "            
+--         },
+--         eve = {
+--             colors.blue,
+--             os.date("%R").." [EVE]   "
+--         },
+--         user = {
+--             colors.orange,
+--             os.date("%R").." [USER]   "
+--         }
+--     }
+--     local list = {
+--         "api",
+--         "con",
+--         "net",
+--         "dis",
+--         "set",
+--         "log",
+--         "dbg",
+--         "eve",
+--         "user"
+--     }
+--     local last = term.current()
+--     local color = nil
+--     local send = nil
+--     local onlist = false
+--     for i = 1, #list do
+--         if list[i] == sender then
+--             onlist = true
+--         end
+--     end
+--     if onlist == true then
+--         color = types[string.lower(sender)][1]
+--         send = types[string.lower(sender)][2]
+--     elseif sender == nil then
+--         color = colors.white
+--         send = "  "
+--     else
+--         color = colors.white
+--         send = os.date("%R").." ["..string.upper(sender).."]   "  
+--     end
+    
+--     -- if sender ~= "null" then 
+--     --     color = types[string.lower(sender)][1]
+--     -- else
+--     --     color = colors.white
+--     -- end
+--     -- if types[string.lower(sender_)][2] then 
+--     --     send = types[string.lower(sender)][2]
+--     -- else
+--     --     send = os.date("%R").." [MSG]   "
+--     -- end
+--     term.redirect(window)
+--     local x, y = term.getCursorPos()
+--     local mx,my = term.getSize()
+--     if y == 1 then
+--         term.clear()
+--         term.setCursorPos(1, 1)
+--     elseif y == my then
+--         term.clear()
+--         term.setCursorPos(1, 1)
+--     end
+--     local x, y = term.getCursorPos()
+--     --aapi.dbg("msg sent by: "..send.." Cx: "..x.." Cy: "..y)
+--     term.setTextColor(color)
+--     write(send)
+--     term.setTextColor(colors.white)
+--     if speed == nil then
+--         if msg == nil then
+--             write(" ")
+--         else
+--             write(msg)
+--         end
+--     else
+--         if msg == nil then
+--             write(" ")
+--         else
+--             textutils.slowWrite(msg, speed)
+--         end
+--     end
+--     term.redirect(last)
+--     if log ~= nil then
+--         local f_ = fs.open(log, "a")
+--         f_.writeLine(textutils.formatTime(os.time("local"),true) .. ": " .. msg)
+--         f_.close()
+--     end
+--     term.setCursorPos(1, y + 1) 
+-- end
 function aapi.cprint(window, sender, msg, log, speed)
+    local color = colors.gray
+    local sname = os.date("%R") .. "[" .. sender .. "]   "
+        local types = {
+            api = {
+                colors.red,
+                os.date("%R").." [AAPI]   "
+            },
+            con = {
+                colors.green,
+                os.date("%R").." [CONSOLE]   "
+            },
+            net = {
+                colors.blue,
+                os.date("%R").." [NETWORK]   "
+            },
+            dis = {
+                colors.yellow,
+                os.date("%R").." [DISPLAY]   "
+            },
+            set = {
+                colors.orange,
+                os.date("%R").." [SETUP]   "
+            },
+            log = {
+                colors.pink,
+                os.date("%R").." [LOG]   "
+            },
+            dbg = {
+                colors.lightBlue,
+                os.date("%R").." [DEBUG]   "            
+            },
+            eve = {
+                colors.blue,
+                os.date("%R").." [EVE]   "
+            },
+            user = {
+                colors.orange,
+                os.date("%R").." [USER]   "
+            },
+        }
+    for key, type in pairs(types) do
+        if textutils.serialize(type) == string.lower(sender) then
+            color = type[1]
+            sname = type[2]
+        end
+    end
+    -- Begin Writing
     if window == nil then
         window = term.native()
     end
-    local types = {
-        api = {
-            colors.red,
-            os.date("%R").." [AAPI]   "
-        },
-        con = {
-            colors.green,
-            os.date("%R").." [CONSOLE]   "
-        },
-        net = {
-            colors.blue,
-            os.date("%R").." [NETWORK]   "
-        },
-        dis = {
-            colors.yellow,
-            os.date("%R").." [DISPLAY]   "
-        },
-        set = {
-            colors.orange,
-            os.date("%R").." [SETUP]   "
-        },
-        log = {
-            colors.pink,
-            os.date("%R").." [LOG]   "
-        },
-        dbg = {
-            colors.lightBlue,
-            os.date("%R").." [DEBUG]   "            
-        },
-        eve = {
-            colors.blue,
-            os.date("%R").." [EVE]   "
-        },
-        user = {
-            colors.orange,
-            os.date("%R").." [USER]   "
-        }
-    }
-    local list = {
-        "api",
-        "con",
-        "net",
-        "dis",
-        "set",
-        "log",
-        "dbg",
-        "eve",
-        "user"
-    }
-    local last = term.current()
-    local color = nil
-    local send = nil
-    local onlist = false
-    for i = 1, #list do
-        if list[i] == sender then
-            onlist = true
-        end
+    local x, y = window.getCursorPos()
+    local mx, my = window.getSize()
+    window.setCursorPos(1, y + 1)
+    if y + 1 >= my then
+        window.scroll(1)
     end
-    if onlist == true then
-        color = types[string.lower(sender)][1]
-        send = types[string.lower(sender)][2]
-    elseif sender == nil then
-        color = colors.white
-        send = "  "
-    else
-        color = colors.white
-        send = os.date("%R").." ["..string.upper(sender).."]   "  
-    end
-    
-    -- if sender ~= "null" then 
-    --     color = types[string.lower(sender)][1]
-    -- else
-    --     color = colors.white
-    -- end
-    -- if types[string.lower(sender_)][2] then 
-    --     send = types[string.lower(sender)][2]
-    -- else
-    --     send = os.date("%R").." [MSG]   "
-    -- end
-    term.redirect(window)
-    local x, y = term.getCursorPos()
-    local mx,my = term.getSize()
-    if y == 1 then
-        term.clear()
-        term.setCursorPos(1, 1)
-    elseif y == my then
-        term.clear()
-        term.setCursorPos(1, 1)
-    end
-    local x, y = term.getCursorPos()
-    --aapi.dbg("msg sent by: "..send.." Cx: "..x.." Cy: "..y)
-    term.setTextColor(color)
-    write(send)
-    term.setTextColor(colors.white)
-    if speed == nil then
-        if msg == nil then
-            write(" ")
+    window.setTextColor(color)
+    if speed == 0 or nil then
+        if msg then
+            window.write(sname)
+            window.setTextColor(colors.white)
+            window.write(msg)
         else
-            write(msg)
+            return
         end
     else
-        if msg == nil then
-            write(" ")
+        if msg then
+            window.write(sname)
+            window.setTextColor(colors.white)
+            window.slowWrite(msg,speed)
         else
-            textutils.slowWrite(msg, speed)
+            return
         end
     end
-    term.redirect(last)
     if log ~= nil then
         local f_ = fs.open(log, "a")
         f_.writeLine(textutils.formatTime(os.time("local"),true) .. ": " .. msg)
         f_.close()
     end
-    term.setCursorPos(1, y + 1) 
 end
 function aapi.PeripheralSetup()
     AttachedPer = {}
