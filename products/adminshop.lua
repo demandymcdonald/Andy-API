@@ -395,7 +395,7 @@ local function buy()
             end
         end
     end
-    parallel.waitForAny(timer(_G["buy"]), bf)
+    bf()
     rtm = true
 end
 local dispref = true 
