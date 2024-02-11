@@ -430,6 +430,11 @@ local function mainmenu()
             o3 = function()
                 local function timeout()
                     timer(_G["ADM"])
+                    if dispref == true then
+                        return
+                    else
+                        sleep(999999999)
+                    end 
                 end
                 local function ADM()
                     aapi.cprint(nil, "Shop", "Please type in the Admin Password:")
