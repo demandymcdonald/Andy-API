@@ -4,11 +4,15 @@ local aapi_core = aapi
 local dbgwindow = nil
 --DebugLogFiles = "/"
 --DebugInstance = "nullnullnull"
-function aapi.initDebug(path,win)
+function aapi.initDebug(path, win)
     local DebugInstance = math.random(10000, 99999)
+    local test = nil
     local filename = "debug-" .. os.date("%F") .. "-" .. DebugInstance .. ".txt"
     DebugLogFiles = textutils.serialize(path .. filename)
-    fs.makeDir(path)
+    local free = aapi.FM("freespace",path)[1]
+    if free < .9 then 
+        fs.makeDir(path)
+    end
     Debugmode = true
     aapi.dbg("Debug file at: " .. DebugLogFiles)
     if win == nil then
@@ -19,6 +23,7 @@ function aapi.initDebug(path,win)
     sleep(1)
 end
 function aapi.initLogs(path)
+
     local CmdInstance = math.random(10000, 99999)
     local filename = "cmd-" .. os.date("%F") .. "-" .. CmdInstance .. ".txt"
     fs.makeDir(path)
@@ -100,10 +105,10 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
                 aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password)
             end
         end,
-        tallow = function()
+        tallow = function(t)
             local pass = false
-            for i = 1, #allow do
-                if msg == allow[i] then
+            for i = 1, #t do
+                if msg == t[i] then
                     pass = true
                 end
             end
@@ -183,7 +188,12 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
         aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password)
     else
         if allow then
-            local ret = allowlist[allow]()
+            if type(allow) == "table" then
+                allowlist["tallow"](allow)
+            else
+                allowlist[allow]()
+            end
+
         end
 		if output == nil then
 			aapi.dbg("Uinput Output: nil")
@@ -208,53 +218,53 @@ function aapi.cprint(window, sender, msg, log, speed)
     end
 
     local tlen = 0
-        local types = {
+    local types = {
         api = {
-                colors.red,
-                os.date("%R") .. " [AAPI]   ",
-                "api"
-            },
-            con = {
-                colors.green,
-                os.date("%R") .. " [CONSOLE]   ",
-                "con"
-            },
-            net = {
-                colors.blue,
-                os.date("%R").." [NETWORK]   ",
-                "net"
-            },
-            dis = {
-                colors.yellow,
-                os.date("%R") .. " [DISPLAY]   ",
-                "dis"
-            },
-            set = {
-                colors.orange,
-                os.date("%R") .. " [SETUP]   ",
-                "set"
-            },
-            log = {
-                colors.pink,
-                os.date("%R").." [LOG]   ",
-                "log"
-            },
-            dbg = {
-                colors.lightBlue,
-                os.date("%R").." [DEBUG]   ",            
-                "dbg"
-            },
-            eve = {
-                colors.blue,
-                os.date("%R").." [EVE]   ",
-                "eve"
-            },
-            user = {
-                colors.orange,
-                os.date("%R").." [USER]   ",
-                "user"
-            },
-        }
+            colors.red,
+            os.date("%R") .. " [AAPI]   ",
+            "api"
+        },
+        con = {
+            colors.green,
+            os.date("%R") .. " [CONSOLE]   ",
+            "con"
+        },
+        net = {
+            colors.blue,
+            os.date("%R").." [NETWORK]   ",
+            "net"
+        },
+        dis = {
+            colors.yellow,
+            os.date("%R") .. " [DISPLAY]   ",
+            "dis"
+        },
+        set = {
+            colors.orange,
+            os.date("%R") .. " [SETUP]   ",
+            "set"
+        },
+        log = {
+            colors.pink,
+            os.date("%R").." [LOG]   ",
+            "log"
+        },
+        dbg = {
+            colors.lightBlue,
+            os.date("%R").." [DEBUG]   ",            
+            "dbg"
+        },
+        eve = {
+            colors.blue,
+            os.date("%R").." [EVE]   ",
+            "eve"
+        },
+        user = {
+            colors.orange,
+            os.date("%R").." [USER]   ",
+            "user"
+        },
+    }
     for key, type in pairs(types) do
         if type[3] == string.lower(sender) then
             color = type[1]
@@ -333,8 +343,12 @@ function aapi.cprint(window, sender, msg, log, speed)
     -- end
     if log ~= nil then
         local f_ = fs.open(log, "a")
-        f_.writeLine(textutils.formatTime(os.time("local"),true) .. ": " .. msg)
-        f_.close()
+        if f_ == nil then
+            
+        else
+            f_.writeLine(textutils.formatTime(os.time("local"),true) .. ": " .. msg)
+            f_.close()            
+        end
     end
     local x, y = window.getCursorPos()
     if y + 1 >= my then
@@ -412,51 +426,160 @@ function aapi.Pertype(type)
     print(table_)
     return (table_)
 end
-function aapi.FM(operation,file,data)
+function aapi.FM(operation, file, data)
     local value = {}
     local ops = {
-        initialize = function ()
+        initialize = function()
             if fs.exists(file) then
                 local f = fs.open(file, "r")
                 if f == nil then
-                    aapi.dbg("Error: ".. file.." is nil")
+                    aapi.dbg("Error: " .. file .. " is nil")
                     return
                 end
                 value = f.readAll()
                 f.close()
             else
                 fs.makeDir(file)
-                value = {}      
+                value = {}
             end
         end,
         save = function()
-            aapi.dbg("Saving "..file.."...")
+            aapi.dbg("Saving " .. file .. "...")
             local f = fs.open(file, "w")
             --for i = 1, #data do
             --    local tosave = textutils.serialize(data[i])
             --    f.writeLine(tosave)
             --    aapi.dbg(string.sub(tosave,1,15).." saved")
             --end
-			f.write(textutils.serialize(data))
+            f.write(textutils.serialize(data))
             f.close()
             value = 1
         end,
         load = function()
-            aapi.dbg("Loading "..file.."...")
+            aapi.dbg("Loading " .. file .. "...")
             local f = fs.open(file, "r")
             if f == nil then
                 aapi.dbg("Error: " .. file .. " is nil")
-				sleep(2)
+                sleep(2)
                 return
             end
-            
+
             value = textutils.unserialize(f.readAll())
             aapi.dbg(f.readAll())
             f.close()
         end,
+        freespace = function()
+            local free = fs.getFreeSpace(file)
+            local cap = fs.getCapacity(file)
+            local perfree = free / cap
+            table.insert(value, perfree)
+            table.insert(value, free)
+            table.insert(value, cap)
+        end,
+        deleteolddebug = function()
+
+            local files = fs.list(path)
+            if data == nil then
+                data = #files * .75
+            end
+            local function mysplit(inputstr, sep)
+                if sep == nil then
+                    sep = "%s"
+                end
+                local t = {}
+                for str in string.gmatch(inputstr, "([^" .. sep .. "]+)") do
+                    table.insert(t, str)
+                end
+                return t
+            end
+            local datess = {}
+            local oldest = {}
+            local current = {}
+            current["y"] = os.date("%Y")
+            current["m"] = os.date("%m")
+            current["d"] = os.date("%e")
+            table.insert(oldest, current)
+            local function tablesort()
+                for i = 1, #files do
+                    datess[files[i] .. "_"] = {}
+                    local splittab = mysplit(files[i], "-")
+                    datess[files[i] .. "_"]["n"] = files[i]
+                    datess[files[i] .. "_"]["y"] = splittab[2]
+                    datess[files[i] .. "_"]["m"] = splittab[3]
+                    datess[files[i] .. "_"]["d"] = splittab[4]
+                    datess[files[i] .. "_"]["h"] = splittab[5]
+                    for i = 1, #oldest do
+                        if datess[files[i] .. "_"]["y"] < oldest[i]["y"] then
+                            table.insert(oldest, datess[files[i] .. "_"])
+                        elseif datess[files[i] .. "_"]["m"] < oldest[i]["m"] then
+                            table.insert(oldest, datess[files[i] .. "_"])
+                            if #oldest >= data then
+                                table.remove(oldest, i)
+                            end
+                        elseif datess[files[i] .. "_"]["d"] < oldest[i]["d"] then
+                            table.insert(oldest, datess[files[i] .. "_"])
+                            if #oldest >= data then
+                                table.remove(oldest, i)
+                            end
+                        elseif #oldest >= data then
+                            table.insert(oldest, datess[files[i] .. "_"])
+                        end
+                    end
+                end
+            end
+            tablesort()
+            tablesort()
+            for i=1,#oldest do
+                fs.delete(path..oldest[i]["n"])
+            end
+        end    
+
     }
     ops[operation]()
-    return(value)
+    return (value)
+end
+
+-- The MIT License (MIT)
+-- Copyright (c) 2018,2020 Thomas Mohaupt <thomas.mohaupt@gmail.com>
+
+-- year: 2-digit (means 20xx) or 4-digit (>= 2000)
+function aapi.datetime2epoch(second, minute, hour, day, month, year)
+    local mi2sec = 60
+    local h2sec = 60 * mi2sec
+    local d2sec = 24 * h2sec
+    -- month to second, without leap year 
+    local m2sec = {
+          0, 
+          31 * d2sec, 
+          59 * d2sec, 
+          90 * d2sec, 
+          120 * d2sec, 
+          151 * d2sec, 
+          181 * d2sec, 
+          212 * d2sec, 
+          243 * d2sec, 
+          273 * d2sec, 
+          304 * d2sec, 
+          334 * d2sec }  
+          
+    local y2sec = 365 * d2sec
+    local offsetSince1970 = 946684800
+  
+    local yy = year < 100 and year or year - 2000
+  
+    local leapCorrection = math.floor(yy/4) + 1  
+    if (yy % 4) == 0 and month < 3 then
+      leapCorrection = leapCorrection - 1
+    end
+    
+    return offsetSince1970 + 
+          second + 
+          minute * mi2sec + 
+          hour * h2sec + 
+          (day - 1) * d2sec + 
+          m2sec[month] + 
+          yy * y2sec +
+          leapCorrection * d2sec 
 end
 --function aapi.Per(peripher)
 --    for key, value in pairs(AttachedPer) do
