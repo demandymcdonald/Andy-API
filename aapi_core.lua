@@ -4,13 +4,14 @@ local aapi_core = aapi
 local dbgwindow = nil
 --DebugLogFiles = "/"
 --DebugInstance = "nullnullnull"
+-- Used to initialize the Debug mode. Path: Path to create a debug log file | Win: window to display debug messages, defaults to the terminal 
 function aapi.initDebug(path, win)
     local DebugInstance = math.random(10000, 99999)
     local test = nil
     local filename = "debug-" .. os.date("%F") .. "-" .. DebugInstance .. ".txt"
     DebugLogFiles = textutils.serialize(path .. filename)
-    local free = aapi.FM("freespace",path)[1]
-    if free < .9 then 
+    local free = aapi.FM("freespace", path)[1]
+    if free < .9 then
         fs.makeDir(path)
     end
     Debugmode = true
@@ -22,23 +23,28 @@ function aapi.initDebug(path, win)
     end
     sleep(1)
 end
+-- Used to create a directory for logging specific messages. Path: Path to create a  log file
 function aapi.initLogs(path)
-
     local CmdInstance = math.random(10000, 99999)
     local filename = "cmd-" .. os.date("%F") .. "-" .. CmdInstance .. ".txt"
     fs.makeDir(path)
     sleep(1)
-    return(textutils.serialize(path .. filename))  
-end 
+    return (textutils.serialize(path .. filename))
+end
+-- Used to send a debug message, use initDebug prior to ensure it works. You also need to have DebugMode = true somewhere at the top of your program to make the message visible
 function aapi.dbg(msg)
     if Debugmode == true then
         local window = dbgwindow or term.native()
-        aapi.cprint(window,"Dbg",msg,DebugLogFiles)
+        aapi.cprint(window, "Dbg", msg, DebugLogFiles)
     end
 end
+-- Use to add messages to a log. Win: window to display debug messages, defaults to the terminal | Path: Path to save the log in | msg: What you want to be logged
 function aapi.log(window, path, msg)
     aapi.cprint(window, "Log", msg, path)
 end
+-- Allows for custom user input with validation. Win: window to display, defaults to the terminal | sender: who you want confirmation messages to come from (see cprint) | speed: speed at which you want confirmation messages to be sent | Allow: (see below) | confirm: true or false allows for confirmation of input prior to returning it | autocomplete: see cc:complete | password: true or false, allows for hiding of inputs
+-- Allow accepts the following: A table with alllowed inputs, num (numeric inputs only), abc (string only, no number only entries), yn (allows yes, y, n, or no. Returns true or false based on yes or no)
+-- NOTE: as a protective measure, uinput returns everything (including numbers and ints) as a string, use textutils.unserialise() to revert any output to its variable,int, or number form
 function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password)
     if window == nil then
 		window = term.native()
@@ -590,5 +596,17 @@ end
 --        end
 --   end
 --end
-
+function aapi.timeout(name,time)
+    _G[name] = os.startTimer(time)
+    local event, id 
+    local function loop()
+        event, id = os.pullEvent("timer")
+    end
+    loop()
+    if id == _G[name] then
+        return(true)
+    else
+        loop()
+    end
+end
 return aapi_core

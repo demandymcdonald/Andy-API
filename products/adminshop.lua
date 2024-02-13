@@ -3,14 +3,6 @@ local disp = require("aapi_display")
 local checksum = 0
 local cchecksum = 0
 local rtm = true
-local function timer(timer_id)
-    timer_id = os.startTimer(120)
-    local event, id
-    repeat
-        event, id = os.pullEvent("timer")
-    until id == timer_id
-    rtm = true
-end
 sleep(2)
 local DebugLogFiles = "AS/debuglogs"
 aapi.initDebug(DebugLogFiles)
@@ -46,6 +38,9 @@ function Startup()
         elseif peripheral.getType(PeripheralList[i]) == "command" then
             Cmd = peripheral.wrap(PeripheralList[i])
             aapi.dbg("Command Block Wrapped")
+        elseif peripheral.getType(PeripheralList[i]) == "playerDetector" then
+            PD = peripheral.wrap(PeripheralList[i])
+            aapi.dbg("PlayerDetector Wrapped")    
         end
     end
     PriceList = aapi.FM("load", "/AS/MarketPrice.txt")
@@ -56,7 +51,8 @@ function Startup()
     --disp.initDisplay()
     disp.addWindow(Mon,"Main","The Company Store",0,0,1,1,colors.black,true)
 	w_Main.clear()
-	w_Main.setCursorPos(1,1)
+    w_Main.setCursorPos(1, 1)
+    LocalPlayers = PD.getPlayersInRange(250)
 end
 Startup()
 sleep(1)
@@ -66,32 +62,81 @@ function Savelist()
     end
 end
 local function listPrices()
-    local function rewrite()
-        local cx, cy = w_Main.getCursorPos()
-        local mx, my = w_Main.getSize()
-        w_Main.setCursorPos(1, 1)
-        w_Main.write("Price List:")
-        w_Main.setCursorPos(1, cy + 1)
-        for i = 1, mx do
-            w_Main.write("-")
+    local pdlist = {}
+    local pnum = 0
+    local mx, my = w_Main.getSize()
+    local function tabulate()
+        local num = 0
+        for i = 1, #PriceList do
+            num = num + 1
         end
-		--for i=1,#PriceList do
-		--		aapi.dbg(PriceList[i]["DName"])
-		--		sleep(1)
-		--end
-        for key, value in pairs(PriceList) do
-            local cx, cy = w_Main.getCursorPos()
-            cy = cy + 1
-            if cy > my then
-                w_Main.scroll(1)
-                cy = my
+        if num > my - 2 then
+            local curnum = 1
+            local page = {}
+            local function newpage()
+                table.insert(pdlist, page)
+                page = {}
+                curnum = 1
+                pnum = pnum + 1
+                --aapi.cprint(nil,"Shop","Page: "..pnum.."c:"..curnum)
             end
-            w_Main.setCursorPos(1, cy + 1)
-            w_Main.write(value["Dname"] .. ": " .. value["Price"]*value["Inf"])
-			aapi.dbg(value["Dname"] .. ": " .. value["Price"]*value["Inf"])
+            for i = 1, num do
+                --aapi.cprint(nil, "Shop", "Page: " .. pnum .. "c:" .. curnum)
+                if curnum <= my - 2 then
+                    local value = PriceList[i]
+                    local write = value["Dname"] .. ": " .. value["Price"] * value["Inf"].."sc"
+                    table.insert(page, write)
+                    curnum = curnum + 1
+                else
+                    newpage()
+                end
+            end
+            newpage()
+        else
+            local page = {}
+            for i = 1, num do
+                local value = PriceList[i]
+                local write = value["Dname"] .. ": " .. value["Price"] * value["Inf"].."sc"
+                table.insert(page, write)
+            end
+            table.insert(pdlist, page)
+            pnum = 1
         end
     end
-    rewrite()
+    local function rewrite()
+        local ploc = 1
+        local function header()
+            w_Main.clear()
+            w_Main.setCursorPos(1, 1)
+            w_Main.write("Price List ("..ploc.."/"..pnum..")")
+            w_Main.setCursorPos(1, 2)
+            for i = 1, mx do
+                w_Main.write("-")
+            end
+        end
+        for i = 1, pnum do
+            header()
+            w_Main.setCursorPos(1, 3)
+            for k = 1, #pdlist[i] do
+                w_Main.write(pdlist[i][k])
+                w_Main.setCursorPos(1, 3 + k)
+            end
+            ploc = ploc + 1
+            sleep(30)
+        end 
+        -- for key, value in pairs(PriceList) do
+        --     local cx, cy = w_Main.getCursorPos()
+        --     cy = cy + 1
+        --     if cy > my then
+        --         w_Main.scroll(1)
+        --         cy = my
+        --     end
+        --     w_Main.setCursorPos(1, cy + 1)
+        --     w_Main.write()
+        --     aapi.dbg(value["Dname"] .. ": " .. value["Price"] * value["Inf"])
+        -- end
+    end
+    tabulate()
 end
 local function bulkaddObject()
     aapi.cprint(nil, "eve", "Please insert items to sell and then press the button")
@@ -250,17 +295,9 @@ local function sell()
                     os.pullEvent("redstone")
                     accepted = true
                 end
-                local function timer()
-                    local timer_id = os.startTimer(120)
-                    local event, id
-                    repeat 
-                        event, id = os.pullEvent("timer")
-                    until id == timer_id
-                    accepted = true
-                    rtm = true
-                end
+
                 --print("A redstone input has changed!")
-                parallel.waitForAny(rs,timer)
+                parallel.waitForAny(rs,aapi.timeout("sellclock",120))
             end
         end
         local function scaninv()
@@ -315,9 +352,24 @@ local function buy()
     local function bf()
         local itemsforsale = {}
         local total = 0
+        local GlobalPlayers = PD.getOnlinePlayers()
         local un = "notch"
-        aapi.cprint(nil, "Shop", "Please type in your username to continue: ")
-        un = aapi.uinput(nil, "Shop", nil, "none", true)
+        aapi.cprint(nil, "Shop", "Please select the player who you are buying for from the following list: ")
+        for i = 1, #GlobalPlayers do
+            aapi.cprint(nil, "Shop", i .. " | " .. GlobalPlayers[i])
+        end
+        local passs = false
+        local msg = aapi.uinput(nil, "Shop", nil, "num", true)
+        for i = 1, #GlobalPlayers do
+            if i == textutils.unserialize(msg) then
+                passs = true
+                un = GlobalPlayers[i]
+            end
+        end
+            if passs == false then
+                aapi.cprint(nil, "Shop", "Invalid Entry, Please try again ")
+                bf()
+            end
         local qty = 0
         local function additem(name, title, price, cmd)
             itemsforsale[name] = {}
@@ -403,7 +455,6 @@ local function mainmenu()
     local function pricescroll()
         while dispref == true do
             listPrices()
-            sleep(5)
         end
     end
     local function menufunction()
@@ -411,61 +462,69 @@ local function mainmenu()
         aapi.cprint(nil, "Shop", "1 | Buy things using Star Coins")
         aapi.cprint(nil, "Shop", "2 | Sell items to earn Star Coins")
         aapi.cprint(nil, "Shop", "3 | Enter Admin Mode")
-        local choice = aapi.uinput(nil,"Shop",nil,"num")     
+        local choice = aapi.uinput(nil, "Shop", nil, "num",nil,nil,nil)
         local opt = {
             o0 = function()
                 rtm = true
-                return    
+                return (true)
             end,
             o1 = function()
                 aapi.cprint(nil, "Shop", "Entering Buy Mode...")
-                dispref = false 
+                dispref = false
                 buy()
+                return (true)
             end,
             o2 = function()
                 aapi.cprint(nil, "Shop", "Entering Sell Mode...")
-                dispref = false 
-                sell()    
+                dispref = false
+                sell()
+                return (true)
             end,
             o3 = function()
-                local function timeout()
-                    timer(_G["ADM"])
-                    if dispref == true then
-                        return
-                    else
-                        sleep(999999999)
-                    end 
-                end
                 local function ADM()
                     aapi.cprint(nil, "Shop", "Please type in the Admin Password:")
                     aapi.uinput(nil, "Shop", nil, { "bikinibottomday" }, nil, nil, true)
                     dispref = false
                     bulkaddObject()
                 end
-                parallel.waitForAny(ADM,timeout)
-                return
+                parallel.waitForAny(ADM, aapi.timeout("ADMIN", 45))
+                return (true)
             end
         }
         if choice == nil then
             choice = "0"
         end
-        if opt["o"..textutils.unserialize(choice)]() == nil then
+        if opt["o" .. textutils.unserialize(choice)]() == nil then
             aapi.cprint(nil, "Shop", "Invalid choice.. Please try again")
-            menufunction() 
+            menufunction()
+        else
+            aapi.cprint(nil, "Shop", "Returning to Main Menu...")
+            rtm = true
         end
     end
-    while true do 
-        if rtm == true then
-            local nat = term.native()
-            w_Main.clear()
-            nat.clear()
-            w_Main.setCursorPos(1, 1)
-            nat.setCursorPos(1, 1)
-            rtm = false
-            dispref = true 
+    while true do
+        LocalPlayers = PD.getPlayersInRange(250)
+        local function menu()
+            if LocalPlayers then
+                if rtm == true then
+                    local nat = term.native()
+                    w_Main.clear()
+                    nat.clear()
+                    w_Main.setCursorPos(1, 1)
+                    nat.setCursorPos(1, 1)
+                    rtm = false
+                    dispref = true
+                end
+                parallel.waitForAll(menufunction(), pricescroll())
+            else
+                dispref = false
+                sleep(30)
+            end
         end
-        parallel.waitForAll(menufunction, pricescroll)
-        
+        local function tout()
+            aapi.timeout("MenuTout",120)
+        end
+        parallel.waitForAny(tout(),menu())
     end
 end
 mainmenu()
