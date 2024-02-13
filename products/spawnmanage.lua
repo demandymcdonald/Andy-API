@@ -22,8 +22,8 @@ function PlayerFinder()
             commands.exec("gamemode adventure " .. players[i])
             table.insert(Playersinspawn, players[i])
             --end
-            commands.exec("effect give " .. players[i] .. " minecraft:regeneration 10")
-            commands.exec("effect give " .. players[i] .. " minecraft:saturation 10")
+            commands.exec("effect give " .. players[i] .. " minecraft:regeneration 25")
+            commands.exec("effect give " .. players[i] .. " minecraft:saturation 25")
         end
     end
     for i = 1, #Playersinspawn do
@@ -39,7 +39,7 @@ function PlayerFinder()
             table.remove(Playersinspawn, i)
         end
     end
-    sleep(5)
+    sleep(15)
 end
 while true do
     PlayerFinder()
