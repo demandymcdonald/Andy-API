@@ -639,6 +639,6 @@ function aapi.deccutoff(numb, length)
     else
         final = cval
     end
-    return
+    return(textutils.unserialize(final))
 end
 return aapi_core
