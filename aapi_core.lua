@@ -612,15 +612,33 @@ function aapi.timeout(name, time)
     end
 end
 function aapi.inactivitytimer(name, time)
-    aapi.dbg("Timer Started | ID:"..name.." | Time:"..time)
+    aapi.dbg("Timer Started | ID:" .. name .. " | Time:" .. time)
     _G[name] = os.startTimer(time)
     while true do
-      local event, timerID = os.pullEvent()
+        local event, timerID = os.pullEvent()
         if event == "key" then
             aapi.inactivitytimer(name, time)
         elseif event == "timer" then
             if timerID == _G[name] then break end
         end
     end
+end
+function aapi.deccutoff(value, length)
+    local cval = "0"
+    local final = "0"
+    if type(value) == "number" then
+        cval = textutils.serialize(value)
+    else
+        error("Value to Round is not a number")
+    end
+    local decimalloc, decloc = string.find(cval, ".")
+    local shortened = nil 
+    if decimalloc then
+        local shortened = string.sub(cval, decimalloc + 1, length)
+        final = string.sub(cval,1,decimalloc)..shortened
+    else
+        final = cval
+    end
+    return(textutils.unserialize(final))
 end
 return aapi_core
