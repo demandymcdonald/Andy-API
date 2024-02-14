@@ -537,7 +537,7 @@ local function mainmenu()
                     rtm = false
                     dispref = true
                 end
-                parallel.waitForAll(menufunction(), pricescroll())
+                parallel.waitForAll(pricescroll(),menufunction())
             else
                 dispref = false
                 sleep(30)
