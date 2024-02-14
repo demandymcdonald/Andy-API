@@ -563,7 +563,7 @@ local function mainmenu()
                 sleep(30)
             end
         end
-        parallell.waitForAny(menu,operationtimeout)
+        parallel.waitForAny(menu,operationtimeout)
     end
 end
 mainmenu()
