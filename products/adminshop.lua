@@ -6,7 +6,7 @@ local rtm = true
 sleep(2)
 local DebugLogFiles = "AS/debuglogs"
 aapi.initDebug(DebugLogFiles)
-Debugmode = false
+Debugmode = true
 PriceList = {}
 Inv = {}
 Dispose = {}
@@ -511,7 +511,7 @@ local function mainmenu()
             o2 = function()
                 aapi.cprint(nil, "Shop", "Entering Sell Mode...")
                 dispref = false
-                buy()
+                sell()
                 return (true)
             end,
             o3 = function()
