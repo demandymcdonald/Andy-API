@@ -623,11 +623,11 @@ function aapi.inactivitytimer(name, time)
         end
     end
 end
-function aapi.deccutoff(value, length)
+function aapi.deccutoff(numb, length)
     local cval = "0"
     local final = "0"
-    if type(value) == "number" then
-        cval = textutils.serialize(value)
+    if type(numb) == "number" then
+        cval = textutils.serialize(numb)
     else
         error("Value to Round is not a number")
     end
@@ -639,6 +639,6 @@ function aapi.deccutoff(value, length)
     else
         final = cval
     end
-    return(textutils.unserialize(final))
+    return
 end
 return aapi_core
