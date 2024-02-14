@@ -596,17 +596,12 @@ end
 --        end
 --   end
 --end
-function aapi.timeout(name,time)
+function aapi.timeout(name, time)
+    aapi.dbg("Timer Started | ID:"..name.." | Time:"..time)
     _G[name] = os.startTimer(time)
-    local event, id 
-    local function loop()
-        event, id = os.pullEvent("timer")
-    end
-    loop()
-    if id == _G[name] then
-        return(true)
-    else
-        loop()
+    while true do
+      local event, timerID = os.pullEvent("timer")
+      if timerID == _G[name] then break end
     end
 end
 return aapi_core
