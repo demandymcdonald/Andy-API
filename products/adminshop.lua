@@ -100,7 +100,8 @@ local function listPrices(op)
                 local page = {}
                 for i = 1, num do
                     local value = PriceList[i]
-                    local write = value["Dname"] .. ": " .. aapi.deccutoff(textutils.unserialize(value["Price"]), 2) * value["Inf"].."sc"
+                    local finalprice = aapi.deccutoff(value["Price"]* value["Inf"], 2)
+                    local write = value["Dname"] .. ": " .. finalprice .."sc"
                     table.insert(page, write)
                 end
                 table.insert(pdlist, page)
