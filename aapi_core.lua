@@ -634,7 +634,7 @@ function aapi.deccutoff(numb, length)
     local decimalloc, decloc = string.find(cval, ".")
     local shortened = nil 
     if decimalloc then
-        local shortened = string.sub(cval, decimalloc + 1, length)
+        local shortened = string.sub(cval, decimalloc + 1,decimalloc + length)
         final = string.sub(cval,1,decimalloc)..shortened
     else
         final = cval
