@@ -482,7 +482,8 @@ local function mainmenu()
         end
     end
     local function operationtimeout()
-        aapi.inactivitytimer("AS_Operation",200)    
+        aapi.inactivitytimer("AS_Operation", 200)
+        rtm = true
     end
     local function menufunction()
         aapi.cprint(nil, "Shop", "Welcome to The Company Store! Press any key to continue")
