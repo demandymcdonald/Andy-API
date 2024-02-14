@@ -67,10 +67,10 @@ local pnum = 0
 local function listPrices(op)
 
     local mx, my = w_Main.getSize()
-
+    local num = 0
     local ops = {
         tabulate = function()
-            local num = 0
+
             for i = 1, #PriceList do
                 num = num + 1
             end
@@ -107,7 +107,7 @@ local function listPrices(op)
                 pnum = 1
             end
         end,
-        rewrite = function()
+        writeList = function()
             local ploc = 1
             local function header()
                 w_Main.clear()
@@ -470,7 +470,7 @@ local dispref = true
 local function mainmenu()
     local function pricescroll()
         while dispref == true do
-            listPrices("rewrite")
+            listPrices("writeList")
             sleep(5)
         end
     end
