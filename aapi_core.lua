@@ -169,8 +169,8 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
     if y + 1 >= my then
         term.scroll(1)
 		term.setCursorPos(1, my)
-    else
-		term.setCursorPos(1, y + 1)
+    --else
+	--	term.setCursorPos(1, y + 1)
 	end
     if autocomplete == true then
         if type(allow) == "table" then
@@ -278,7 +278,7 @@ function aapi.cprint(window, sender, msg, log, speed)
         end
     end
     slen = string.len(sname)
-    tlen = slen + mlen
+    tlen = slen + mlen 
     -- Begin Writing
     if window == nil then
         window = term.native()
@@ -291,7 +291,7 @@ function aapi.cprint(window, sender, msg, log, speed)
         
         local lstart = 1
         local lend = 0
-        if tlen > mx then
+        if tlen + 1 > mx then
             numlines = math.ceil(tlen / mx)
             lend = (mx - slen - 1)
             for i = 1, numlines do
@@ -300,9 +300,16 @@ function aapi.cprint(window, sender, msg, log, speed)
                     lstart = lend+1
                     lend = lstart+mx-2
                 end
-				if i<numlines then
-					lline = string.sub(msg, lstart, lend) .. "-"
-					table.insert(tmsg,lline)  
+                if i < numlines then
+                    lline = string.sub(msg, lstart, lend)
+                    local lastlet = string.sub(msg, lend, lend)
+                    local nextlet = string.sub(msg, lend+1, lend+1)
+                    if lastlet == " " or nextlet == " " then
+                        table.insert(tmsg,lline)
+                    else
+                        lline = lline .. "-"
+                        table.insert(tmsg,lline)  
+                    end
 				else
 					lline = string.sub(msg, lstart, lend)
 					table.insert(tmsg,lline)  
@@ -597,11 +604,23 @@ end
 --   end
 --end
 function aapi.timeout(name, time)
+    aapi.dbg("Timer Started | ID:" .. name .. " | Time:" .. time)
+    _G[name] = os.startTimer(time)
+    while true do
+        local event, timerID = os.pullEvent("timer")
+        if timerID == _G[name] then break end
+    end
+end
+function aapi.inactivitytimer(name, time)
     aapi.dbg("Timer Started | ID:"..name.." | Time:"..time)
     _G[name] = os.startTimer(time)
     while true do
-      local event, timerID = os.pullEvent("timer")
-      if timerID == _G[name] then break end
+      local event, timerID = os.pullEvent()
+        if event == "key" then
+            aapi.inactivitytimer(name, time)
+        elseif event == "timer" then
+            if timerID == _G[name] then break end
+        end
     end
 end
 return aapi_core

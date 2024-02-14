@@ -471,13 +471,15 @@ local function mainmenu()
     local function pricescroll()
         while dispref == true do
             listPrices("writeList")
-            sleep(5)
         end
+    end
+    local function operationtimeout()
+        aapi.inactivitytimer("AS_Operation",200)    
     end
     local function menufunction()
         aapi.cprint(nil, "Shop", "Welcome to The Company Store! Press any key to continue")
         os.pullEvent("key")
-        aapi.cprint(nil, "Shop", "Welcome to The Company Store! Select an option from the list below:")
+        aapi.cprint(nil, "Shop", "Select an option from the list below:")
         aapi.cprint(nil, "Shop", "1 | Buy things using Star Coins")
         aapi.cprint(nil, "Shop", "2 | Sell items to earn Star Coins")
         aapi.cprint(nil, "Shop", "3 | Enter Admin Mode")
@@ -490,13 +492,13 @@ local function mainmenu()
             o1 = function()
                 aapi.cprint(nil, "Shop", "Entering Buy Mode...")
                 dispref = false
-                buy()
+                parallel.waitForAny(buy,operationtimeout)
                 return (true)
             end,
             o2 = function()
                 aapi.cprint(nil, "Shop", "Entering Sell Mode...")
                 dispref = false
-                sell()
+                parallel.waitForAny(sell,operationtimeout)
                 return (true)
             end,
             o3 = function()
@@ -504,9 +506,9 @@ local function mainmenu()
                     aapi.cprint(nil, "Shop", "Please type in the Admin Password:")
                     aapi.uinput(nil, "Shop", nil, { "bikinibottomday" }, nil, nil, true)
                     dispref = false
-                    bulkaddObject()
+                    parallel.waitForAny(bulkaddObject, operationtimeout)
                 end
-                parallel.waitForAny(ADM, aapi.timeout("ADMIN", 45))
+                parallel.waitForAny(ADM, operationtimeout)
                 return (true)
             end
         }
@@ -521,10 +523,13 @@ local function mainmenu()
             rtm = true
         end
     end
+    local function menutout()
+        aapi.timeout("MMtimeout",120)    
+    end
     listPrices("tabulate")
     while true do
         LocalPlayers = PD.getPlayersInRange(250)
-        for i=1,#LocalPlayers do
+        for i = 1, #LocalPlayers do
             aapi.dbg(LocalPlayers[i])
         end
         local function menu()
@@ -539,7 +544,7 @@ local function mainmenu()
                     rtm = false
                     dispref = true
                 end
-                parallel.waitForAll(pricescroll(),menufunction())
+                parallel.waitForAny(menufunction,pricescroll,operationtimeout)
             else
                 dispref = false
                 sleep(30)
