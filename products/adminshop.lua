@@ -61,10 +61,11 @@ function Savelist()
         return
     end
 end
+
+local pdlist = {}
+local pnum = 0
 local function listPrices(op)
 
-    local pdlist = {}
-    local pnum = 0
     local mx, my = w_Main.getSize()
 
     local ops = {
@@ -542,7 +543,6 @@ local function mainmenu()
                 sleep(30)
             end
         end
-        listPrices("tabulate")
         menu()
     end
 end
