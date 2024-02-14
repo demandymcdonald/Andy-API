@@ -88,7 +88,8 @@ local function listPrices(op)
                     --aapi.cprint(nil, "Shop", "Page: " .. pnum .. "c:" .. curnum)
                     if curnum <= my - 2 then
                         local value = PriceList[i]
-                        local finalprice = aapi.deccutoff(value["Price"]* value["Inf"], 2)
+                        --local finalprice = aapi.deccutoff(value["Price"]* value["Inf"], 2)
+                        local finalprice = value["Price"]* value["Inf"]
                         local write = value["Dname"] .. ": " .. finalprice .."sc"
                         table.insert(page, write)
                         curnum = curnum + 1
@@ -101,7 +102,8 @@ local function listPrices(op)
                 local page = {}
                 for i = 1, num do
                     local value = PriceList[i]
-                    local finalprice = aapi.deccutoff(value["Price"]* value["Inf"], 2)
+                    --local finalprice = aapi.deccutoff(value["Price"]* value["Inf"], 2)
+                    local finalprice = value["Price"]* value["Inf"]
                     local write = value["Dname"] .. ": " .. finalprice .."sc"
                     table.insert(page, write)
                 end
