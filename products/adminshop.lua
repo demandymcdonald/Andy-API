@@ -501,13 +501,13 @@ local function mainmenu()
             o1 = function()
                 aapi.cprint(nil, "Shop", "Entering Buy Mode...")
                 dispref = false
-                parallel.waitForAny(buy,operationtimeout)
+                buy()
                 return (true)
             end,
             o2 = function()
                 aapi.cprint(nil, "Shop", "Entering Sell Mode...")
                 dispref = false
-                parallel.waitForAny(sell,operationtimeout)
+                buy()
                 return (true)
             end,
             o3 = function()
@@ -515,9 +515,9 @@ local function mainmenu()
                     aapi.cprint(nil, "Shop", "Please type in the Admin Password:")
                     aapi.uinput(nil, "Shop", nil, { "bikinibottomday" }, nil, nil, true)
                     dispref = false
-                    parallel.waitForAny(bulkaddObject, operationtimeout)
+                    bulkaddObject()
                 end
-                parallel.waitForAny(ADM, operationtimeout)
+                ADM()
                 return (true)
             end
         }
@@ -544,7 +544,7 @@ local function mainmenu()
         local function menu()
             if #LocalPlayers > 0 then
                 aapi.dbg("Player Detected")
-                if rtm == true then
+                --if rtm == true then
                     local nat = term.native()
                     w_Main.clear()
                     nat.clear()
@@ -552,7 +552,7 @@ local function mainmenu()
                     nat.setCursorPos(1, 1)
                     rtm = false
                     dispref = true
-                end
+                --end
                 parallel.waitForAny(menufunction,pricescroll,operationtimeout)
             else
                 dispref = false
