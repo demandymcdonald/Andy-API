@@ -144,6 +144,11 @@ local function listPrices(op)
     ops[op]()
 end
 local function bulkaddObject()
+    aapi.cprint(nil, "eve", "Would you like to reset the Price List")
+    local msg = aapi.uinput(nil, "eve", nil, "yn")
+    if msg == "true" then
+        PriceList = {}    
+    end
     aapi.cprint(nil, "eve", "Please insert items to sell and then press the button")
     os.pullEvent("redstone")
     if Inv.list() then
@@ -191,6 +196,9 @@ local function bulkaddObject()
     end
 
     Savelist()
+    pdlist = {}
+    pnum = 0
+    listPrices("tabulate")
 end
 local function movemoney(dir, qty)
 	-- Coindep
