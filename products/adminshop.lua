@@ -557,13 +557,13 @@ local function mainmenu()
                     rtm = false
                     dispref = true
                 --end
-                parallel.waitForAny(menufunction,pricescroll,operationtimeout)
+                parallel.waitForAll(menufunction,pricescroll)
             else
                 dispref = false
                 sleep(30)
             end
         end
-        menu()
+        parallell.waitForAny(menu,operationtimeout)
     end
 end
 mainmenu()
