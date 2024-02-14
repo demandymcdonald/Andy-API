@@ -475,7 +475,9 @@ local function mainmenu()
         end
     end
     local function menufunction()
-        aapi.cprint(nil, "Shop", "Welcome to The Company Store! Please select a function from the list below:")
+        aapi.cprint(nil, "Shop", "Welcome to The Company Store! Press any key to continue")
+        os.pullEvent("key")
+        aapi.cprint(nil, "Shop", "Welcome to The Company Store! Select an option from the list below:")
         aapi.cprint(nil, "Shop", "1 | Buy things using Star Coins")
         aapi.cprint(nil, "Shop", "2 | Sell items to earn Star Coins")
         aapi.cprint(nil, "Shop", "3 | Enter Admin Mode")
