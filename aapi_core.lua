@@ -617,7 +617,7 @@ function aapi.inactivitytimer(name, time)
     while true do
         local event, timerID = os.pullEvent()
         if event == "key" then
-            aapi.dbg("kp_timer reset")
+            --aapi.dbg("kp_timer reset")
             aapi.inactivitytimer(name, time)
         elseif event == "timer" then
 

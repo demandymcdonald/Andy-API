@@ -6,7 +6,7 @@ local rtm = true
 sleep(2)
 local DebugLogFiles = "AS/debuglogs"
 aapi.initDebug(DebugLogFiles)
-Debugmode = true
+Debugmode = false
 PriceList = {}
 Inv = {}
 Dispose = {}
