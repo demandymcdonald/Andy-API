@@ -542,6 +542,7 @@ local function mainmenu()
                 sleep(30)
             end
         end
+        listPrices("tabulate")
         menu()
     end
 end
