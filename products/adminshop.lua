@@ -103,7 +103,7 @@ local function listPrices(op)
                 for i = 1, num do
                     local value = PriceList[i]
                     --local finalprice = aapi.deccutoff(value["Price"]* value["Inf"], 2)
-                    local finalprice = value["Price"]* value["Inf"]
+                    local finalprice = value["Price"]/ value["Inf"]
                     local write = value["Dname"] .. ": " .. finalprice .."sc"
                     table.insert(page, write)
                 end
@@ -345,7 +345,7 @@ local function sell()
                         local adder = {}
                         adder["Name"] = data["Name"]
                         adder["Dname"] = data["Dname"]
-                        adder["Price"] = data["Price"]
+                        adder["Price"] = data["Price"] 
                         adder["Inf"] = (value["Qty"] / data["Num"]) * 0.00008 + data["Inf"]
                         adder["Num"] = value["Qty"] + data["Num"]
                         aapi.dbg("Removed " .. data["Name"] .. " from slot " .. name)
@@ -529,9 +529,6 @@ local function mainmenu()
             aapi.cprint(nil, "Shop", "Returning to Main Menu...")
             rtm = true
         end
-    end
-    local function menutout()
-        aapi.timeout("MMtimeout",120)    
     end
     listPrices("tabulate")
     while true do
