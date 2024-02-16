@@ -304,20 +304,14 @@ local function sell()
     while rtm == false do
         aapi.cprint(nil, "Store",
             "Please insert any items you wish to sell into the Offering Box and press the button when you are ready to complete the transaction")
-        aapi.cprint(nil, "Store","Or press any key to return...")
         local accepted = false
         local total = 0
         local ufo = {}
         local function redstone()
             while accepted == false do
                 local function rs()
-                    local id,event = os.pullEvent()
-                    if event == "redstone" then
-                        accepted = true
-                    elseif event == "key" then
-                        rtm = true
-                        return
-                    end
+                    local id,event = os.pullEvent("redstone")
+                    accepted = true
                 end
                 rs()
                 --print("A redstone input has changed!")
