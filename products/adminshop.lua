@@ -216,7 +216,7 @@ local function movemoney(dir, qty)
             for i = 1, rxbigger do
 				aapi.dbg("Depositing: "..i.."/"..rxbigger)
                 Coinsrc.pushItems(peripheral.getName(Coinbox), 1, 64)
-                sleep(.5)
+                sleep(.1)
             end
             Coinsrc.pushItems(peripheral.getName(Coinbox), 1,64*(xbigger-rxbigger))
         end
@@ -230,7 +230,7 @@ local function movemoney(dir, qty)
             for i = 1, rxbigger do
                 aapi.dbg("Withdrawing: "..i.."/"..rxbigger)
                 Coinbox.pushItems(peripheral.getName(Dispose), 1, 64)
-                sleep(.5)
+                sleep(.1)
             end
             Coinbox.pushItems(peripheral.getName(Dispose), 1,64*(xbigger-rxbigger))
         end
