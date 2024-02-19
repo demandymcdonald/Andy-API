@@ -399,7 +399,7 @@ local function buy()
         end
         sleep(1)
         additem(1, "Additional Claimed Chunk", 75, "ftbchunks admin extra_claim_chunks " .. un .. " add ")
-        additem(2, "Additional Force Load Chunk", 150, "ftbchunks admin extra_force_load_chunks " .. un .. " add ")
+        additem(2, "Additional Loaded Chunk", 150, "ftbchunks admin extra_force_load_chunks " .. un .. " add ")
         additem(3, "ATM Nugget", 250, "give " .. un .. " allthemodium:allthemodium_nugget ")
         additem(4, "Vibranium Nugget", 500, "give " .. un .. " allthemodium:vibranium_nugget ")
         additem(5, "Template: Netherite", 2000, "give " .. un .. " minecraft:netherite_upgrade_smithing_template")
