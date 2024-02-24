@@ -77,8 +77,48 @@ function FSSetup()
     aapi.cprint(this,"eve","Hello, my name is EVE.",nil,sped)
     aapi.cprint(this, "eve", "I'm your AI Reactor Controller. I'm here to guide you through the setup process!", nil, sped)
     aapi.cprint(this, "eve", "Let's start setting up your reactor", nil, sped)
+    aapi.cprint(this, "eve",
+        "Before we go any further, please craft a printer and ensure that said printer is connected to the network and supplied with paper and ink",
+        nil, sped)
+    pktc()
+    local PeripheralList = peripheral.getNames()
+    local printerinst = false
+    for i = 1, #PeripheralList do
+        if peripheral.getType(peripheralList[i]) == "printer" then
+            print = peripheral.wrap(peripheralList[i])
+            printerinst = true
+        end
+    end
+    if printerinst == false then
+        aapi.cprint(this, "eve", "Printer not detected, restarting setup..", nil, sped)
+        sleep(2)
+        FSSetup()
+    end
+    local pass = false
+    while pass == false do
+        local success = aapi.printdocument("github", "ASReactor TOS", "docs/asreactortos.txt")
+        if success == "Printed" then
+            pass = trueW
+        else
+            aapi.cprint(this, "eve",
+                "Failed to print the terms of service, please ensure there is enough paper and ink in the printer..", nil,
+                sped)W
+            pktc()
+        end
+    end
+    aapi.cprint(this, "eve", "Do you agree to the terms of service?", nil, sped)
+    local msg = aapi.uinput(this, "eve", sped, "yn")
+    if msg == false then
+        shell.run("delete andysoftreactor_launcher.lua")
+        shell.run("delete andysoftreactor.lua")
+        shell.run("delete startup.lua")         
+        aapi.cprint(this, "eve", "TOS Rejected, uninstalling Andysoft Reactor", nil, sped)
+        aapi.cprint(this, "eve", "Have a nice life :)", nil, sped)
+        sleep(5)
+        os.shutdown()
+    end
     local function activation()
-        local pass = false
+        local pass =W false
 
         aapi.cprint(this, "eve", "Please Insert your Product Activation Code now:", nil, sped)
         local msg = aapi.uinput(this, "eve", nil)
