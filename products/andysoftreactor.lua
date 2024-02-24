@@ -4,8 +4,9 @@ AAPI = require("aapi_core")
 local DebugLogFiles = "asreactor/debuglogs/"
 AAPI.initDebug(DebugLogFiles)
 local disp = require("aapi_display")
+local audio = require("aapi_audio")
 AAPI.dbg("hello world")
-
+local speakerenabled = false
 function Startup()
     aapi.PeripheralSetup()
     Reactors = aapi.Pertype("fissionReactorLogicAdapter")
@@ -14,6 +15,10 @@ function Startup()
     Batteries = aapi.Pertype("inductionPort")
     Monitors = aapi.Pertype("monitor")
     Turbines = aapi.Pertype("turbineValve")
+    Speakers = aapi.Pertype("speaker")
+    if Speakers then
+        speakerenabled = true
+    end
     LastRS = 0
     SelectedReactor = 1
     local PeripheralList = peripheral.getNames()
@@ -29,8 +34,10 @@ function Startup()
     Powertable = {}
     Displays = {}
     Pstatcount = 1
+    Alarm = false
     Cycle = 0
-    EnergyUnit = "FE"
+    Energyunit = "FE"
+    ASTable = {}
     if fs.exists("/asreactor/settings.txt") then
         local fs_ = fs.open("/asreactor/settings.txt", "r")
         if fs_ ~= nil then
@@ -42,7 +49,10 @@ function Startup()
             BRproduce = fs_.readLine()
             Gcycle = fs_.readLine()
             BRLimit = fs_.readLine()
-            EnergyUnit = fs_.readLine()
+            Energynit = fs_.readLine()
+            Tempunit = fs_.readLine()
+            AutoStatus = fs_.readLine()
+            ASTable = fs_.readLine()            
             fs_.close()
             disp.initDisplay(false, Displays, Monitors, Displaytypes, "/asreactor/monitorconfig.txt")
         else
@@ -51,8 +61,18 @@ function Startup()
     else
         error("Settings file not found.. Please run launcher..")
     end
- -- avg output
+    -- avg output
 end
+function SaveSettings()
+    if fs.exists("/asreactor/settings.txt") then
+        local fs_ = fs.open("/asreactor/settings.txt", "r")
+        local towrite = {Tier,Surmargin,AOTP,Battery,Batnames,BRproduce,Gcycle,BRLimit,Energyunit,Tempunit,AutoStatus,ASTable}
+        for i=1,#towrite do
+            fs_.writeLine(towrite[i])    
+        end
+        fs_.close()
+    end
+end    
 -----------------------------------------------------------------
 function Warning(type,value_,value2_)
     local bcolor = colors.lightGray
@@ -119,7 +139,16 @@ function Warning(type,value_,value2_)
     --table.insert(Warnings,code,tcolor,bcolor)
 end
 ----------------------------------------------------------------
-
+function FacilityAlarm()
+    os.pullEvent("Alarm")
+    if Alarm == false then
+        Alarm = true
+        audio.smcmd("medialoop", "alarm.dfpwm", "products/asreactor_sounds/", Speakers)
+    elseif Alarm == true then
+        Alarm = false
+        audio.smcmd("stoploop")        
+    end
+end
 function Powermeter()
     GlobalBR = 0
     Battery = true
@@ -218,58 +247,100 @@ function Powermeter()
         GlobalBR = string.sub(ucGlobalBR,1,(3+roundfactor))
     end
     powerstatistics()
-    powercalculate()
-    if oldbr ~= GlobalBR then
-        for i = 1,#Reactors do 
-            local delta = GlobalBR / #Reactors
-            AAPI.dbg("Delta Burn Rate for "..#Reactors.." Reactors is " .. delta.." Each")
-            local reason = "AUTO-ADJUST-BR Reactor "..i.." | 'Adjusted BR to:"..delta.."'"
-            Commands(Reactors[i],"Burnrate",reason,delta)
+    if AutoStatus == 0 then
+        powercalculate()
+        if oldbr ~= GlobalBR then
+            for i = 1, #Reactors do
+                local delta = GlobalBR / #Reactors
+                AAPI.dbg("Delta Burn Rate for " .. #Reactors .. " Reactors is " .. delta .. " Each")
+                local reason = "AUTO-ADJUST-BR Reactor " .. i .. " | 'Adjusted BR to:" .. delta .. "'"
+                Commands(Reactors[i], "Burnrate", reason, delta)
+            end
         end
     end
+    SaveSettings()
 end 
 function Commands(object, input, reason, value1)
     local command = {
         scram = function()
             object.scram()
+            audio.smcmd("playgamesound","mekanism:digital_beep",1,Speakers)
             local msg = "!!!SCRAM INITATED!!! - "..reason
-            AAPI.log(w_rlog,Commandlog,msg)
-        end,
-        resetalarm = function()
-
+            AAPI.log(w_rlog, Commandlog, msg)
+            Commands["alarmtoggle"]()
         end,
         shutdown = function()
             object.scram()
-            local msg = "Reactor Shutdown- "..reason
+            audio.smcmd("playgamesound","mekanism:digital_beep",1,Speakers)
+            local msg = "Reactor "..SelectedReactor.." Shutdown- "..reason
             AAPI.log(w_rlog,Commandlog,msg)
         end,
         startup = function()
             object.activate()
-            local msg = "Reactor Startup- "..reason
+            audio.smcmd("playgamesound","mekanism:digital_beep",1,Speakers)
+            local msg = "Reactor "..SelectedReactor.." Startup- "..reason
             AAPI.log(w_rlog,Commandlog,msg)            
         end,
         burnrate = function()
             object.setBurnRate(value1)
             local msg = reason
+            audio.smcmd("playgamesound","mekanism:digital_beep",1,Speakers)
+            if AutoStatus == 1 then
+                table.remove(ASTable, SelectedReactor)
+                table.insert(ASTable, SelectedReactor, value1)
+                SaveSettings()
+            end
             AAPI.log(w_rlog, Commandlog, msg)
         end,
-        rselectplus = function ()
+        rselectplus = function()
+            audio.smcmd("playgamesound","mekanism:digital_beep",1,Speakers)
+            
             local num = #Reactors
             if SelectedReactor == num then
                 SelectedReactor = 1
             else
                 SelectedReactor = SelectedReactor + 1
             end
-            AAPI.log("Selected Reactor Changed to"..SelectedReactor)
+            AAPI.log(w_rlog, Commandlog,"Selected Reactor Changed to"..SelectedReactor)
         end,
-        rselectminus = function ()
+        rselectminus = function()
+            audio.smcmd("playgamesound","mekanism:digital_beep",1,Speakers)
+
             local num = #Reactors
             if SelectedReactor == 1 then
                 SelectedReactor = num
             else
                 SelectedReactor = SelectedReactor - 1
             end
-            AAPI.log("Selected Reactor Changed to"..SelectedReactor)
+            AAPI.log(w_rlog, Commandlog,"Selected Reactor Changed to" .. SelectedReactor)
+        end,
+        actoggle = function()
+            audio.smcmd("playgamesound","mekanism:digital_beep",1,Speakers)
+            if AutoStatus == 0 then
+                AAPI.log(w_rlog, Commandlog,"Eve Autocommand DISABLED")
+                AutoStatus = 1
+                for i = 1, #Reactors do
+                    ASTable = {}
+                    local reactor = Reactors[i]
+                    local br = reactor.getBurnRate()
+                    table.insert(ASTable, br)
+                end
+                SaveSettings()
+            elseif AutoStatus == 1 then
+                ASTable = {}
+                AutoStatus = 0
+                SaveSettings()
+                AAPI.log(w_rlog, Commandlog,"Eve Autocommand ENABLED")
+            end
+        end,
+        alarmtoggle = function()
+
+            if Alarm == true then
+                AAPI.log(w_rlog, Commandlog,"!!!Facility Alarm Deactivated!!! -" .. reason)
+            elseif Alarm == false then
+                AAPI.log(w_rlog, Commandlog,"!!!Facility Alarm Activated!!! -" .. reason)
+            end
+            FacilityAlarm()
         end
     }
     command[string.lower(input)]()
@@ -300,7 +371,7 @@ function SYSstatus()
                     Commands(reactor, "scram", reason)
                     AAPI.dbg("SCRAM REACTOR DAMAGE")
                 elseif rtemp >= 1000 then
-                    local reason = "Reactor "..i.."AUTO-SCRAM 'TEMP @"..disp.textf("temp",rtemp,"f").."'"
+                    local reason = "Reactor "..i.."AUTO-SCRAM 'TEMP @"..disp.textf("temp",rtemp,Tempunit).."'"
                     Commands(reactor, "scram", reason)
                     AAPI.dbg("SCRAM HIGH REACTOR TEMP")
                 elseif rcool <= .40 then
@@ -404,6 +475,7 @@ function Input(side)
         two = function()
         end,
         three = function()
+            Commands(nil,"ACtoggle")
         end,
         four = function()
             for i=1,#Reactors do
@@ -436,12 +508,18 @@ function Input(side)
             Commands(Reactors[SelectedReactor],"burnrate","Manual: +.5",curburn+.5)
         end,
         twelve = function()
-
+            if Alarm == true then
+                Commands(nil,"Alarmtoggle","Manual Alarm Shutoff")
+            end
         end,
         thirteen = function()
+            Commands(Reactors[SelectedReactor],"shutdown","Manual Shutdown")
         end,
         fourteen = function()
-
+            Commands(Reactors[SelectedReactor],"startup","Manual Startup")
+        end,
+        fifteen = function()
+            Commands(Reactors[SelectedReactor],"scram","Manual Activation")
         end
     }
     if input ~= 0 then
@@ -457,18 +535,17 @@ end
 function BuildDisplays()
     local function CustomReactorInterface()
         local function pre()
-                                        --[[
+            --[[
                     data_[1] = length
                     data_[2] = width
                 ]]
-            parent.setCursorPos(xstart, ystart)    
-        end        
+            parent.setCursorPos(xstart, ystart)
+        end
         local function dodraw()
             paintutils.drawFilledBox(xstart, ystart, xend, yend, bcolor)
             parent.setTextColor(ncolor)
             local lct = 1
             local wct = 1
-            
         end
     end
     for key, display in pairs(Displays) do
@@ -477,12 +554,12 @@ function BuildDisplays()
             display[2].setTextScale(.5)
             local displayname = "Reactordisplay"
             disp.addWindow(display[2], displayname, "ARS Reactor Status", 0, 0, 1, 1, colors.black, true)
-            disp.addWindow(w_Reactordisplay, "RStatusWidgets", "Status & Warnings", 0, 0, 1, .3 * #Reactors, colors.black,
+            disp.addWindow(w_Reactordisplay, "RStatusWidgets", "Status & Warnings", 0, 0, 1, .3 * #Reactors, colors
+                .black,
                 false)
             disp.addWindow(w_Reactordisplay, "rlog", "Reactor Log", 0, .3 * #Reactors, 1, .8, colors.black, false)
             SYSstatusWidgets()
-            disp.buildWidgets("Rwidgets",w_RStatusWidgets, Rwidget,true)
-
+            disp.buildWidgets("Rwidgets", w_RStatusWidgets, Rwidget, true)
         elseif display[1] == "Battery" then
             display[2].clear()
             display[2].setTextScale(.5)
@@ -493,7 +570,7 @@ function BuildDisplays()
             POWmainstatWidgets()
             disp.buildWidgets("Pwidgets", w_BStatusWidgets, Pwidget, true)
             disp.addWindow(w_Batterydisplay, "ADisplay", "Batteries", 0, .6, 1, 1 * #Reactors, colors
-                .black, false)    
+                .black, false)
             disp.windowArray(w_ADisplay, #Batteries, "Awidget", Batnames, colors.lightGray, true, 0, 0, 1, 1)
             for i = 1, #Batteries do
                 disp.buildWidgets("Awidgets" .. i, _G["w_Awidget" .. i], _G["Awidgetlist" .. i], false)
@@ -501,11 +578,19 @@ function BuildDisplays()
         end
     end
 end
+local function convertenergy(data)
+        return(aapi.contostand("temp",data,"j"))
+end
 function SYSstatusWidgets()
     Rwidget = {}
     local i = 1
-    for key, data in pairs(ReactorList) do
-        local name = ReactorList["reactor" .. i]
+
+    disp.createWidget(Rwidget, "display", ("Selected Reactor"),
+    ("SELR"), SelectedReactor, colors.yellow,
+    colors.black, colors.white)
+    for key, data in pairs(Reactors) do
+        local name = Reactors["reactor" .. i]
+        
         disp.createWidget(Rwidget, "display", ("reactor" .. i .. "status"),
             ("R" .. i .. "STAT"), name["Status"], name["StatBool"][1],
             name["StatBool"][2], colors.white)
@@ -513,7 +598,7 @@ function SYSstatusWidgets()
             ("R" .. i .. "DAMA"), disp.textf("per", name["Dama"]), name["DamaC"][1],
             name["DamaC"][2], colors.white)
         disp.createWidget(Rwidget, "display", ("reactor" .. i .. "temp"),
-            ("R" .. i .. "TEMP"), disp.textf("temp", name["Temp"], "f"), name["TempC"][1],
+            ("R" .. i .. "TEMP"), disp.textf("temp", name["Temp"], Tempunit), name["TempC"][1],
             name["TempC"][2], colors.white)
         disp.createWidget(Rwidget, "display", ("reactor" .. i .. "cool"),
             ("R" .. i .. "COOL"), disp.textf("per", name["Cool"]), name["CoolC"][1],
@@ -546,9 +631,9 @@ function POWmainstatWidgets()
         table.insert(aiop, value[1])
         table.insert(aotp, value[2])
         table.insert(aenb, value[3])
-        table.insert(aiopd, disp.textf("energy", value[1], EnergyUnit))
-        table.insert(aotpd, disp.textf("energy", value[2], EnergyUnit))
-        table.insert(aenbd, disp.textf("energy", value[3], EnergyUnit))
+        table.insert(aiopd, disp.textf("energy", value[1],  Energyunit))
+        table.insert(aotpd, disp.textf("energy", value[2],  Energyunit))
+        table.insert(aenbd, disp.textf("energy", value[3],  Energyunit))
     end
     local aenb_ = disp.createDataTable(dname, aenb, aenbd)
     local aiop_ = disp.createDataTable(dname, aiop, aiopd)
@@ -559,12 +644,12 @@ function POWmainstatWidgets()
         .gray, colors.white, colors.black, colors.black, { colors.blue, colors.lightBlue })
     disp.createWidget(Pwidget, "smallbargraph", "AOTPG", "Using:", aotp_, colors
         .gray, colors.white, colors.black, colors.black, { colors.blue, colors.lightBlue })
-    disp.createWidget(Pwidget, "display", "EnergyBalanceD", "Energy Balance", disp.textf("energy", EnergyBalance, EnergyUnit),
+    disp.createWidget(Pwidget, "display", "EnergyBalanceD", "Energy Balance", disp.textf("energy", convertenergy(EnergyBalance),   Energyunit),
         colors
         .gray, colors.white, colors.white)
-    disp.createWidget(Pwidget, "display", "AIOPD", "Generating:", disp.textf("energy", INP, EnergyUnit), colors
+    disp.createWidget(Pwidget, "display", "AIOPD", "Generating:", disp.textf("energy", convertenergy(INP), Energyunit), colors
         .green, colors.white, colors.white)
-    disp.createWidget(Pwidget, "display", "AOTPD", "Using:", disp.textf("energy", OTP, EnergyUnit), colors
+    disp.createWidget(Pwidget, "display", "AOTPD", "Using:", disp.textf("energy", convertenergy(OTP),  Energyunit), colors
         .red, colors.white, colors.white)
     local function POWstatusWidgets(i)
         local name = Batdata[Batnames[i]][Cycle]
@@ -573,9 +658,9 @@ function POWmainstatWidgets()
         disp.createWidget(wtname, "smallbarmeter", ("Bat" .. i .. "Fill"), ("B" .. i .. "FIL"), { name["Fill"], 1 },
             colors.gray, colors.white, colors.black, colors.green, colors.white)
         disp.createWidget(wtname, "display", ("Bat" .. i .. "Input"), ("B" .. i .. "IN"),
-            disp.textf("energy", name["Input"], EnergyUnit), colors.gray, colors.white, colors.green)
+            disp.textf("energy", convertenergy(name["Input"]), Energyunit), colors.gray, colors.white, colors.green)
         disp.createWidget(wtname, "display", ("Bat" .. i .. "Output"), ("B" .. i .. "OUT"),
-            disp.textf("energy", name["Output"], EnergyUnit), colors.gray, colors.white, colors.red)
+            disp.textf("energy", convertenergy(name["Output"]),    Energyunit), colors.gray, colors.white, colors.red)
     end
     for i = 1, #Batteries do
         POWstatusWidgets(i)
@@ -592,49 +677,59 @@ elseif Tier == 2 then
         Powermeter()
         SYSstatusWidgets()
         POWmainstatWidgets()
+        sleep(10)
     end
 elseif Tier == 3 then
     BuildDisplays()
     local function thread1()
+        audio.smcmd("playmedia", "startup.dfpwm", "products/asreactor_sounds/", Speakers)
         while true do
             SYSstatus()
             SYSstatusWidgets()
-            sleep(2)
+            sleep(5)
         end
     end
     local function thread2()
         while true do
             Powermeter()
             POWmainstatWidgets()
-            sleep(10)
+            sleep(20)
         end
     end
     local function thread3()
         while true do
-            input()
+            Input()
         end
     end
-    parallel.waitForAll(thread1, thread2, thread3)
+    if speakerenabled == true then
+        parallel.waitForAll(thread1, thread2, thread3,audio.soundmanager,FacilityAlarm)
+    else
+        parallel.waitForAll(thread1, thread2, thread3)        
+    end
 elseif Tier == 4 then
     BuildDisplays()
     local function thread1()
         while true do
             SYSstatus()
             SYSstatusWidgets()
-            sleep(2)
+            sleep(5)
         end
     end
     local function thread2()
         while true do
             Powermeter()
             POWmainstatWidgets()
-            sleep(10)
+            sleep(20)
         end
     end
     local function thread3()
         while true do
-            input()
+            Input()
         end
     end
-    parallel.waitForAll(thread1,thread2,thread3)
+    if speakerenabled == true then
+        parallel.waitForAll(thread1, thread2, thread3,audio.soundmanager,FacilityAlarm)
+    else
+        parallel.waitForAll(thread1, thread2, thread3)        
+    end
 end

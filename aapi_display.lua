@@ -647,13 +647,13 @@ function aapi_display.buildWidgets(id,parent,datatable,centered)
     end
     term.redirect(term.native())
 end
-function aapi_display.refreshWidget(id,data)
+function aapi_display.refreshWidget(id, data)
     for key, value in pairs(data) do
         local c = _G[id][value["name"]]
         term.redirect(c["parent"])
         Widgets[value["type_"]](c["parent"], value["title"], value["data"], c["xpos"], c["ypos"], c["xend"],
-            c["yend"], value["bgcolor"],value["ncolor"], value["dcolor"], value["ecolor"], value["fcolor"])
-        term.redirect(term.native())        
+            c["yend"], value["bgcolor"], value["ncolor"], value["dcolor"], value["ecolor"], value["fcolor"])
+        term.redirect(term.native())
     end
     aapi.dbg("Widgets Refreshed")
 end
@@ -686,7 +686,7 @@ function aapi_display.textf(type_,text,convert2)
         energy = function()
             local units = {
                 FE = function()
-                    local mathe = math.floor(text * 2.5)
+                    local mathe = math.floor(text)
                     local len = string.len(mathe)
                     local concat = {
                         { 1, 3,1, "FE/t" },
@@ -704,8 +704,7 @@ function aapi_display.textf(type_,text,convert2)
                     end
                 end,
                 RF = function()
-                    local math = text * .4
-                    local mathe = math.floor(text * 2.5)
+                    local mathe = math.floor(text)
                     local len = string.char(#mathe)
                     local concat = {
                         { 1,  3,  1,  "RF/t" },
@@ -720,7 +719,41 @@ function aapi_display.textf(type_,text,convert2)
                             aapi.dbg("[textf]   " .. text .. " converted to " .. result)
                         end
                     end
-                end
+                end,
+                J = function()
+                    local mathe = math.floor(text / 2.5)
+                    local len = string.char(#mathe)
+                    local concat = {
+                        { 1,  3,  1,  "J/t" },
+                        { 4,  6,  3,  "kJ/t" },
+                        { 7,  9,  6,  "MJ/t" },
+                        { 10, 12, 9,  "GJ/t" },
+                        { 13, 15, 12, "TJ/t" }
+                    }
+                    for key, value in pairs(concat) do
+                        if len >= value[1] and len <= value[2] then
+                            result = textutils.serialize(mathe / (10 ^ value[3])) .. value[4]
+                            aapi.dbg("[textf]   " .. text .. " converted to " .. result)
+                        end
+                    end
+                end,
+                EU = function()
+                    local mathe = math.floor(text *4)
+                    local len = string.char(#mathe)
+                    local concat = {
+                        { 1,  3,  1,  "EU/t" },
+                        { 4,  6,  3,  "kEU/t" },
+                        { 7,  9,  6,  "MEU/t" },
+                        { 10, 12, 9,  "GEU/t" },
+                        { 13, 15, 12, "TEU/t" }
+                    }
+                    for key, value in pairs(concat) do
+                        if len >= value[1] and len <= value[2] then
+                            result = textutils.serialize(mathe / (10 ^ value[3])) .. value[4]
+                            aapi.dbg("[textf]   " .. text .. " converted to " .. result)
+                        end
+                    end
+                end,
             }
             units[convert2]()
         end    

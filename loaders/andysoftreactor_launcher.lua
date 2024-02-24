@@ -23,7 +23,7 @@ Apistartup()
 local aapi = require("aapi_core")
 local disp = require("aapi_display")
 local sound = require("aapi_audio")
-local channelmap = {"15 = Scram","14 = Power Off","13 = Power On","12 = Reset Alarm","11 = Burn Rate Up (.5)","10 = Burn Rate Up (.1)","9 = Reset Burn Rate","8 = Burn Rate Down (.1)","7 = Burn Rate Down (.5)","6 = Change Selected Reactor (+)","5 = Change Selected Reactor (-)","4 = Facility Shutdown"}
+local channelmap = {"15 = Scram","14 = Power On","13 = Power Off","12 = Reset Alarm","11 = Burn Rate Up (.5)","10 = Burn Rate Up (.1)","9 = Reset Burn Rate","8 = Burn Rate Down (.1)","7 = Burn Rate Down (.5)","6 = Change Selected Reactor (+)","5 = Change Selected Reactor (-)","4 = Facility Shutdown","3 = Enable/Disable Automatic Control"}
 function Startup()
     if fs.exists("/asreactor/settings.txt") then
         while true do
@@ -74,13 +74,21 @@ function FSSetup()
         aapi.cprint(this, "eve", "Press any key to continue..")
         local msg = aapi.uinput(this, "eve", sped)
     end
+    aapi.cprint(this, "eve",
+    "Please select the language you wish to use. Your options are: English, Ingles, and Englisch", nil, sped)
+    aapi.uinput(this, "eve", sped, { "English", "Ingles", "Englisch" }, nil, { "English", "Ingles", "Englisch" })
+
     aapi.cprint(this,"eve","Hello, my name is EVE.",nil,sped)
     aapi.cprint(this, "eve", "I'm your AI Reactor Controller. I'm here to guide you through the setup process!", nil, sped)
-    aapi.cprint(this, "eve", "Let's start setting up your reactor", nil, sped)
+
     aapi.cprint(this, "eve",
         "Before we go any further, please craft a printer and ensure that said printer is connected to the network and supplied with paper and ink",
         nil, sped)
     pktc()
+
+
+aapi.uinput(this, "eve", sped, { "English", "Ingles", "Englisch" }, nil, { "English", "Ingles", "Englisch" })
+
     local PeripheralList = peripheral.getNames()
     local printerinst = false
     for i = 1, #PeripheralList do
@@ -111,12 +119,13 @@ function FSSetup()
     if msg == false then
         shell.run("delete andysoftreactor_launcher.lua")
         shell.run("delete andysoftreactor.lua")
-        shell.run("delete startup.lua")         
+        shell.run("delete startup.lua")
         aapi.cprint(this, "eve", "TOS Rejected, uninstalling Andysoft Reactor", nil, sped)
         aapi.cprint(this, "eve", "Have a nice life :)", nil, sped)
         sleep(5)
         os.shutdown()
     end
+
     local function activation()
         local pass = false
 
@@ -137,6 +146,24 @@ function FSSetup()
         end
     end
     activation()
+    aapi.cprint(this, "eve", "Let's start setting up your reactor", nil, sped)
+    local function SIUconfig()
+        aapi.cprint(this, "eve",
+            "What unit would you like your power to be measured in?",
+            nil, sped)
+        aapi.cprint(this, "eve",
+            "Your options are: FE,EU,RF,J",
+            nil, sped)
+        Energyunit = aapi.uinput(this, "eve", sped, { "FE", "EU", "RF", "J" }, nil)
+        aapi.cprint(this, "eve",
+            "What unit would you like tempeture to be measured in?",
+            nil, sped)
+        aapi.cprint(this, "eve",
+            "Your options are: F,C, and K",
+            nil, sped)
+        Tempunit = aapi.uinput(this, "eve", sped, { "C","F","K" }, nil)
+    end
+    SIUconfig()
     function RedstoneSetup()
         local rs = nil
 
@@ -425,6 +452,7 @@ function FSSetup()
         Bcheck()
         Vcheck()
         if tier < 2 then
+
             Tcheck()
             local function Turbinetest()
                 local tr = 0
@@ -434,6 +462,7 @@ function FSSetup()
                 end
                 return (tr)
             end
+
             TR = Turbinetest()
             RedstoneSetup()
             if tier < 3 then
@@ -493,6 +522,10 @@ function FSSetup()
     fs_.writeLine(TR)
     fs_.writeLine(1)
     fs_.writeLine(BR)
+    fs_.writeLine(Energyunit)
+    fs_.writeLine(Tempunit)
+    fs_.writeLine(0)
+    fs_.writeLine({})      
     fs_.close()
 
     -- local msg = aapi.uinput(this,"eve",sped,{"Yes","No"},false,true,false)

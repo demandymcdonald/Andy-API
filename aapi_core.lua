@@ -551,7 +551,39 @@ function aapi.FM(operation, file, data)
     ops[operation]()
     return (value)
 end
-
+function aapi.contostand(type, data, unit)
+    --convert all types of energy into FE and all types of temp into kelvin
+    local result = 0
+    local types = {
+        temp = {
+            k = function()
+                result = data    
+            end,
+            c = function()
+                result = data + 273.15
+            end,
+            f = function()
+                result = ((data - 32) * 5 / 9 + 273.15)
+            end,
+        },
+        energy = {
+            fe = function()
+                result = data
+            end,
+            rf = function()
+                result = data
+            end,
+            j = function()
+                result = data * 0.4
+            end,
+            eu = function()
+                result = data * 4
+            end,
+        }
+    }
+    types[type][string.lower(unit)]()
+    return(result)
+end
 -- The MIT License (MIT)
 -- Copyright (c) 2018,2020 Thomas Mohaupt <thomas.mohaupt@gmail.com>
 
