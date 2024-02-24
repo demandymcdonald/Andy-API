@@ -98,11 +98,11 @@ function FSSetup()
     while pass == false do
         local success = aapi.printdocument("github", "ASReactor TOS", "docs/asreactortos.txt")
         if success == "Printed" then
-            pass = trueW
+            pass = true
         else
             aapi.cprint(this, "eve",
                 "Failed to print the terms of service, please ensure there is enough paper and ink in the printer..", nil,
-                sped)W
+                sped)
             pktc()
         end
     end
@@ -118,7 +118,7 @@ function FSSetup()
         os.shutdown()
     end
     local function activation()
-        local pass =W false
+        local pass = false
 
         aapi.cprint(this, "eve", "Please Insert your Product Activation Code now:", nil, sped)
         local msg = aapi.uinput(this, "eve", nil)
