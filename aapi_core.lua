@@ -635,13 +635,82 @@ function aapi.deccutoff(numb, length)
         error("Value to Round is not a number")
     end
     local decimalloc, decloc = string.find(cval, ".")
-    local shortened = nil 
+    local shortened = nil
     if decimalloc then
-        local shortened = string.sub(cval, decimalloc + 1,decimalloc + length)
-        final = string.sub(cval,1,decimalloc)..shortened
+        local shortened = string.sub(cval, decimalloc + 1, decimalloc + length)
+        final = string.sub(cval, 1, decimalloc) .. shortened
     else
         final = cval
     end
-    return(textutils.unserialize(final))
+    return (textutils.unserialize(final))
+end
+function aapi.printdocument(type, title, document)
+    local result = "Printed"
+    local function printdoc(tit, text)
+        local lines = require "cc.strings".wrap(text, 25)
+        local pn = 1
+        if #lines > 21 then
+            pn = math.ceil(#lines / 21)
+        end
+        if pn == 1 then
+            if not printer.newPage() then
+                result = "Out of Paper or Ink"
+                return
+            end
+            printer.setPageTitle(tit)
+            printer.setCursorPos(1, 1)
+            for i = 1, #lines do
+                printer.setCursorPos(1, i)
+                printer.write(lines[i])
+            end
+            printer.endPage()
+        else
+            local lineno = 1
+            for i = 1, pn do
+                if not printer.newPage() then
+                    result = "Out of Paper or Ink"
+                    return
+                end
+                printer.setPageTitle(tit .. "Pg: " .. i .. "/" .. #pn)
+                for n = 1, 21 do
+                    printer.setCursorPos(1, n)
+                    local wline = lines[lineno]
+                    if wline == nil then
+                        return
+                    else
+                        printer.write(wline)
+                    end
+                    lineno = lineno + 1
+                end
+                printer.endPage()
+            end
+        end
+    end
+    local function fsdocument(path)
+        local file = fs.open(path, "r")
+        local lines = {}
+        while true do
+            local line = file.readLine()
+
+            -- If line is nil then we've reached the end of the file and should stop
+            if not line then break end
+
+            table.insert(lines, line)
+        end
+        file.close()
+        return(lines)
+    end
+    if type == "string" or type == "table" then
+        printdoc(title, document)
+    elseif type == "github" then
+        local loader = require("aapi_loader")
+        loader.custom(document[1],document[2], false)
+        local doc = fsdocument(document[2])
+        printdoc(title, doc)
+    elseif type == "local" then
+        local doc = fsdocument(document)
+        printdoc(title,doc)
+    end
+    return(result)
 end
 return aapi_core
