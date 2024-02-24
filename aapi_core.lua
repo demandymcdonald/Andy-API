@@ -704,10 +704,10 @@ function aapi.printdocument(type, title, document)
         printdoc(title, document)
     elseif type == "github" then
         local loader = require("aapi_loader")
-        loader.custom(document[1],document[2], false)
-        local doc = fsdocument(document[2])
+        loader.custom(document[1],"/tmp/"..document[2], false)
+        local doc = fsdocument("/tmp/"..document[2])
         printdoc(title, doc)
-        shell.run("delete "..document[2])
+        shell.run("delete "..doc)
     elseif type == "local" then
         local doc = fsdocument(document)
         printdoc(title, doc)
