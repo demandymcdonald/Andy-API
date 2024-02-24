@@ -403,7 +403,7 @@ function aapi.PeripheralSetup()
         AttachedPer[type][count]["wrap"] = wrap
         Persave[type][count] = {}
         Persave[type][count]["name"] = name
-        _G['name'] = wrap
+        _G[name] = wrap
         aapi.dbg(name .. " of type " .. type .. " Initialized.. This is number: " .. count)
         sleep(0.1)
     end
