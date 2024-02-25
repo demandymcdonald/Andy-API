@@ -1,8 +1,11 @@
 local aapi_display = {}
 local aapi = require("aapi_core")
-function aapi_display.initDisplay(setup,result,pers,displaynames,savepath)
+function aapi_display.initDisplay(setup,result,pers,displaynames,savepath,win)
     DataTableSize = {}
     Gval = 0
+    if win == nil then
+        win = term.native()
+    end
     local function monitorSetup()
         local count = 0
         if fs.exists(savepath) and setup == false then
@@ -21,7 +24,7 @@ function aapi_display.initDisplay(setup,result,pers,displaynames,savepath)
                     if id == key then
                         local res = { value, moni }
                         table.insert(result, res)
-                        aapi.dbg("Monitor " .. id .. " is now startcount: " .. value)
+                        aapi.dbg("Monitor " .. id .. " is now type: " .. value)
                     end
                 end
             end
@@ -40,8 +43,8 @@ function aapi_display.initDisplay(setup,result,pers,displaynames,savepath)
             term.clear()
             term.redirect(term.native())
             term.setCursorPos(1, 1)
-            aapi.cprint(nil,"Display","Welcome to Monitor Setup..")
-            aapi.cprint(nil,"Display","We are going to go through every monitor now, for each of your connected monitors please specify the startcount from the list below: ")
+            aapi.cprint(win,"Display","Welcome to Monitor Setup..")
+            aapi.cprint(win,"Display","We are going to go through every monitor now, for each of your connected monitors please specify the type from the list below: ")
             textutils.tabulate(displaynames)
             print()
             print()
@@ -53,8 +56,8 @@ function aapi_display.initDisplay(setup,result,pers,displaynames,savepath)
             local fs_ = fs.open(savepath, "a")
             for id, monit in pairs(pers) do
                 local function monselect()
-                    aapi.cprint(nil,"Display","Monitor " .. dcount .. "/" .. count)
-                    aapi.cprint(nil,"Display","Please choose what startcount monitor " .. id .. " is...")
+                    aapi.cprint(win,"Display","Monitor " .. dcount .. "/" .. count)
+                    aapi.cprint(win,"Display","Please choose which monitor type " .. id .. " is...")
                     local msg = read(nil, displaynames, function(text) return completion.choice(text, displaynames) end)
                     local res = { msg, monit }
                     local sres = msg
@@ -65,7 +68,7 @@ function aapi_display.initDisplay(setup,result,pers,displaynames,savepath)
                         end
                     end
                     if correct == true then
-                        aapi.cprint(nil,"Display","Monitor " .. id .. " saved as startcount " .. msg)
+                        aapi.cprint(win,"Display","Monitor " .. id .. " saved as type " .. msg)
                         table.insert(result, res)
                         fs_.writeLine(sres)
                         sleep(3)
@@ -80,7 +83,7 @@ function aapi_display.initDisplay(setup,result,pers,displaynames,savepath)
                         term.clearLine()
                         dcount = dcount + 1
                     else
-                        aapi.cprint(nil,"Display","Invalid Choice.." .. msg .. " Please try again..")
+                        aapi.cprint(win,"Display","Invalid Choice.." .. msg .. " Please try again..")
                         sleep(3)
                         local px, py = term.getCursorPos()
                         term.setCursorPos(1, py - 1)
@@ -96,7 +99,7 @@ function aapi_display.initDisplay(setup,result,pers,displaynames,savepath)
                 end
                 monselect()
             end
-            aapi.cprint(nil,"Display","Monitor Configuration Complete.. Thank you!")
+            aapi.cprint(win,"Display","Monitor Configuration Complete.. Thank you!")
             fs_.close()
         end
         for key, moni in pairs(pers) do
@@ -182,7 +185,7 @@ function aapi_display.windowArray(parent,number,namet,titlet,bcolor,fs,startx,st
     local rows = 0
     local xint = (endx - startx)
     local yint = (endy - starty)
-    local startcount = nil
+    local startcount = 0
     if (number % 2 == 0) and number >=4 then
         rows = number / 4
         count = 4

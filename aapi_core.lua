@@ -437,7 +437,7 @@ function aapi.Pertype(type)
     else
         table_ = { nil, nil }
     end
-    print(table_)
+    --print(table_)
     return (table_)
 end
 function aapi.FM(operation, file, data)
@@ -677,7 +677,10 @@ function aapi.deccutoff(numb, length)
     end
     return (textutils.unserialize(final))
 end
-function aapi.gitget(cmd,gitfile,localfile,istemp)
+function aapi.gitget(cmd, gitfile, localfile, istemp)
+    if Version == nil then
+        Version = "m"
+    end
     if gitbeenrun == false then
         if fs.exists("/gitapi.lua") then
             Git = require("gitapi")
@@ -714,27 +717,48 @@ function aapi.gitget(cmd,gitfile,localfile,istemp)
                 end
                 localfile_ = "/tmp/"..localfile
             end
-                if Version == "m" then
-                    Git.get("demandymcdonald", "Andy-API", "main", gitfile, localfile_)
-                elseif Version == "d" then
-                    Git.get("demandymcdonald", "Andy-API", "InDev", gitfile, localfile_)
-                end
+            if Version == "m" then
+                Git.get("demandymcdonald", "Andy-API", "main", gitfile, localfile_)
+            elseif Version == "d" then
+                Git.get("demandymcdonald", "Andy-API", "InDev", gitfile, localfile_)
+            end
         end
     }
     cmds[string.lower(cmd)]()
 end
-function aapi.printdocument(type, title, document)
+function aapi.printdocument(printer,ftype, title, document)
     local result = "Printed"
     local function printdoc(tit, text)
-        local lines = require "cc.strings".wrap(text, 25)
+        local lines = {}
+        for i = 1,#text do
+            local line = require "cc.strings".wrap(text[i], 25)
+            if type(line) == "table" then
+                for u = 1, #line do
+                    table.insert(lines, line[u])
+                end
+            else
+                table.insert(lines.line)
+            end
+        end
         local pn = 1
         if #lines > 21 then
             pn = math.ceil(#lines / 21)
         end
         if pn == 1 then
             if not printer.newPage() then
-                result = "Out of Paper or Ink"
-                return
+                local newpage = false
+                if printer.getPaperLevel() == 0 or printer.getInkLevel() == 0 then
+                    result = "Out of Paper or Ink"
+                    return
+                else
+                    while newpage == false do
+                        aapi.dbg("Buffer full, waiting...")
+                        if printer.newPage() then
+                            newpage = true
+                        end
+                        sleep(5)
+                    end
+                end
             end
             printer.setPageTitle(tit)
             printer.setCursorPos(1, 1)
@@ -747,10 +771,21 @@ function aapi.printdocument(type, title, document)
             local lineno = 1
             for i = 1, pn do
                 if not printer.newPage() then
-                    result = "Out of Paper or Ink"
-                    return
+                    local newpage = false
+                    if printer.getPaperLevel() == 0 or printer.getInkLevel() == 0 then
+                        result = "Out of Paper or Ink"
+                        return
+                    else
+                        while newpage == false do
+                            aapi.dbg("Buffer full, waiting...")
+                            if printer.newPage() then
+                                newpage = true
+                            end
+                            sleep(5)
+                        end
+                    end
                 end
-                printer.setPageTitle(tit .. "Pg: " .. i .. "/" .. #pn)
+                printer.setPageTitle(tit .. "Pg: " .. i .. "/" .. pn)
                 for n = 1, 21 do
                     printer.setCursorPos(1, n)
                     local wline = lines[lineno]
@@ -769,25 +804,24 @@ function aapi.printdocument(type, title, document)
     local function fsdocument(path)
         local file = fs.open(path, "r")
         local lines = {}
+        aapi.dbg("Reading Lines...")
         while true do
             local line = file.readLine()
-
             -- If line is nil then we've reached the end of the file and should stop
             if not line then break end
-
             table.insert(lines, line)
         end
+        aapi.dbg("Completeed reading lines")
         file.close()
         return(lines)
     end
-    if type == "string" or type == "table" then
+    if ftype == "string" or ftype == "table" then
         printdoc(title, document)
-    elseif type == "github" then
+    elseif ftype == "github" then
         aapi.gitget("get",document[1],document[2],true)
-        local doc = fsdocument("/tmp/"..document[2])
-        printdoc(title, doc)
-        shell.run("delete "..doc)
-    elseif type == "local" then
+        printdoc(title, fsdocument("/tmp/"..document[2]))
+        shell.run("delete "..document[2])
+    elseif ftype == "local" then
         local doc = fsdocument(document)
         printdoc(title, doc)
     end

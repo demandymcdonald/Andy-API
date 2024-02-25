@@ -11,7 +11,7 @@ function Startup()
     aapi.PeripheralSetup()
     Reactors = aapi.Pertype("fissionReactorLogicAdapter")
     Boilers = aapi.Pertype("boilerValve")
-    PressureValve = aapi.Pertype("ultimateChemicalTank")
+    Condensers = aapi.Pertype("rotaryCondensentrator")
     Batteries = aapi.Pertype("inductionPort")
     Monitors = aapi.Pertype("monitor")
     Turbines = aapi.Pertype("turbineValve")
@@ -38,6 +38,10 @@ function Startup()
     Cycle = 0
     Energyunit = "FE"
     ASTable = {}
+    SodTable = {}
+    BoiTable = {}
+    -- SodTable = {R1 = {RC1, RC2, RC3, etc}}
+    -- BoiTable = {R1 = {B1,B2,B3,etc.}}
     if fs.exists("/asreactor/settings.txt") then
         local fs_ = fs.open("/asreactor/settings.txt", "r")
         if fs_ ~= nil then
@@ -52,7 +56,9 @@ function Startup()
             Energynit = fs_.readLine()
             Tempunit = fs_.readLine()
             AutoStatus = fs_.readLine()
-            ASTable = fs_.readLine()            
+            ASTable = fs_.readLine()
+            SodTable = fs_.readLine()
+            BoiTable = fs_.readLine()           
             fs_.close()
             disp.initDisplay(false, Displays, Monitors, Displaytypes, "/asreactor/monitorconfig.txt")
         else
@@ -221,12 +227,12 @@ function Powermeter()
         --  EnergyBalance = turout - metflow
     end
     local function powerstatistics()
-        local cyclevel = {INP,OTP,EnergyBalance,Gcycle}
+        local cyclevel = { INP, OTP, EnergyBalance, Gcycle }
         table.insert(Powertable, cyclevel)
         if Pstatcount == 9 then
             table.remove(Powertable, 1)
         else
-            Pstatcount = Pstatcount + 1        
+            Pstatcount = Pstatcount + 1
         end
     end
     local oldbr = nil
@@ -244,7 +250,7 @@ function Powermeter()
             ucGlobalBR = realmargin / BRproduce
         end
         local roundfactor = string.len(math.floor(ucGlobalBR))
-        GlobalBR = string.sub(ucGlobalBR,1,(3+roundfactor))
+        GlobalBR = string.sub(ucGlobalBR, 1, (3 + roundfactor))
     end
     powerstatistics()
     if AutoStatus == 0 then
@@ -259,12 +265,82 @@ function Powermeter()
         end
     end
     SaveSettings()
-end 
+end
+function SodiumManagement(cmd,Reactor)
+    local u = "R0"
+    local entct = 0
+    for key,value in ipairs(BoiTable) do
+        entct = entct + 1
+    end
+    if #Reactors == entct then
+        u = "R"..Reactor
+    else
+        u = "R1"
+    end
+    local function togglefill()
+        for i = 1, #SodTable[u] do
+            local machine = SodTable[u][i]
+            local isworking = not machine.isCondensentrating()
+            if isworking == false and filloff == false then
+                machine.setCondensentrating(false)
+            else
+                machine.setCondensentrating(true)
+            end
+        end
+    end
+    local function fillon()
+        for i=1,#SodTable[u] do
+            local machine = SodTable[u][i]
+            local isworking = not machine.isCondensentrating()
+            if isworking == false then
+                machine.setCondensentrating(false)
+            else
+                return
+            end
+        end    
+    end   
+    local function filloff()
+        for i=1,#SodTable[u] do
+            local machine = SodTable[u][i]
+            local isworking = not machine.isCondensentrating()
+            if isworking == true then
+                machine.setCondensentrating(true)
+            else
+                return
+            end     
+        end    
+    end  
+    local cmds = {
+        togfill = togglefill(),
+        fon = fillon(),
+        foff = filloff(),
+        levelman = function()
+            local reactor = Reactors[Reactor]
+            local boilers = BoiTable[u]
+            local pass = true
+            if reactor.getCoolantFilledPercentage() <.9 then
+                pass = false
+            end
+            for i = 1, #boilers do
+                local boiler = boilers[i]
+                if boiler.getCoolantFilledPercentage() < .65 then
+                    pass = false
+                end
+            end
+            if pass == true then
+                filloff()
+            else
+                fillon()
+            end
+        end
+    }
+    cmds[cmd]()
+end
 function Commands(object, input, reason, value1)
     local command = {
         scram = function()
             object.scram()
-            local msg = "!!!SCRAM INITATED!!! - "..reason
+            local msg = "!!!SCRAM INITATED!!! - " .. reason
             AAPI.log(w_rlog, Commandlog, msg)
             if Alarm == false then
                 Commands["alarmtoggle"]()
@@ -272,13 +348,13 @@ function Commands(object, input, reason, value1)
         end,
         shutdown = function()
             object.scram()
-            local msg = "Reactor "..SelectedReactor.." Shutdown- "..reason
-            AAPI.log(w_rlog,Commandlog,msg)
+            local msg = "Reactor " .. SelectedReactor .. " Shutdown- " .. reason
+            AAPI.log(w_rlog, Commandlog, msg)
         end,
         startup = function()
             object.activate()
-            local msg = "Reactor "..SelectedReactor.." Startup- "..reason
-            AAPI.log(w_rlog,Commandlog,msg)            
+            local msg = "Reactor " .. SelectedReactor .. " Startup- " .. reason
+            AAPI.log(w_rlog, Commandlog, msg)
         end,
         burnrate = function()
             object.setBurnRate(value1)
@@ -291,28 +367,26 @@ function Commands(object, input, reason, value1)
             AAPI.log(w_rlog, Commandlog, msg)
         end,
         rselectplus = function()
-            
             local num = #Reactors
             if SelectedReactor == num then
                 SelectedReactor = 1
             else
                 SelectedReactor = SelectedReactor + 1
             end
-            AAPI.log(w_rlog, Commandlog,"Selected Reactor Changed to"..SelectedReactor)
+            AAPI.log(w_rlog, Commandlog, "Selected Reactor Changed to" .. SelectedReactor)
         end,
         rselectminus = function()
-
             local num = #Reactors
             if SelectedReactor == 1 then
                 SelectedReactor = num
             else
                 SelectedReactor = SelectedReactor - 1
             end
-            AAPI.log(w_rlog, Commandlog,"Selected Reactor Changed to" .. SelectedReactor)
+            AAPI.log(w_rlog, Commandlog, "Selected Reactor Changed to" .. SelectedReactor)
         end,
         actoggle = function()
             if AutoStatus == 0 then
-                AAPI.log(w_rlog, Commandlog,"Eve Autocommand DISABLED")
+                AAPI.log(w_rlog, Commandlog, "Eve Autocommand DISABLED")
                 AutoStatus = 1
                 for i = 1, #Reactors do
                     ASTable = {}
@@ -325,21 +399,23 @@ function Commands(object, input, reason, value1)
                 ASTable = {}
                 AutoStatus = 0
                 SaveSettings()
-                AAPI.log(w_rlog, Commandlog,"Eve Autocommand ENABLED")
+                AAPI.log(w_rlog, Commandlog, "Eve Autocommand ENABLED")
             end
         end,
         alarmtoggle = function()
-
             if Alarm == true then
-                AAPI.log(w_rlog, Commandlog,"!!!Facility Alarm Deactivated!!! -" .. reason)
+                AAPI.log(w_rlog, Commandlog, "!!!Facility Alarm Deactivated!!! -" .. reason)
             elseif Alarm == false then
-                AAPI.log(w_rlog, Commandlog,"!!!Facility Alarm Activated!!! -" .. reason)
+                AAPI.log(w_rlog, Commandlog, "!!!Facility Alarm Activated!!! -" .. reason)
             end
             FacilityAlarm()
-        end
+        end,
+        togglefill = function()
+        end,
     }
     command[string.lower(input)]()
 end
+
 function SYSstatus()
     local function reactorstatus()
         AAPI.dbg("Checking Rstatus...")
@@ -362,23 +438,23 @@ function SYSstatus()
             local rfuel = reactor.getFuelFilledPercentage()
             if reactor.getStatus() == true then
                 if rdama >= .1 then
-                    local reason = "Reactor "..i.."AUTO-SCRAM 'DAM'"
+                    local reason = "Reactor " .. i .. "AUTO-SCRAM 'DAM'"
                     Commands(reactor, "scram", reason)
                     AAPI.dbg("SCRAM REACTOR DAMAGE")
                 elseif rtemp >= 1000 then
-                    local reason = "Reactor "..i.."AUTO-SCRAM 'TEMP @"..disp.textf("temp",rtemp,Tempunit).."'"
+                    local reason = "Reactor " .. i .. "AUTO-SCRAM 'TEMP @" .. disp.textf("temp", rtemp, Tempunit) .. "'"
                     Commands(reactor, "scram", reason)
                     AAPI.dbg("SCRAM HIGH REACTOR TEMP")
                 elseif rcool <= .40 then
-                    local reason = "Reactor "..i.."AUTO-SCRAM 'COOL @"..disp.textf("per",rcool).."'"
+                    local reason = "Reactor " .. i .. "AUTO-SCRAM 'COOL @" .. disp.textf("per", rcool) .. "'"
                     Commands(reactor, "scram", reason)
                     AAPI.dbg("SCRAM LOW REACTOR COOLANT")
                 elseif rfuel < 0.10 then
-                    local reason = "Reactor "..i.."AUTO-SD 'FUEL @"..disp.textf("per",rfuel).."'"                    
+                    local reason = "Reactor " .. i .. "AUTO-SD 'FUEL @" .. disp.textf("per", rfuel) .. "'"
                     Commands(reactor, "shutdown", reason)
                     AAPI.dbg("SHUTDOWN LOW REACTOR FUEL")
                 elseif rwast >= 0.80 then
-                    local reason = "Reactor "..i.."AUTO-SD 'Waste @"..disp.textf("per",rwast).."'"        
+                    local reason = "Reactor " .. i .. "AUTO-SD 'Waste @" .. disp.textf("per", rwast) .. "'"
                     Commands(reactor, "shutdown", reason)
                     AAPI.dbg("SHUTDOWN HIGH REACTOR WASTE")
                 elseif rcool == 100 then
@@ -388,6 +464,7 @@ function SYSstatus()
             else
                 rstatus = "Inactive"
             end
+            SodiumManagement("levelman",i)
             ReactorList["reactor" .. i] = {}
             ReactorList["reactor" .. i]["Status"] = rstatus
             ReactorList["reactor"..i]["StatBool"] = Warning("bool", "+", name["StatBool"])
@@ -442,24 +519,10 @@ function SYSstatus()
                 AAPI.dbg("SCRAM LOW BOILER WATER")
             end
         end
-        if bcoolfull == true then
-            for i = 1, #Valves do
-                local valve = Valves[i]
-                valve.setDumpingMode("DUMPING")
-                AAPI.dbg("Valve "..Valves[i].." Dumping")
-            end
-            --Warning("Valves", 1)
-        elseif bcoolfull == false then
-            for i = 1, #Valves do
-                local valve = Valves[i]
-                valve.setDumpingMode("IDLE")
-                AAPI.dbg("Valve "..Valves[i].." Idle")
-            end
-            --Warning("Valves", 0)       
-        end
     end
     reactorstatus()
     boilerstatus()
+
 end
 --------------------------------------------------------------------------------------------------
 function Input()
