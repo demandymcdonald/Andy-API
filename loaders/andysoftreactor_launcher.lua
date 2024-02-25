@@ -75,9 +75,6 @@ function FSSetup()
         nil, sped)
     pktc()
 
-
-aapi.uinput(this, "eve", sped, { "English", "Ingles", "Englisch" }, nil, { "English", "Ingles", "Englisch" })
-
     local PeripheralList = peripheral.getNames()
     local printerinst = false
     for i = 1, #PeripheralList do
