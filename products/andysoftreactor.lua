@@ -264,27 +264,25 @@ function Commands(object, input, reason, value1)
     local command = {
         scram = function()
             object.scram()
-            audio.smcmd("playgamesound","mekanism:digital_beep",1,Speakers)
             local msg = "!!!SCRAM INITATED!!! - "..reason
             AAPI.log(w_rlog, Commandlog, msg)
-            Commands["alarmtoggle"]()
+            if Alarm == false then
+                Commands["alarmtoggle"]()
+            end
         end,
         shutdown = function()
             object.scram()
-            audio.smcmd("playgamesound","mekanism:digital_beep",1,Speakers)
             local msg = "Reactor "..SelectedReactor.." Shutdown- "..reason
             AAPI.log(w_rlog,Commandlog,msg)
         end,
         startup = function()
             object.activate()
-            audio.smcmd("playgamesound","mekanism:digital_beep",1,Speakers)
             local msg = "Reactor "..SelectedReactor.." Startup- "..reason
             AAPI.log(w_rlog,Commandlog,msg)            
         end,
         burnrate = function()
             object.setBurnRate(value1)
             local msg = reason
-            audio.smcmd("playgamesound","mekanism:digital_beep",1,Speakers)
             if AutoStatus == 1 then
                 table.remove(ASTable, SelectedReactor)
                 table.insert(ASTable, SelectedReactor, value1)
@@ -293,7 +291,6 @@ function Commands(object, input, reason, value1)
             AAPI.log(w_rlog, Commandlog, msg)
         end,
         rselectplus = function()
-            audio.smcmd("playgamesound","mekanism:digital_beep",1,Speakers)
             
             local num = #Reactors
             if SelectedReactor == num then
@@ -304,7 +301,6 @@ function Commands(object, input, reason, value1)
             AAPI.log(w_rlog, Commandlog,"Selected Reactor Changed to"..SelectedReactor)
         end,
         rselectminus = function()
-            audio.smcmd("playgamesound","mekanism:digital_beep",1,Speakers)
 
             local num = #Reactors
             if SelectedReactor == 1 then
@@ -315,7 +311,6 @@ function Commands(object, input, reason, value1)
             AAPI.log(w_rlog, Commandlog,"Selected Reactor Changed to" .. SelectedReactor)
         end,
         actoggle = function()
-            audio.smcmd("playgamesound","mekanism:digital_beep",1,Speakers)
             if AutoStatus == 0 then
                 AAPI.log(w_rlog, Commandlog,"Eve Autocommand DISABLED")
                 AutoStatus = 1
@@ -467,7 +462,7 @@ function SYSstatus()
     boilerstatus()
 end
 --------------------------------------------------------------------------------------------------
-function Input(side)
+function Input()
     local input = RS.getAnalogInput("left")
     local channelmap = {
         one = function()
@@ -522,10 +517,13 @@ function Input(side)
             Commands(Reactors[SelectedReactor],"scram","Manual Activation")
         end
     }
-    if input ~= 0 then
+    if input ~= 0 or (LastRS ~= 0 and input == 0) then
         if input == LastRS then
             return
+        elseif input == 0 then
+            LastRS = 0
         else
+            audio.smcmd("playgamesound","mekanism:digital_beep",1,Speakers)
             channelmap[input]()
             LastRS = input
         end            
