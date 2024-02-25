@@ -8,18 +8,7 @@ activationcodes["PlatnumPLUS"] = "2p59HcUjmf2kMe"
 local tiers = {"Basic","Gold","Platnum","PlatnumPLUS"}
 local tier = 0
 
-function Apistartup()
-    shell.run("delete aapi_loader.lua")
-    shell.run("pastebin get gWaWXz2q aapi_loader.lua")
-    local loader = require("aapi_loader")
-    loader.setVersion("d")
-    loader.update()
-    loader.core()
-    loader.display()
-    loader.audio()
-    loader.custom("products/andysoftreactor.lua", "andysoftreactor.lua")
-end
-Apistartup()
+
 local aapi = require("aapi_core")
 local disp = require("aapi_display")
 local sound = require("aapi_audio")

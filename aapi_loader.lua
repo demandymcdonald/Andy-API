@@ -80,16 +80,16 @@ function F.net()
     end
     Net = require("aapi_net")
 end
-function F.sound()
+function F.audio()
     F.git()
     print("[LOADER]  Initializing AAPI_Sound...")
-    shell.run("delete aapi_sound.lua")
+    shell.run("delete aapi_audio.lua")
     if Version == "m" then
-        Git.get("demandymcdonald", "Andy-API", "main", "aapi_sound.lua", "aapi_sound.lua")
+        Git.get("demandymcdonald", "Andy-API", "main", "aapi_audio.lua", "aapi_audio.lua")
     elseif Version == "d" then
-        Git.get("demandymcdonald", "Andy-API", "InDev", "aapi_sound.lua", "aapi_sound.lua")
+        Git.get("demandymcdonald", "Andy-API", "InDev", "aapi_audio.lua", "aapi_audio.lua")
     end
-    Sound = require("aapi_sound")
+    Sound = require("aapi_audio")
 end
 function F.user()
     F.git()
