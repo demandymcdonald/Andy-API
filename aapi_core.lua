@@ -2,6 +2,7 @@
 local aapi = {}
 local aapi_core = aapi
 local dbgwindow = nil
+local gitbeenrun = false
 --DebugLogFiles = "/"
 --DebugInstance = "nullnullnull"
 -- Used to initialize the Debug mode. Path: Path to create a debug log file | Win: window to display debug messages, defaults to the terminal 
@@ -676,6 +677,52 @@ function aapi.deccutoff(numb, length)
     end
     return (textutils.unserialize(final))
 end
+function aapi.gitget(cmd,gitfile,localfile,istemp)
+    if gitbeenrun == false then
+        if fs.exists("/gitapi.lua") then
+            Git = require("gitapi")
+            if Version == "m" then
+                Git.get("demandymcdonald", "Andy-API", "main", "git.lua", "gitapi_tmp.lua")
+            elseif Version == "d" then
+                Git.get("demandymcdonald", "Andy-API", "InDev", "git.lua", "gitapi_tmp.lua")
+            end
+            shell.run("delete gitapi.lua")
+            shell.run("rename /gitapi_tmp.lua /gitapi.lua")
+            Git = require("gitapi")
+            gitbeenrun = true
+        else
+            ---print("[LOADER]   Downloading GitHub Integration...")
+            shell.run("pastebin get Zv4fpxuj gitapi.lua")
+            ---print("[LOADER]   Download Successful..")
+            Git = require("gitapi")
+            gitbeenrun = true
+        end
+    else
+        Git = require("gitapi")    
+    end
+    local cmds = {
+        get = function()
+            local localfile_ = nil
+            if fs.exists(localfile) then
+                shell.run("delete " .. localfile)
+            end
+            if istemp == false then
+                localfile_ = localfile
+            else
+                if not fs.exists("/tmp/") then
+                    fs.makeDir("/tmp/")
+                end
+                localfile_ = "/tmp/"..localfile
+            end
+                if Version == "m" then
+                    Git.get("demandymcdonald", "Andy-API", "main", gitfile, localfile_)
+                elseif Version == "d" then
+                    Git.get("demandymcdonald", "Andy-API", "InDev", gitfile, localfile_)
+                end
+        end
+    }
+    cmds[string.lower(cmd)]()
+end
 function aapi.printdocument(type, title, document)
     local result = "Printed"
     local function printdoc(tit, text)
@@ -718,6 +765,7 @@ function aapi.printdocument(type, title, document)
             end
         end
     end
+    
     local function fsdocument(path)
         local file = fs.open(path, "r")
         local lines = {}
@@ -735,8 +783,7 @@ function aapi.printdocument(type, title, document)
     if type == "string" or type == "table" then
         printdoc(title, document)
     elseif type == "github" then
-        local loader = require("aapi_loader")
-        loader.custom(document[1],"/tmp/"..document[2], false)
+        aapi.gitget("get",document[1],document[2],true)
         local doc = fsdocument("/tmp/"..document[2])
         printdoc(title, doc)
         shell.run("delete "..doc)

@@ -7,7 +7,7 @@ activationcodes["Platnum"] = "FgIkhbvGKinpjd"
 activationcodes["PlatnumPLUS"] = "2p59HcUjmf2kMe"
 local tiers = {"Basic","Gold","Platnum","PlatnumPLUS"}
 local tier = 0
-
+Version = "d"
 
 local aapi = require("aapi_core")
 local disp = require("aapi_display")
@@ -78,8 +78,8 @@ function FSSetup()
     local PeripheralList = peripheral.getNames()
     local printerinst = false
     for i = 1, #PeripheralList do
-        if peripheral.getType(peripheralList[i]) == "printer" then
-            print = peripheral.wrap(peripheralList[i])
+        if peripheral.getType(PeripheralList[i]) == "printer" then
+            print = peripheral.wrap(PeripheralList[i])
             printerinst = true
         end
     end
@@ -90,7 +90,7 @@ function FSSetup()
     end
     local pass = false
     while pass == false do
-        local success = aapi.printdocument("github", "ASReactor TOS", "docs/asreactortos.txt")
+        local success = aapi.printdocument("github", "ASReactor TOS", {"docs/asreactortos.txt","asreactortos.txt"})
         if success == "Printed" then
             pass = true
         else
@@ -200,8 +200,8 @@ function FSSetup()
                 local PeripheralList = peripheral.getNames()
 
                 for i = 1, #PeripheralList do
-                    if peripheral.getType(peripheralList[i]) == "redstoneIntegrator" then
-                        rs = peripheral.wrap(peripheralList[i])
+                    if peripheral.getType(PeripheralList[i]) == "redstoneIntegrator" then
+                        rs = peripheral.wrap(PeripheralList[i])
                     end
                 end
                 if rs == nil then
