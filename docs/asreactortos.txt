@@ -1,7 +1,7 @@
 
 Andysoft Corporation Terms of Service for Andysoft Reactor
 
-Effective on date of install
+Effective Date: 02/25/2024
 
 Welcome to Andysoft Reactor, a proprietary software developed by Andysoft Corporation ("Andysoft," "we," "us," "our") designed to control nuclear reactors within the Minecraft environment. By installing, copying, downloading, accessing, or otherwise using Andysoft Reactor ("Software"), you ("User," "you," "your") agree to be bound by the following terms and conditions ("Terms of Service"). If you do not agree to these terms, do not use this Software.
 

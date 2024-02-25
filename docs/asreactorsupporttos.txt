@@ -1,0 +1,41 @@
+Andysoft Corporation Terms of Service for PlatnumPLUS Tier 48 Hour Support Service
+
+Effective Date: 02/25/2024
+
+Welcome to the PlatnumPLUS Tier 48 Hour Support Service ("Support Service"), provided by Andysoft Corporation ("Andysoft," "we," "us," "our"). This Support Service is available exclusively to users ("User," "you," "your") of the Andysoft Reactor within the PlatnumPLUS tier. By accessing or using this Support Service, you agree to be bound by the following terms and conditions ("Terms of Service"). If you do not agree to these terms, do not use this Support Service.
+
+1. Support Service Coverage
+
+a. Duration of Service: The Support Service is available for the lifetime of the Andysoft Reactor product, commencing from the first installation of the software. This service is designed to provide assistance and resolve issues directly related to the software's operation and functionality.
+
+b. Scope of Service: The Support Service coverage includes assistance with issues directly related to the Andysoft Reactor software. It does not extend to problems arising from:
+
+- Negligence or failure to follow installation and operational instructions provided for the Software.
+- Mis-installation or incorrect setup of the Software.
+- Negligence or failure to follow nuclear industry best practices.
+- Acts of God, natural disasters, or any uncontrollable external forces that affect the operation of the Software.
+- Stupidity, lack of judgment, or errors in operation beyond the scope of standard usage.
+- Malicious conduct, including but not limited to safety tests conducted in a manner akin to the Chernobyl incident, or any acts that intentionally or knowingly compromise the safety and integrity of the Software.
+- Acts of sabotage, war, terrorism, or any deliberate actions aimed at undermining the Software.
+- Errors or issues stemming directly or indirectly from ADHD or any other condition that affects the user's ability to operate the Software as intended.
+c. Service Calls and Fees: Service calls determined to be necessitated by any of the aforementioned excluded causes may incur a fee at the current market rate for such services. This fee will be communicated to the user once cause has been established.
+
+2. Service Response Time
+
+Andysoft commits to providing a response to service requests within two (2) business days, excluding weekends and all known public holidays. This timeframe is our standard for ensuring timely support for our PlatnumPLUS Tier users.
+
+3. Limitation of Liability
+
+Andysoft shall not be liable for any failure to provide Support Service or delays in response times resulting from circumstances beyond our reasonable control, including but not limited to acts of God, real life commitments or work, natural disasters, public emergencies, and labor strikes.
+
+4. Amendments to Terms of Service
+
+Andysoft reserves the right to amend these Terms of Service at any time. Your continued use of the Support Service after any such changes constitutes your acceptance of the new Terms of Service.
+
+5. Governing Law
+
+These Terms of Service shall be governed by and construed in accordance with the laws of the jurisdiction in which Andysoft Corporation is established, without giving effect to any principles of conflicts of law.
+
+6. Agreement to Terms
+
+By using the Support Service, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service. If you do not agree to these terms, you must not use the Support Service.

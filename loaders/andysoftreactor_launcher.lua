@@ -67,7 +67,10 @@ function FSSetup()
     aapi.cprint(this, "eve",
     "Please select the language you wish to use. Your options are: English, Ingles, and Englisch", nil, sped)
     aapi.uinput(this, "eve", sped, { "English", "Ingles", "Englisch" }, nil, { "English", "Ingles", "Englisch" })
-
+    aapi.cprint(this, "eve",
+        "Note: Due to bugs in the GUI2 update, this reactor will be running the 'alpha' gui. GUI2 will be rolled out with the fusion update.",
+        nil, sped)
+    sleep(5)
     aapi.cprint(this,"eve","Hello, my name is EVE.",nil,sped)
     aapi.cprint(this, "eve", "I'm your AI Reactor Controller. I'm here to guide you through the setup process!", nil, sped)
 
@@ -128,12 +131,24 @@ function FSSetup()
                 tier = seltier
             end
         end
-        if pass == true then
-            aapi.cprint(this, "eve", "Activation code accepted.. Welcome "..tiers[tier].." customer!", nil, sped)
-        else
-            aapi.cprint(this, "eve", "Invalid code, Please try again..", nil, sped)
-            sleep(3)
-            activation()
+            if pass == true then
+                aapi.cprint(this, "eve", "Activation code accepted.. Welcome " .. tiers[tier] .. " customer!", nil, sped)
+            else
+                aapi.cprint(this, "eve", "Invalid code, Please try again..", nil, sped)
+                sleep(3)
+                activation()
+            end
+        if tier == 4 then
+            if Testing == false then
+                aapi.cprint(this, "eve", "Printing PlatnumPLUS 48 Hour Support TOS, Please look over documents to continue", nil, sped)    
+                local pass = false
+                while pass == false do
+                    local success = aapi.printdocument(Main_printer,"github", "ASR P+ Support TOS", {"docs/asreactorsupporttos.txt","asreactorsupporttos.txt"})
+                    if success == "Printed" then
+                        pass = true
+                    end
+                end
+            end
         end
     end
     activation()
@@ -553,35 +568,36 @@ function FSSetup()
                 end
             end
         end
-        local function Vcheck()
-            aapi.PeripheralSetup()
-            if #PressureValve == 0 then
-                aapi.cprint(this, "eve",
-                    "No Pressure Valve Detected.. Please ensure an ultimateChemicalTank is connected to the network and try again..",
-                    nil, sped)
-                pktc()
-                PressureValve = aapi.Pertype("ultimateChemicalTank")
-                Vcheck()
-            else
-                aapi.cprint(this, "eve",
-                    "There are currently " ..
-                    #PressureValve .. " PressureValves connected to the network, is that correct (number should be 1)?",
-                    nil, sped)
-                local msg
-                aapi.uinput(this, "eve", sped, "yn")
-                if msg == "false" then
-                    aapi.cprint(this, "eve",
-                        "Connect the disconnected peripherals then continue..",
-                        nil, sped)
-                    pktc()
-                    PressureValve = aapi.Pertype("ultimateChemicalTank")
-                    Vcheck()
-                end
-            end
-        end
+        -- local function Vcheck()
+        --     aapi.PeripheralSetup()
+        --     if #PressureValve == 0 then
+        --         aapi.cprint(this, "eve",
+        --             "No Pressure Valve Detected.. Please ensure an ultimateChemicalTank is connected to the network and try again..",
+        --             nil, sped)
+        --         pktc()
+        --         PressureValve = aapi.Pertype("ultimateChemicalTank")
+        --         Vcheck()
+        --     else
+        --         aapi.cprint(this, "eve",
+        --             "There are currently " ..
+        --             #PressureValve .. " PressureValves connected to the network, is that correct (number should be 1)?",
+        --             nil, sped)
+        --         local msg
+        --         aapi.uinput(this, "eve", sped, "yn")
+        --         if msg == "false" then
+        --             aapi.cprint(this, "eve",
+        --                 "Connect the disconnected peripherals then continue..",
+        --                 nil, sped)
+        --             pktc()
+        --             PressureValve = aapi.Pertype("ultimateChemicalTank")
+        --             Vcheck()
+        --         end
+        --     end
+        -- end
         Rcheck()
         Bcheck()
-        Vcheck()
+        SodiumSetup()
+        --Vcheck()
         BR = ReactorCert()
         if tier > 1 then
 
