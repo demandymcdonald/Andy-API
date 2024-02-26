@@ -241,7 +241,7 @@ function Powermeter()
             GlobalBR = GlobalBR + Reactors[i].getBurnRate()
         end
         oldbr = GlobalBR
-        local realmargin = OTP + Surmargin
+        local realmargin = OTP * Surmargin
         -- Reactor produces 200k sodium per mb fuel/tick
         local ucGlobalBR = nil
         if FillMode == true then

@@ -44,7 +44,7 @@ function Startup()
         FSSetup()
         AOTP = {}
     end
-    Surmargin = 1000000
+    Surmargin = 10
  -- avg output
     Batnames = { "Bob the Bat", "Joe the Bat" }
     Gcycle = 0
@@ -487,87 +487,87 @@ function FSSetup()
         end
         return (maxburn)
     end
-
+    function Rcheck()
+        aapi.PeripheralSetup()
+        if #Reactors == 0 then
+            aapi.cprint(this, "eve",
+                "No Fission Reactors Detected.. Please ensure the reactor logic port is connected to the network and try again..",
+                nil, sped)
+            pktc()
+            Reactors = aapi.Pertype("fissionReactorLogicAdapter")
+            Rcheck()
+        else
+            aapi.cprint(this, "eve",
+                "There are currently " .. #Reactors .. " Fission Reactors connected to the network, is that correct?",
+                nil, sped)
+            local msg
+            aapi.uinput(this, "eve", sped, "yn")
+            if msg == "false" then
+                aapi.cprint(this, "eve",
+                    "Connect the disconnected reactors then continue..",
+                    nil, sped)
+                pktc()
+                Reactors = aapi.Pertype("fissionReactorLogicAdapter")
+                Rcheck()
+            end
+        end
+    end
+    function Bcheck()
+        aapi.PeripheralSetup()
+        if #Boilers == 0 then
+            aapi.cprint(this, "eve",
+                "No Boilers Detected.. Please ensure the Boilers valve is connected to the network and try again..",
+                nil, sped)
+            pktc()
+            Boilers = aapi.Pertype("boilerValve")
+            Bcheck()
+        else
+            aapi.cprint(this, "eve",
+                "There are currently " .. #Boilers .. " Boilers connected to the network, is that correct?",
+                nil, sped)
+            local msg
+            aapi.uinput(this, "eve", sped, "yn")
+            if msg == "false" then
+                aapi.cprint(this, "eve",
+                    "Connect the disconnected peripherals then continue..",
+                    nil, sped)
+                pktc()
+                Boilers = aapi.Pertype("boilerValve")
+                Bcheck()
+            end
+        end
+    end
+    function Tcheck()
+        aapi.PeripheralSetup()
+        if #Turbines == 0 then
+            aapi.cprint(this, "eve",
+                "No Turbines Detected.. Please ensure the turbine valve is connected to the network and try again..",
+                nil, sped)
+            pktc()
+            Turbines = aapi.Pertype("turbineValve")
+            Tcheck()
+        else
+            aapi.cprint(this, "eve",
+                "There are currently " .. #Turbines .. " Turbines connected to the network, is that correct?",
+                nil, sped)
+            local msg
+            aapi.uinput(this, "eve", sped, "yn")
+            if msg == "false" then
+                aapi.cprint(this, "eve",
+                    "Connect the disconnected peripherals then continue..",
+                    nil, sped)
+                pktc()
+                Turbines = aapi.Pertype("turbineValve")
+                Tcheck()
+            end
+        end
+    end
     Battery = false
     Batnames = {}
     SM = 0
     if tier > 0 then
         disp.initDisplay(false, Displays, Monitors, Displaytypes, "/asreactor/monitorconfig.txt",this)
-        local function Rcheck()
-            aapi.PeripheralSetup()
-            if #Reactors == 0 then
-                aapi.cprint(this, "eve",
-                    "No Fission Reactors Detected.. Please ensure the reactor logic port is connected to the network and try again..",
-                    nil, sped)
-                pktc()
-                Reactors = aapi.Pertype("fissionReactorLogicAdapter")
-                Rcheck()
-            else
-                aapi.cprint(this, "eve",
-                    "There are currently " .. #Reactors .. " Fission Reactors connected to the network, is that correct?",
-                    nil, sped)
-                local msg
-                aapi.uinput(this, "eve", sped, "yn")
-                if msg == "false" then
-                    aapi.cprint(this, "eve",
-                        "Connect the disconnected reactors then continue..",
-                        nil, sped)
-                    pktc()
-                    Reactors = aapi.Pertype("fissionReactorLogicAdapter")
-                    Rcheck()
-                end
-            end
-        end
-        local function Bcheck()
-            aapi.PeripheralSetup()
-            if #Boilers == 0 then
-                aapi.cprint(this, "eve",
-                    "No Boilers Detected.. Please ensure the Boilers valve is connected to the network and try again..",
-                    nil, sped)
-                pktc()
-                Boilers = aapi.Pertype("boilerValve")
-                Bcheck()
-            else
-                aapi.cprint(this, "eve",
-                    "There are currently " .. #Boilers .. " Boilers connected to the network, is that correct?",
-                    nil, sped)
-                local msg
-                aapi.uinput(this, "eve", sped, "yn")
-                if msg == "false" then
-                    aapi.cprint(this, "eve",
-                        "Connect the disconnected peripherals then continue..",
-                        nil, sped)
-                    pktc()
-                    Boilers = aapi.Pertype("boilerValve")
-                    Bcheck()
-                end
-            end
-        end
-        local function Tcheck()
-            aapi.PeripheralSetup()
-            if #Turbines == 0 then
-                aapi.cprint(this, "eve",
-                    "No Turbines Detected.. Please ensure the turbine valve is connected to the network and try again..",
-                    nil, sped)
-                pktc()
-                Turbines = aapi.Pertype("turbineValve")
-                Tcheck()
-            else
-                aapi.cprint(this, "eve",
-                    "There are currently " .. #Turbines .. " Turbines connected to the network, is that correct?",
-                    nil, sped)
-                local msg
-                aapi.uinput(this, "eve", sped, "yn")
-                if msg == "false" then
-                    aapi.cprint(this, "eve",
-                        "Connect the disconnected peripherals then continue..",
-                        nil, sped)
-                    pktc()
-                    Turbines = aapi.Pertype("turbineValve")
-                    Tcheck()
-                end
-            end
-        end
+
         -- local function Vcheck()
         --     aapi.PeripheralSetup()
         --     if #PressureValve == 0 then
@@ -603,12 +603,12 @@ function FSSetup()
 
             Tcheck()
             local function Turbinetest()
-                local tr = 0
+                local blades = 0
                 for i = 1, #Turbines do
-                    local turbine = Turbines[1]
-                    tr = tr + turbine.getMaxProduction()
+                    blades = blades + Turbines[i].getBlades()
                 end
-                return (tr)
+                local result = blades * 7140
+                return (result)
             end
 
             TR = Turbinetest()
@@ -651,13 +651,14 @@ function FSSetup()
                             local msg = aapi.uinput(this, "eve", sped)
                             table.insert(bname, msg)
                         end
+                        return(bname)
                     end
                     Battery = true
                     Bacheck()
                     Batnames = BatterySetup()
                 end
-                aapi.cprint(this, "eve", "What would you like the margin (amount of energy over what is being consumed) for your reactor system to be (in FE)?", nil, sped)
-                SM = aapi.uinput(this,"eve",sped,"num")  
+                aapi.cprint(this, "eve", "What would you like the margin (percentage produced above what is being consumed)?", nil, sped)
+                SM = aapi.uinput(this,"eve",sped,"num") /100 + 1  
             end
         end
     end
