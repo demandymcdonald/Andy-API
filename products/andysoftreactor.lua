@@ -764,7 +764,7 @@ Startup()
 
 local function thread1()
     if speakerenabled == true then
-        audio.smcmd("playmedia", "startup.dfpwm", "products/asreactor_sounds/", Speakers)
+        audio.smcmd("playmedia", "startup.dfpwm", "products/asreactorsounds/", Speakers)
     end
     while true do
         SYSstatus()
