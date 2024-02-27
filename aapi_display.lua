@@ -213,7 +213,7 @@ function aapi_display.windowArray(parent,number,namet,titlet,bcolor,fs,startx,st
         if count > 0 then
             xen = xst + xsize
             yen = yst + ysize
-            disp.addWindow(parent, name, title, xst, yst, xen, yen, bcolor, fs)
+            aapi_display.addWindow(parent, name, title, xst, yst, xen, yen, bcolor, fs)
             xst = xen
             count = count - 1
             dcount = dcount + 1
@@ -223,7 +223,7 @@ function aapi_display.windowArray(parent,number,namet,titlet,bcolor,fs,startx,st
             xst = 1 / count
             xen = xst + xsize
             yen = yst + ysize
-            disp.addWindow(parent, name, title, xst, yst, xen, yen, bcolor, fs)
+            aapi_display.addWindow(parent, name, title, xst, yst, xen, yen, bcolor, fs)
             count = startcount - 1
             dcount = dcount + 1
         end
@@ -458,7 +458,7 @@ function aapi_display.buildWidgets(id,parent,datatable,centered)
                 parent.setCursorPos(xctr, (ystart + 1))
                 parent.write(name)
                 local dat = data_[1]
-                local datlab = disp.textf("per",dat)
+                local datlab = aapi_display.textf("per",dat)
                 --local dmin = data_[2]
                 local dmax = data_[2]
                 local dend = (10*(dat/dmax)) + xstart +1
@@ -660,8 +660,13 @@ function aapi_display.refreshWidget(id, data)
     end
     aapi.dbg("Widgets Refreshed")
 end
-function aapi_display.textf(type_,text,convert2)
+function aapi_display.textf(type_,text,convertto)
     local result = nil
+    local convert2 = " "
+    if convertto ~= nil then
+        convert2 = string.lower(convertto)
+    end
+     
     local types = {
         per = function()
             result = math.floor(text * 100) .. "%"
@@ -688,7 +693,7 @@ function aapi_display.textf(type_,text,convert2)
         end,
         energy = function()
             local units = {
-                FE = function()
+                fe = function()
                     local mathe = math.floor(text)
                     local len = string.len(mathe)
                     local concat = {
@@ -706,7 +711,7 @@ function aapi_display.textf(type_,text,convert2)
                         end
                     end
                 end,
-                RF = function()
+                rf = function()
                     local mathe = math.floor(text)
                     local len = string.char(#mathe)
                     local concat = {
@@ -723,7 +728,7 @@ function aapi_display.textf(type_,text,convert2)
                         end
                     end
                 end,
-                J = function()
+                j = function()
                     local mathe = math.floor(text / 2.5)
                     local len = string.char(#mathe)
                     local concat = {
@@ -740,7 +745,7 @@ function aapi_display.textf(type_,text,convert2)
                         end
                     end
                 end,
-                EU = function()
+                eu = function()
                     local mathe = math.floor(text *4)
                     local len = string.char(#mathe)
                     local concat = {

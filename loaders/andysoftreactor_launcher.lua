@@ -13,23 +13,31 @@ local aapi = require("aapi_core")
 local disp = require("aapi_display")
 local audio = require("aapi_audio")
 local channelmap = {"15 = Scram","14 = Power On","13 = Power Off","12 = Reset Alarm","11 = Burn Rate Up (.5)","10 = Burn Rate Up (.1)","9 = Reset Burn Rate","8 = Burn Rate Down (.1)","7 = Burn Rate Down (.5)","6 = Change Selected Reactor (+)","5 = Change Selected Reactor (-)","4 = Facility Shutdown","3 = Enable/Disable Automatic Ctrl"}
+aapi.PeripheralSetup()
 function Startup()
     if fs.exists("/asreactor/settings.txt") then
         while true do
             Reactors = aapi.Pertype("fissionReactorLogicAdapter")
-            shell.run("andysoftreactor")
-            for i = 1,#Reactors do
+            aapi.cprint(nil, "eve", "Launching AS Reactor...")
+            sleep(2)
+            shell.run("andysoftreactor.lua")
+            for i = 1, #Reactors do
                 local reactor = Reactors[i]
-                reactor.scram()
+                if reactor.getStatus() == true then
+                    reactor.scram()
+                end
             end
+            sleep(20)
         end
     else
-        aapi.PeripheralSetup()
         Reactors = aapi.Pertype("fissionReactorLogicAdapter")
+        --Reactors = {}
         Boilers = aapi.Pertype("boilerValve")
-        PressureValve = aapi.Pertype("ultimateChemicalTank")
+        --Boilers = {}
+        --PressureValve = aapi.Pertype("ultimateChemicalTank")
         Batteries = aapi.Pertype("inductionPort")
         Monitors = aapi.Pertype("monitor")
+        --Turbines = {}
         Turbines = aapi.Pertype("turbineValve")
         Condensers = aapi.Pertype("rotaryCondensentrator")
         Commandlog = aapi.initLogs("asreactor/commandlogs/")
@@ -62,8 +70,9 @@ function FSSetup()
     this = w_setup
     local function pktc()
         aapi.cprint(this, "eve", "Press any key to continue..")
-        local msg = aapi.uinput(this, "eve", sped)
+        local msg = aapi.uinput(this, "eve", sped,"none")
     end
+    if Testing == false then
     aapi.cprint(this, "eve",
     "Please select the language you wish to use. Your options are: English, Ingles, and Englisch", nil, sped)
     aapi.uinput(this, "eve", sped, { "English", "Ingles", "Englisch" }, nil, { "English", "Ingles", "Englisch" })
@@ -92,7 +101,7 @@ function FSSetup()
         sleep(2)
         FSSetup()
     end
-    if Testing == false then
+
     aapi.cprint(this, "eve", "Printing TOS, Please look over documents to continue", nil, sped)    
     local pass = false
     while pass == false do
@@ -165,7 +174,7 @@ function FSSetup()
             nil, sped)
         Energyunit = aapi.uinput(this, "eve", sped, { "FE", "EU", "RF", "J" }, nil)
         aapi.cprint(this, "eve",
-            "What unit would you like tempeture to be measured in?",
+            "What unit would you like temperature to be measured in?",
             nil, sped)
         aapi.cprint(this, "eve",
             "Your options are: F,C, and K",
@@ -176,26 +185,63 @@ function FSSetup()
 
     local SodTable = {}
     local BoiTable = {}
+    function Pcheck(peripher,pertype,loc_pname)
+        peripher = aapi.Pertype(pertype)
+        if #peripher == 0 then
+            aapi.cprint(this, "eve",
+                "No Fission Reactors Detected.. Please ensure the ".. loc_pname .." is connected to the network and try again..",
+                nil, sped)
+            pktc()
+            aapi.cprint(this, "eve",
+            "Updating Peripheral List. Please wait...",
+                nil, sped)
+            sleep(1)
+            aapi.PeripheralSetup()
+            Pcheck(peripher,pertype,loc_pname)
+        else
+            aapi.cprint(this, "eve",
+                "There are currently " .. #peripher .." ".. loc_pname .. "s connected to the network, is that correct?",
+                nil, sped)
+            local msg = aapi.uinput(this, "eve", sped, "yn")
+            if msg == "false" then
+                aapi.cprint(this, "eve",
+                    "Connect the disconnected "..loc_pname.."s then continue..",
+                    nil, sped)
+                pktc()
+                aapi.cprint(this, "eve",
+                "Updating Peripheral List. Please wait...",
+                    nil, sped)
+                sleep(1)
+                aapi.PeripheralSetup()
+                Pcheck(peripher,pertype,loc_pname)
+            end
+        end
+    end
     function SodiumSetup()
         local systemtype = "null"
-        local function SodiumInstall()
+        local function Stype()
             aapi.cprint(this, "eve", "What kind of sodium coolent setup do you have?", nil, sped)
-            aapi.cprint(this, "eve",
-                "1. Universal: ALL Boilers are Connected to ALL reators and ALL Reactors are connected to the SAME source of Sodium",
-                nil, sped)
-            aapi.cprint(this, "eve",
-                "2. Segregated: each reactor is connected to it's own boilers and sodium sources, which are not connected to any other reactors",
-                nil, sped)
-            local msg = aapi.uinput(this,"eve",sped,{"1","2"},true)
-            if msg == "1" then 
-                systemtype = "uni"
-                aapi.cprint(this, "eve", "Universal system type selected..", nil, sped)  
-            elseif msg == "2" then
-                systemtype = "seg"
-                aapi.cprint(this, "eve", "Segregated system type selected..", nil, sped)
-            else
-                error("Something has gone horribly wrong! Please fix!")
-            end
+                aapi.cprint(this, "eve",
+                    "1. Universal: ALL Boilers are Connected to ALL reators and ALL Reactors are connected to the SAME source of Sodium",
+                    nil, sped)
+                aapi.cprint(this, "eve",
+                    "2. Segregated: each reactor is connected to it's own boilers and sodium sources, which are not connected to any other reactors",
+                    nil, sped)
+                local msg = aapi.uinput(this, "eve", sped, { "1", "2" }, true)
+                aapi.cprint(this, "eve", msg)
+                local rmsg = textutils.unserialise(msg)
+                if rmsg == 1 then 
+                    systemtype = "uni"
+                    aapi.cprint(this, "eve", "Universal system type selected..", nil, sped)  
+                elseif rmsg == 2 then
+                    systemtype = "seg"
+                    aapi.cprint(this, "eve", "Segregated system type selected..", nil, sped)
+                else
+                    error("Something has gone horribly wrong! Please fix!")
+                end    
+        end
+        local function SodiumInstall()
+            Stype()
             sleep(.5)
             aapi.cprint(this, "eve",
                 "Due to changes in how AS Reactor manages sodium, all sodium entering the system is required to be in liquid form. The sodium will be converted into its gassious form using rotery condensentrators.",
@@ -234,10 +280,10 @@ function FSSetup()
                 SodTable["R1"] = {}
                 BoiTable["R1"] = {}
                 for i=1,#Boilers do
-                    table.insert(BoiTable["R1"],Condensers[i])
+                    table.insert(BoiTable["R1"],i)
                 end
                 for i=1,#Condensers do
-                    table.insert(SodTable["R1"],Boilers[i])
+                    table.insert(SodTable["R1"],i)
                 end
                 sleep(5)
                 aapi.cprint(this, "eve", "SodiumMAN Installation Complete!", nil, sped)
@@ -253,34 +299,57 @@ function FSSetup()
                     local val = textutils.serialize(i-1)
                     table.insert(conlist,val)
                 end
-                for i=1,#Reactors do
-                    aapi.cprint(this, "eve", "Starting setup for Reactor #"..i, nil, sped)
+                for i = 1, #Reactors do
+                    local rname = "R" .. i
+                    local reactor = Reactors[i]
+                    aapi.cprint(this, "eve", "Starting setup for "..rname, nil, sped)
                     local nombre = "R"..i
                     SodTable[nombre] = {}
                     BoiTable[nombre] = {}
-                    aapi.cprint(this, "eve", "Which boilers are connected to Reactor #"..i, nil, sped)
+                    aapi.cprint(this, "eve", "Which boilers are connected to "..rname, nil, sped)
                     aapi.cprint(this, "eve", "Type one number at a time, and type end when complete", nil, sped)
-                    aapi.cprint(this, "eve", "Boiler numbers are between 0 and "..#Boilers, nil, sped)
+                    aapi.cprint(this, "eve", "Boiler numbers are between 0 and "..#Boilers-1, nil, sped)
                     local looper = true
-                    while looper == true do 
+                    while looper == true do
+                        aapi.cprint(this, "eve", "Type ONE id number or type end when complete", nil, sped)
                         local msg = aapi.uinput(this,"eve",sped,boilist)
-                        local dcm = textutils.unserialize(msg)
+                        local dcm = textutils.unserialise(msg)
                         if msg == "end" then
                             looper = false
                         elseif type(dcm) == "number" then
-                            table.insert(BoiTable[nombre],Boilers[dcm])
+                            table.insert(BoiTable[nombre], dcm + 1)
+                        else
+                            error("You f-ed up andy")
                         end
                     end
-                    aapi.cprint(this, "eve", "Which condensentrators are connected to Reactor #"..i, nil, sped)
+                    aapi.cprint(this, "eve", "Which condensentrators are connected to to "..rname, nil, sped)
                     aapi.cprint(this, "eve", "Type one number at a time, and type end when complete", nil, sped)
-                    aapi.cprint(this, "eve", "Condensentrators numbers are between 0 and "..#Condensers, nil, sped)
-                    while looper == true do 
-                        local msg = aapi.uinput(this,"eve",sped,conlist)
-                        local dcm = textutils.unserialize(msg)
+                    aapi.cprint(this, "eve", "Condensentrators numbers are between 0 and " .. #Condensers-1, nil, sped)
+                    looper = true
+                    while looper == true do
+                        aapi.cprint(this, "eve", "Type ONE id number or type end when complete", nil, sped)
+                        local msg = aapi.uinput(this, "eve", sped, conlist)
+                        local dcm = textutils.unserialise(msg)
                         if msg == "end" then
                             looper = false
                         elseif type(dcm) == "number" then
-                            table.insert(SodTable[nombre],Condensers[dcm])
+                            table.insert(SodTable[nombre], dcm + 1)
+                        else
+                            error("You f-ed up andy")
+                        end
+                    end
+                    local coollevel = reactor.getCoolantFilledPercentage()
+                    if coollevel < .98 then
+                        for e=1,#SodTable["R"..i] do
+                            local num = SodTable["R" .. i][e]
+                            local sod = Condensers[num]
+                            sod.setCondensentrating(true)
+                        end
+                    else
+                        for e=1,#SodTable["R"..i] do
+                            local num = SodTable["R" .. i][e]
+                            local sod = Condensers[num]
+                            sod.setCondensentrating(false)
                         end
                     end
                 end
@@ -295,13 +364,16 @@ function FSSetup()
                 "Note: Andysoft is not liable for any damages incured due to incompatibilities between the SodiumMAN software and your reactor setup and may charge an additional fee for any service calls involving incompatibilities (regardless of plan tier). Are you sure you want to skip the setup walkthrough?",
                 nil, sped)
             local msg = aapi.uinput(this, "eve", sped, "yn")
-            if msg == true then
+            if msg == "true" then
+                Stype()
                 SodiumConfig()
             else
                 SodiumInstall()
+                SodiumConfig()
             end
         else
             SodiumInstall()
+            SodiumConfig()
         end
     end
     function RedstoneSetup()
@@ -443,125 +515,88 @@ function FSSetup()
         end
     end
     function ReactorCert()
-        local maxburn = {}
-        local bwaterbneck = false
-        aapi.cprint(this,"eve","Starting the: 'Nuclear Regulatory Commission 'Approved' Reactor Certification Test.. This may take some time to complete.. Please ensure all chunks remain loaded while test is underway..",nil,sped)
-        for i = 1, #Reactors do
-            aapi.cprint(this,"eve","Starting test on Reactor #"..i.."..",nil,sped)
-            local reactor = Reactors[i]
-            local complete = false
-            reactor.setBurnRate(1)
-            reactor.activate()
-            while complete == false do
-                if reactor.isForceDisabled() == true then
-                    error("Reactor is busted bro")
-                end
-                local rcool = reactor.getCoolantFilledPercentage()
-                local rburn = reactor.getBurnRate()
-                local function completed()
-                    complete = true
-                    reactor.setBurnRate(1)
-                    reactor.scram()
-                    table.insert(maxburn, (rburn - 1))
-                    aapi.cprint(this,"eve","Test on Reactor #"..i.." Complete..",nil,sped)
-                end
-                if rcool < .95 then
-                    completed()
-                    aapi.cprint(this, "eve", "Coolent Bottleneck at " .. rburn, nil, sped)
-                end
-                for u = 1, #Boilers do
-                    local boiler = Boilers[u]
-                    local bwater = boiler.getWaterFilledPercentage()
-                    if bwater < .90 then
-                        bwaterbneck = true
+        if Testing == false then
+            local maxburn = {}
+            local bwaterbneck = false
+            aapi.cprint(this,"eve","Starting the: 'Nuclear Regulatory Commission 'Approved' Reactor Certification Test.. This may take some time to complete.. Please ensure all chunks remain loaded while test is underway..",nil,sped)
+            for i = 1, #Reactors do
+                local rname = "R"..i
+                aapi.cprint(this,"eve","Starting test on "..rname.."..",nil,sped)
+                local reactor = Reactors[i]
+                local complete = false
+                reactor.setBurnRate(1)
+                reactor.activate()
+                local firstfill = false
+                local filling = false
+                while complete == false do
+                    local rcool = reactor.getCoolantFilledPercentage()
+                    local rburn = reactor.getBurnRate()
+                    if rcool < .96 and firstfill == false then
+                        reactor.setBurnRate(.1)
+                        filling = true
+                        firstfill = true
+                        for e = 1, #SodTable["R" .. i] do
+                            Condensers[SodTable["R" .. i][e]].setCondensentrating(true)
+                        end
+                        aapi.cprint(this,"eve","Filling Reactor to required levels for testing, please wait..",nil,sped)                    
+                        while filling == true do
+                            rcool = reactor.getCoolantFilledPercentage()
+                            if rcool > .98 then
+                                filling = false
+                                for e = 1, #SodTable["R" .. i] do
+                                    Condensers[SodTable["R" .. i][e]].setCondensentrating(false)
+                                end
+                            else
+                                aapi.cprint(this,"eve","Reactor Coolant at ".. disp.textf("per",rcool).." . Filling to 98%...",nil,sped)
+                            end
+                            sleep(15)
+                        end
+                        reactor.setBurnRate(1)
+                    else
+                        firstfill = true
+                    end
+                    if reactor.isForceDisabled() == true then
+                        error("Reactor is busted bro")
+                    end
+
+                    local function completed()
+                        complete = true
+                        reactor.setBurnRate(1)
+                        reactor.scram()
+                        table.insert(maxburn, (rburn - 1))
+                        aapi.cprint(this,"eve","Test on "..rname.." Complete..",nil,sped)
+                    end
+                    if rcool < .95 then
                         completed()
-                        aapi.cprint(this, "eve", "Boiler Water Level Bottleneck at " .. rburn, nil, sped)
+                        aapi.cprint(this, "eve", "Coolent Bottleneck at " .. rburn, nil, sped)
+                    end
+                    for u = 1, #Boilers do
+                        local boiler = Boilers[u]
+                        local bwater = boiler.getWaterFilledPercentage()
+                        if bwater < .90 then
+                            bwaterbneck = true
+                            completed()
+                            aapi.cprint(this, "eve", "Boiler Water Level Bottleneck at " .. rburn, nil, sped)
+                        end
+                    end
+                    if complete == false then
+                        if rcool < .985 then
+                            reactor.setBurnRate(rburn + 1.5) 
+                            aapi.cprint(this, "eve", "Increasing Burn Rate by 1.5")
+                        else
+                            reactor.setBurnRate(rburn + .5) 
+                            aapi.cprint(this, "eve", "Increasing Burn Rate by .5")
+                        end
+                        sleep(10)
                     end
                 end
-                if complete == false then
-                    reactor.setBurnRate(rburn + .5)
-                    aapi.cprint(this, "eve", "Increasing Burn Rate by .5")
-                    sleep(10)
-                end
             end
-        end
-        return (maxburn)
-    end
-    function Rcheck()
-        aapi.PeripheralSetup()
-        if #Reactors == 0 then
-            aapi.cprint(this, "eve",
-                "No Fission Reactors Detected.. Please ensure the reactor logic port is connected to the network and try again..",
-                nil, sped)
-            pktc()
-            Reactors = aapi.Pertype("fissionReactorLogicAdapter")
-            Rcheck()
+            return (maxburn)
         else
-            aapi.cprint(this, "eve",
-                "There are currently " .. #Reactors .. " Fission Reactors connected to the network, is that correct?",
-                nil, sped)
-            local msg
-            aapi.uinput(this, "eve", sped, "yn")
-            if msg == "false" then
-                aapi.cprint(this, "eve",
-                    "Connect the disconnected reactors then continue..",
-                    nil, sped)
-                pktc()
-                Reactors = aapi.Pertype("fissionReactorLogicAdapter")
-                Rcheck()
-            end
+            return (65)
         end
     end
-    function Bcheck()
-        aapi.PeripheralSetup()
-        if #Boilers == 0 then
-            aapi.cprint(this, "eve",
-                "No Boilers Detected.. Please ensure the Boilers valve is connected to the network and try again..",
-                nil, sped)
-            pktc()
-            Boilers = aapi.Pertype("boilerValve")
-            Bcheck()
-        else
-            aapi.cprint(this, "eve",
-                "There are currently " .. #Boilers .. " Boilers connected to the network, is that correct?",
-                nil, sped)
-            local msg
-            aapi.uinput(this, "eve", sped, "yn")
-            if msg == "false" then
-                aapi.cprint(this, "eve",
-                    "Connect the disconnected peripherals then continue..",
-                    nil, sped)
-                pktc()
-                Boilers = aapi.Pertype("boilerValve")
-                Bcheck()
-            end
-        end
-    end
-    function Tcheck()
-        aapi.PeripheralSetup()
-        if #Turbines == 0 then
-            aapi.cprint(this, "eve",
-                "No Turbines Detected.. Please ensure the turbine valve is connected to the network and try again..",
-                nil, sped)
-            pktc()
-            Turbines = aapi.Pertype("turbineValve")
-            Tcheck()
-        else
-            aapi.cprint(this, "eve",
-                "There are currently " .. #Turbines .. " Turbines connected to the network, is that correct?",
-                nil, sped)
-            local msg
-            aapi.uinput(this, "eve", sped, "yn")
-            if msg == "false" then
-                aapi.cprint(this, "eve",
-                    "Connect the disconnected peripherals then continue..",
-                    nil, sped)
-                pktc()
-                Turbines = aapi.Pertype("turbineValve")
-                Tcheck()
-            end
-        end
-    end
+
     Battery = false
     Batnames = {}
     SM = 0
@@ -594,14 +629,16 @@ function FSSetup()
         --         end
         --     end
         -- end
-        Rcheck()
-        Bcheck()
+        aapi.cprint(this, "eve", "Beginning Peripheral Testing...", nil, sped)
+        Pcheck(Reactors,"fissionReactorLogicAdapter","Fission Reactor")
+        Pcheck(Boilers, "boilerValve", "Boiler")
+        Pcheck(Turbines, "turbineValve", "Turbine")
+        
         SodiumSetup()
         --Vcheck()
         BR = ReactorCert()
         if tier > 1 then
 
-            Tcheck()
             local function Turbinetest()
                 local blades = 0
                 for i = 1, #Turbines do
@@ -651,33 +688,38 @@ function FSSetup()
                             local msg = aapi.uinput(this, "eve", sped)
                             table.insert(bname, msg)
                         end
-                        return(bname)
+                        Batnames = bname
                     end
                     Battery = true
                     Bacheck()
-                    Batnames = BatterySetup()
+                    BatterySetup()
                 end
                 aapi.cprint(this, "eve", "What would you like the margin (percentage produced above what is being consumed)?", nil, sped)
-                SM = aapi.uinput(this,"eve",sped,"num") /100 + 1  
+                SM = textutils.unserialize(aapi.uinput(this,"eve",sped,"num")) /100 + 1  
             end
         end
     end
-    local fs_ = fs.open("/asreactor/settings.txt", "r")
+    local fs_ = fs.open("/asreactor/settings.txt", "w")
     fs_.writeLine(tier)
     fs_.writeLine(SM)
     fs_.writeLine(0)   
     fs_.writeLine(Battery)
-    fs_.writeLine(Batnames)
+    --fs_.writeLine(textutils.serialize(Batnames))
     fs_.writeLine(TR)
     fs_.writeLine(1)
     fs_.writeLine(BR)
     fs_.writeLine(Energyunit)
     fs_.writeLine(Tempunit)
     fs_.writeLine(0)
-    fs_.writeLine({})   
-    fs_.writeLine(SodTable) 
-    fs_.writeLine(BoiTable)  
+    --fs_.writeLine(textutils.serialize({}))   
+    --fs_.writeLine(textutils.serialize(SodTable)) 
+    --fs_.writeLine(textutils.serialize(BoiTable))
     fs_.close()
+    aapi.FM("save", "/asreactor/batdata.txt", Batnames)
+    aapi.FM("save", "/asreactor/SodMAN1.txt", SodTable)
+    aapi.FM("save", "/asreactor/SodMAN2.txt", BoiTable)
+    aapi.FM("save","/asreactor/APset.txt",{})
+
 
     -- local msg = aapi.uinput(this,"eve",sped,{"Yes","No"},false,true,false)
     -- if string.lower(msg) == "yes" then

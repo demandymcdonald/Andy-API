@@ -48,102 +48,96 @@ end
 -- NOTE: as a protective measure, uinput returns everything (including numbers and ints) as a string, use textutils.unserialise() to revert any output to its variable,int, or number form
 function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password)
     if window == nil then
-		window = term.native()
-		term.redirect(window)
-	else 
-		term.redirect(window)
-	end
+        window = term.native()
+        term.redirect(window)
+    else
+        term.redirect(window)
+    end
+    if allow == nil then
+        allow = "none"
+    end
 	local msg = "nullnullnull"
     local complete = require("cc.completion")
 	local mx,my = term.getSize()
     local x, y = term.getCursorPos()
-	local output = nil
     --aapi.dbg("Cursor Y: "..y)
     if y + 1 >= my then
         term.scroll(1)
-		term.setCursorPos(1, my)
+        term.setCursorPos(1, my)
     else
-		term.setCursorPos(1, y + 1)
-	end
+        term.setCursorPos(1, y + 1)
+    end
+    local cpass = false
     local function confo(msg_)
         if confirm == true then
             aapi.cprint(window, sender, "Please retype your entry to confirm..", nil, speed)
             local confi = read()
             if confi == msg_ then
-                output = msg_
+                cpass = true
             else
                 aapi.cprint(window, sender, "Entries do not match.. Try again", nil, speed)
                 sleep(1)
-                aapi.uinput(window, sender, speed, allow, confirm, autocomplete, password)
             end
         else
 			aapi.dbg("Confo OPT: "..msg_)
-            output = msg_
+            cpass = true
         end
     end
-
+    local pass = false
+    local passval = "nil"    
     local allowlist = {
         num = function()
             if tonumber(msg) ~= nil then
-                confo(msg)
+                pass = true
+                passval = textutils.serialise(msg)
             else
                 aapi.cprint(window,sender,"Invalid entry.. Please only use numbers",nil,speed)
                 sleep(1)
-                aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password)
+                pass = false
             end
         end,
         abc = function()
             if tonumber(msg) == nil then
-                confo(msg)
+                pass = true
+                passval = msg
             else
-                aapi.cprint(window, sender, "Invalid entry.. Please only use Letters and Symbols", nil, speed)
+                aapi.cprint(window,sender,"Invalid entry.. Please only use letters",nil,speed)
                 sleep(1)
-                aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password)
+                pass = false
             end
         end,
         none = function()
             confo(msg)
         end,
-        sallow = function()
-            if msg == allow then
-                confo(msg)
-            else
-                aapi.cprint(window, sender, "Invalid entry.. Please try again...", nil, speed)
-                aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password)
-            end
-        end,
-        tallow = function(t)
-            local pass = false
+        tallow = function()
+            local t = allow
             for i = 1, #t do
-                if msg == t[i] then
+                if string.lower(msg) == string.lower(t[i]) then
                     pass = true
+                    passval = t[i]
                 end
             end
             if pass == false then
-                aapi.cprint(window, sender, "Invalid entry.. Please try again...", nil, speed)
-                aapi.uinput(window, sender, speed, allow, confirm, autocomplete, password)
+                aapi.cprint(window,sender,"Invalid entry.. Please try again",nil,speed)
+                sleep(1)
             end
         end,
         yn = function()
-            local cleaned = string.lower(msg)
-			local pass = false
 			local alist = {"yes","y","n","no"}
 			for i = 1,#alist do 
-				if cleaned == alist[i] then
-					if cleaned == "yes" then
-						confo("true")
-					elseif cleaned == "y" then
-						confo("true")
-					else
-						confo("false")
-					end
-					pass = true
-				end
-			end
-			if pass == false then
+                if string.lower(msg) == string.lower(alist[i]) then
+                    pass = true
+                    if string.lower(alist[i]) == "yes" or string.lower(alist[i]) == "y" or string.lower(alist[i]) == "true" then
+                        passval = "true"
+                    else
+                        passval = "false"
+                    end
+                end
+            end
+            if pass == false then
                 aapi.cprint(window, sender, "Invalid entry.. Please respond with either: y, yes, n, or no", nil, speed)
-                aapi.uinput(window, sender, speed, allow, confirm, autocomplete, password)
-            end               
+                sleep(1)
+            end
         end,
     }
     --if allow == nil then
@@ -169,46 +163,67 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
     --aapi.dbg("Cursor Y: "..y)
     if y + 1 >= my then
         term.scroll(1)
-		term.setCursorPos(1, my)
-    --else
-	--	term.setCursorPos(1, y + 1)
-	end
+        term.setCursorPos(1, my)
+        --else
+        --    term.setCursorPos(1, y + 1)
+    end
+    if allow == "none" then
+        msg = read() or "nil"
+        return
+    end
     if autocomplete == true then
         if type(allow) == "table" then
-            msg = read(nil, nil, function(text) return complete.choice(text, allow) end)
+            while pass == false do
+                msg = read(nil, nil, function(text) return complete.choice(text, allow) end) or "null"
+                allowlist["tallow"]()
+            end
+            while cpass == false do
+                confo(passval)
+            end
         else
             return
         end
     else
-        msg = read()
+        while pass == false do
+            if type(allow) == "table" then
+                msg = read() or " "
+                allowlist["tallow"]()
+            else
+                msg = read() or " "
+                allowlist[allow]()
+            end
+        end
+        while cpass == false do
+            confo(passval)
+        end        
     end
     if password == true then
         
     end
-    if msg == nil then
-        aapi.cprint(window,sender,"No input detected.. Please try again",nil,speed)
-        sleep(1)
-        aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password)
-    elseif type(msg) ~= "string" then
-        aapi.cprint("Invalid entry detected, please try again..")
-        sleep(1)
-        aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password)
-    else
-        if allow then
-            if type(allow) == "table" then
-                allowlist["tallow"](allow)
-            else
-                allowlist[allow]()
-            end
+    -- if msg == " " then
+    --     aapi.cprint(window,sender,"No input detected.. Please try again",nil,speed)
+    --     sleep(1)
+    --     aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password)
+    -- elseif type(msg) ~= "string" then
+    --     aapi.cprint("Invalid entry detected, please try again..")
+    --     sleep(1)
+    --     aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password)
+    -- else
+    --     if allow then
+    --         if type(allow) == "table" then
+                
+    --         else
+    --             allowlist[allow]()
+    --         end
 
-        end
-		if output == nil then
-			aapi.dbg("Uinput Output: nil")
-		else
-			aapi.dbg("Uinput Output:"..output)
-		end
-        return(output)
-    end
+    --     end
+	-- 	if output == nil then
+	-- 		aapi.dbg("Uinput Output: nil")
+	-- 	else
+	-- 		aapi.dbg("Uinput Output:"..output)
+	-- 	end
+        return(passval)
+    -- end
 end
 function aapi.cprint(window, sender, msg, log, speed)
     local color = colors.gray
@@ -395,7 +410,7 @@ function aapi.PeripheralSetup()
         local type = peripheral.getType(PeripheralList[i])
         local count = #AttachedPer[type] + 1
         local wrap = peripheral.wrap(PeripheralList[i])
-        sleep(.1)
+        --sleep(.1)
         local name = peripheral.getName(wrap)
         --local gvarname = _G['fname .. "ct"']
         --print(textutils.serialize(wrap))
@@ -406,7 +421,7 @@ function aapi.PeripheralSetup()
         Persave[type][count]["name"] = name
         _G[name] = wrap
         aapi.dbg(name .. " of type " .. type .. " Initialized.. This is number: " .. count)
-        sleep(0.1)
+        --sleep(0.1)
     end
     aapi.dbg("Peripheral Init Done..")
 end
@@ -476,10 +491,10 @@ function aapi.FM(operation, file, data)
                 aapi.dbg("Error: " .. file .. " is nil")
                 sleep(2)
                 return
+            else
+                value = textutils.unserialize(f.readAll())
+                aapi.dbg(f.readAll())
             end
-
-            value = textutils.unserialize(f.readAll())
-            aapi.dbg(f.readAll())
             f.close()
         end,
         freespace = function()
@@ -726,11 +741,11 @@ function aapi.gitget(cmd, gitfile, localfile, istemp)
     }
     cmds[string.lower(cmd)]()
 end
-function aapi.printdocument(printer,ftype, title, document)
+function aapi.printdocument(printer, ftype, title, document)
     local result = "Printed"
     local function printdoc(tit, text)
         local lines = {}
-        for i = 1,#text do
+        for i = 1, #text do
             local line = require "cc.strings".wrap(text[i], 25)
             if type(line) == "table" then
                 for u = 1, #line do
@@ -800,7 +815,7 @@ function aapi.printdocument(printer,ftype, title, document)
             end
         end
     end
-    
+
     local function fsdocument(path)
         local file = fs.open(path, "r")
         local lines = {}
@@ -813,18 +828,18 @@ function aapi.printdocument(printer,ftype, title, document)
         end
         aapi.dbg("Completeed reading lines")
         file.close()
-        return(lines)
+        return (lines)
     end
     if ftype == "string" or ftype == "table" then
         printdoc(title, document)
     elseif ftype == "github" then
-        aapi.gitget("get",document[1],document[2],true)
-        printdoc(title, fsdocument("/tmp/"..document[2]))
-        shell.run("delete "..document[2])
+        aapi.gitget("get", document[1], document[2], true)
+        printdoc(title, fsdocument("/tmp/" .. document[2]))
+        shell.run("delete " .. document[2])
     elseif ftype == "local" then
         local doc = fsdocument(document)
         printdoc(title, doc)
     end
-    return(result)
+    return (result)
 end
 return aapi_core
