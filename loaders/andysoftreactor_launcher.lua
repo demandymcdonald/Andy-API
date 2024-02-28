@@ -151,6 +151,7 @@ function Startup()
                 end
             end
             menu()
+            sleep(10)
         end
         
     else
