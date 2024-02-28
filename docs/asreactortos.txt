@@ -1,0 +1,58 @@
+
+Andysoft Corporation Terms of Service for Andysoft Reactor
+
+Effective Date: 02/25/2024
+
+Welcome to Andysoft Reactor, a proprietary software developed by Andysoft Corporation ("Andysoft," "we," "us," "our") designed to control nuclear reactors within the Minecraft environment. By installing, copying, downloading, accessing, or otherwise using Andysoft Reactor ("Software"), you ("User," "you," "your") agree to be bound by the following terms and conditions ("Terms of Service"). If you do not agree to these terms, do not use this Software.
+
+1. License Grant
+
+Andysoft grants you a non-exclusive, non-transferable, limited license to use the Software for a single reactor facility within the Minecraft environment. Use of the Software in more than one facility, including facilities on future servers, requires additional licenses, each subject to its fee.
+
+2. Restrictions
+
+You may not modify, distribute, sell, or lease the Software. You agree not to use the Software for any illegal purpose or in any manner inconsistent with these Terms of Service.
+
+3. Software Updates
+
+Andysoft reserves the right, at its sole discretion, to update, modify, or replace any part of the Software without prior notice. Such updates may occur automatically. By continuing to use the Software after updates are released, you agree to be bound by the updated version.
+
+4. Inspection
+
+Andysoft representatives may, at any time and without prior notice, inspect your reactor facility to ensure compliance with these Terms of Service. You agree to provide full access to your facility for such inspections.
+
+5. Liability
+
+You expressly acknowledge and agree that, to the maximum extent permitted by applicable law, your use of the Software is at your sole risk. Andysoft shall not be liable for any direct, indirect, incidental, special, consequential, or exemplary damages, including but not limited to, damages for loss of profits, goodwill, use, data, or other intangible losses (even if Andysoft has been advised of the possibility of such damages), resulting from:
+
+The use or the inability to use the Software;
+Unauthorized access to or alteration of your transmissions or data;
+Conduct or content of any third party on the services;
+Any other matter relating to the services.
+Specifically, Andysoft is not liable for any meltdowns, damage to property, radiation-related illnesses, or any other problems that may arise from the use of the Software.
+
+6. Payments and Fees
+
+Andysoft reserves the right to require payment for any future updates, services, or features related to the Andysoft Reactor. Failure to make such payments may result in termination of your license.
+
+7. Termination
+
+Failure to abide by these Terms of Service may result in immediate termination of your license to use the Software. Upon termination, you must cease all use of the Software and destroy all copies.
+
+8. Governing Law
+
+These Terms of Service shall be governed by and construed in accordance with the laws of the jurisdiction in which Andysoft Corporation is established, without giving effect to any principles of conflicts of law.
+
+9. Amendment and Severability
+
+Andysoft reserves the right, at its sole discretion, to modify or replace any part of these Terms of Service. It is your responsibility to check these Terms of Service periodically for changes. Your continued use of or access to the Software following the posting of any changes to these Terms of Service constitutes acceptance of those changes.
+
+10. Agreement to Terms
+
+Continued use of the Software shall be considered conclusive acceptance of these Terms of Service. If any provision of these Terms of Service is deemed unlawful, void, or for any reason unenforceable, then that provision shall be deemed severable from these Terms of Service and shall not affect the validity and enforceability of any remaining provisions.
+
+Contact Information
+
+For any questions regarding these Terms of Service, please contact Andysoft Corporation at [Insert Contact Information].
+
+END OF TERMS OF SERVICE

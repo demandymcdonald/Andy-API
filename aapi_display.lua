@@ -1,8 +1,11 @@
 local aapi_display = {}
-aapi = require("aapi_core")
-function aapi_display.initDisplay(setup,result,pers,displaynames,savepath)
+local aapi = require("aapi_core")
+function aapi_display.initDisplay(setup,result,pers,displaynames,savepath,win)
     DataTableSize = {}
     Gval = 0
+    if win == nil then
+        win = term.native()
+    end
     local function monitorSetup()
         local count = 0
         if fs.exists(savepath) and setup == false then
@@ -21,7 +24,7 @@ function aapi_display.initDisplay(setup,result,pers,displaynames,savepath)
                     if id == key then
                         local res = { value, moni }
                         table.insert(result, res)
-                        aapi.dbg("Monitor " .. id .. " is now startcount: " .. value)
+                        aapi.dbg("Monitor " .. id .. " is now type: " .. value)
                     end
                 end
             end
@@ -40,8 +43,8 @@ function aapi_display.initDisplay(setup,result,pers,displaynames,savepath)
             term.clear()
             term.redirect(term.native())
             term.setCursorPos(1, 1)
-            aapi.cprint(nil,"Display","Welcome to Monitor Setup..")
-            aapi.cprint(nil,"Display","We are going to go through every monitor now, for each of your connected monitors please specify the startcount from the list below: ")
+            aapi.cprint(win,"Display","Welcome to Monitor Setup..")
+            aapi.cprint(win,"Display","We are going to go through every monitor now, for each of your connected monitors please specify the type from the list below: ")
             textutils.tabulate(displaynames)
             print()
             print()
@@ -53,8 +56,8 @@ function aapi_display.initDisplay(setup,result,pers,displaynames,savepath)
             local fs_ = fs.open(savepath, "a")
             for id, monit in pairs(pers) do
                 local function monselect()
-                    aapi.cprint(nil,"Display","Monitor " .. dcount .. "/" .. count)
-                    aapi.cprint(nil,"Display","Please choose what startcount monitor " .. id .. " is...")
+                    aapi.cprint(win,"Display","Monitor " .. dcount .. "/" .. count)
+                    aapi.cprint(win,"Display","Please choose which monitor type " .. id .. " is...")
                     local msg = read(nil, displaynames, function(text) return completion.choice(text, displaynames) end)
                     local res = { msg, monit }
                     local sres = msg
@@ -65,7 +68,7 @@ function aapi_display.initDisplay(setup,result,pers,displaynames,savepath)
                         end
                     end
                     if correct == true then
-                        aapi.cprint(nil,"Display","Monitor " .. id .. " saved as startcount " .. msg)
+                        aapi.cprint(win,"Display","Monitor " .. id .. " saved as type " .. msg)
                         table.insert(result, res)
                         fs_.writeLine(sres)
                         sleep(3)
@@ -80,7 +83,7 @@ function aapi_display.initDisplay(setup,result,pers,displaynames,savepath)
                         term.clearLine()
                         dcount = dcount + 1
                     else
-                        aapi.cprint(nil,"Display","Invalid Choice.." .. msg .. " Please try again..")
+                        aapi.cprint(win,"Display","Invalid Choice.." .. msg .. " Please try again..")
                         sleep(3)
                         local px, py = term.getCursorPos()
                         term.setCursorPos(1, py - 1)
@@ -96,7 +99,7 @@ function aapi_display.initDisplay(setup,result,pers,displaynames,savepath)
                 end
                 monselect()
             end
-            aapi.cprint(nil,"Display","Monitor Configuration Complete.. Thank you!")
+            aapi.cprint(win,"Display","Monitor Configuration Complete.. Thank you!")
             fs_.close()
         end
         for key, moni in pairs(pers) do
@@ -115,6 +118,7 @@ function aapi_display.initDisplay(setup,result,pers,displaynames,savepath)
     end
 end
 function aapi_display.addWindow(par, name, title, x, y, wid, hei, color, fs)
+    local last = term.current()
     local w, h = par.getSize()
     aapi.dbg(w)
     aapi.dbg(h)
@@ -166,8 +170,9 @@ function aapi_display.addWindow(par, name, title, x, y, wid, hei, color, fs)
     term.setCursorPos(1, 1)
     _G["w_" .. name].setTextColor(colors.white)
     --print("test test test")
+    term.redirect(last)
 end
-function aapi_display.windowArray(parent,number,namet,titlet,bcolor,fs,startx,starty,endx,endy)
+function aapi_display.windowArray(parent, number, namet, titlet, bcolor, fs, startx, starty, endx, endy)
     local rows = 0
     local count = 0
     local xsize = 0
@@ -180,17 +185,17 @@ function aapi_display.windowArray(parent,number,namet,titlet,bcolor,fs,startx,st
     local rows = 0
     local xint = (endx - startx)
     local yint = (endy - starty)
-    local startcount = nil
-    if (number % 2 == 0) and number >=4 then
+    local startcount = 0
+    if (number % 2 == 0) and number >= 4 then
         rows = number / 4
         count = 4
-        ysize = yint/rows
+        ysize = yint / rows
         startcount = 4
     elseif (number % 2 ~= 0) and number >= 3 then
         startcount = 3
         rows = number / 3
         count = 3
-        ysize = yint/rows
+        ysize = yint / rows
     else
         rows = 1
         count = number
@@ -208,7 +213,7 @@ function aapi_display.windowArray(parent,number,namet,titlet,bcolor,fs,startx,st
         if count > 0 then
             xen = xst + xsize
             yen = yst + ysize
-            disp.addWindow(parent, name, title, xst, yst, xen, yen, bcolor, fs)
+            aapi_display.addWindow(parent, name, title, xst, yst, xen, yen, bcolor, fs)
             xst = xen
             count = count - 1
             dcount = dcount + 1
@@ -218,7 +223,7 @@ function aapi_display.windowArray(parent,number,namet,titlet,bcolor,fs,startx,st
             xst = 1 / count
             xen = xst + xsize
             yen = yst + ysize
-            disp.addWindow(parent, name, title, xst, yst, xen, yen, bcolor, fs)
+            aapi_display.addWindow(parent, name, title, xst, yst, xen, yen, bcolor, fs)
             count = startcount - 1
             dcount = dcount + 1
         end
@@ -230,12 +235,12 @@ function aapi_display.createWidget(tablee, type_, name, title, data, bgcolor, nc
     local sname = name
     local function colorcheck(color)
         local colour = nil
-        if color == nil then
-            colour = colors.lime
-            aapi.dbg("ERROR: Color error in "..sname.." Replaced with Lime")
-        else
-            colour = color
-        end
+        --if color == nil then
+        --    colour = colors.lime
+        --    aapi.dbg("ERROR: Color error in "..sname.." Replaced with Lime")
+        --else
+            colour = color or colors.lime
+        --end
         return(colour)
     end
     name = {}
@@ -453,7 +458,7 @@ function aapi_display.buildWidgets(id,parent,datatable,centered)
                 parent.setCursorPos(xctr, (ystart + 1))
                 parent.write(name)
                 local dat = data_[1]
-                local datlab = disp.textf("per",dat)
+                local datlab = aapi_display.textf("per",dat)
                 --local dmin = data_[2]
                 local dmax = data_[2]
                 local dend = (10*(dat/dmax)) + xstart +1
@@ -645,18 +650,21 @@ function aapi_display.buildWidgets(id,parent,datatable,centered)
     end
     term.redirect(term.native())
 end
-function aapi_display.refreshWidget(id,data)
-    for key, value in pairs(data) do
+function aapi_display.refreshWidget(id, value)
         local c = _G[id][value["name"]]
         term.redirect(c["parent"])
         Widgets[value["type_"]](c["parent"], value["title"], value["data"], c["xpos"], c["ypos"], c["xend"],
-            c["yend"], value["bgcolor"],value["ncolor"], value["dcolor"], value["ecolor"], value["fcolor"])
-        term.redirect(term.native())        
-    end
-    aapi.dbg("Widgets Refreshed")
+            c["yend"], value["bgcolor"], value["ncolor"], value["dcolor"], value["ecolor"], value["fcolor"])
+        term.redirect(term.native())
+    aapi.dbg("Widget:"..value["name"].." Refreshed")
 end
-function aapi_display.textf(type_,text,convert2)
+function aapi_display.textf(type_,text,convertto)
     local result = nil
+    local convert2 = " "
+    if convertto ~= nil then
+        convert2 = string.lower(convertto)
+    end
+     
     local types = {
         per = function()
             result = math.floor(text * 100) .. "%"
@@ -683,8 +691,8 @@ function aapi_display.textf(type_,text,convert2)
         end,
         energy = function()
             local units = {
-                FE = function()
-                    local mathe = math.floor(text * 2.5)
+                fe = function()
+                    local mathe = math.floor(text)
                     local len = string.len(mathe)
                     local concat = {
                         { 1, 3,1, "FE/t" },
@@ -701,9 +709,8 @@ function aapi_display.textf(type_,text,convert2)
                         end
                     end
                 end,
-                RF = function()
-                    local math = text * .4
-                    local mathe = math.floor(text * 2.5)
+                rf = function()
+                    local mathe = math.floor(text)
                     local len = string.char(#mathe)
                     local concat = {
                         { 1,  3,  1,  "RF/t" },
@@ -718,7 +725,41 @@ function aapi_display.textf(type_,text,convert2)
                             aapi.dbg("[textf]   " .. text .. " converted to " .. result)
                         end
                     end
-                end
+                end,
+                j = function()
+                    local mathe = math.floor(text / 2.5)
+                    local len = string.char(#mathe)
+                    local concat = {
+                        { 1,  3,  1,  "J/t" },
+                        { 4,  6,  3,  "kJ/t" },
+                        { 7,  9,  6,  "MJ/t" },
+                        { 10, 12, 9,  "GJ/t" },
+                        { 13, 15, 12, "TJ/t" }
+                    }
+                    for key, value in pairs(concat) do
+                        if len >= value[1] and len <= value[2] then
+                            result = textutils.serialize(mathe / (10 ^ value[3])) .. value[4]
+                            aapi.dbg("[textf]   " .. text .. " converted to " .. result)
+                        end
+                    end
+                end,
+                eu = function()
+                    local mathe = math.floor(text *4)
+                    local len = string.char(#mathe)
+                    local concat = {
+                        { 1,  3,  1,  "EU/t" },
+                        { 4,  6,  3,  "kEU/t" },
+                        { 7,  9,  6,  "MEU/t" },
+                        { 10, 12, 9,  "GEU/t" },
+                        { 13, 15, 12, "TEU/t" }
+                    }
+                    for key, value in pairs(concat) do
+                        if len >= value[1] and len <= value[2] then
+                            result = textutils.serialize(mathe / (10 ^ value[3])) .. value[4]
+                            aapi.dbg("[textf]   " .. text .. " converted to " .. result)
+                        end
+                    end
+                end,
             }
             units[convert2]()
         end    
@@ -750,7 +791,7 @@ function aapi_display.loading(disp, num, tasks)
     disp.setCursorPos(xctr, yctr)
     disp.write("Loading...")
 end
-function aapi_display.ctrtitle(disp,msg,rate)
+function aapi_display.ctrtitle(disp, msg, rate)
     local cool = nil
     local w, h = disp.getSize()
     if disp == term.native() then
@@ -765,8 +806,63 @@ function aapi_display.ctrtitle(disp,msg,rate)
         disp.setTextScale(3)
         cool = 3
     end
-    local xctr, yctr = ((w / 2)-cool) - (string.len(msg)/2), (h / 2)
+    local xctr, yctr = ((w / 2) - cool) - (string.len(msg) / 2), (h / 2)
     disp.setCursorPos(xctr, yctr)
-    textutils.slowWrite(msg,rate)
+    textutils.slowWrite(msg, rate)
+end
+function aapi_display.arrayTabulate(disp,data,starty,color)
+    local rowcount = 0
+    local colcount = 0
+    local column = {}
+    local coleng = {}
+    local ctleng = {}
+    aapi.dbg("Array Tabulating initiated...")
+    --setmetatable(column, {_G = _G})            
+    local dlen,dhei = disp.getSize()
+    for key, value in pairs(data) do
+        colcount = 0
+        rowcount = rowcount + 1
+        for i = 1, #value do
+            colcount = colcount + 1
+        end
+        aapi.dbg("Colcount: " .. colcount)
+        aapi.dbg("Rowcount: "..rowcount)
+    end
+    for key, value in pairs(data) do
+        for i = 1, colcount do
+            if ctleng[i] == nil then
+                ctleng[i] = 0
+            end
+            if ctleng[i] < string.len(value[i]) then
+                ctleng[i] = math.max((string.len(value[i]) + ctleng[i]) / 2)
+            end
+            column[i] = {}
+            table.insert(column[i], value[i])
+        end
+    end
+    -- Start Printing Table
+    local colpos = 1
+    local ypos = starty
+
+    if color == nil then
+        color = colors.white
+    end
+    disp.setTextColor(color)
+    for i = 1, colcount do
+        aapi.dbg("Colpos: " .. colpos)
+        aapi.dbg("Ypos: "..colpos)
+        coleng[i] = (ctleng[i] / dlen) - 2
+        if i ~= 1 then
+            colpos = colpos + coleng[i - 1] + 2
+            ypos = starty
+        end
+        disp.setCursorPos(colpos, ypos)
+        for key, value in pairs(column[i]) do
+            disp.write(" " .. string.sub(value, 1, coleng[i]))
+            ypos = ypos + 1
+            disp.setCursorPos(colpos, ypos)
+        end
+        aapi.dbg("Line "..i.." tabulated")
+    end
 end
 return aapi_display
