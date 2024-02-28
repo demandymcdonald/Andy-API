@@ -296,12 +296,13 @@ function Powermeter()
         -- Reactor produces 200k sodium per mb fuel/tick
         local ucGlobalBR = nil
         if FillMode == true then
-            ucGlobalBR = realmargin/ BRproduce
+            ucGlobalBR = realmargin*4/ BRproduce
         else
             ucGlobalBR = realmargin / BRproduce
         end
         local roundfactor = string.len(math.floor(ucGlobalBR))
-        GlobalBR = string.sub(ucGlobalBR, 1, (3 + roundfactor))
+        local pgr = tonumber(string.sub(ucGlobalBR, 1, (3 + roundfactor))) or 0
+        GlobalBR = math.min(pgr,tonumber(BRLimit) or 1)
         aapi.log(w_rlog, Commandlog, "GlobalBR for Cycle: "..Gcycle.." is "..GlobalBR..".. Old GBR: "..oldbr)
     end
     powerstatistics()
