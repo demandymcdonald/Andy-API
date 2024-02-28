@@ -8,7 +8,7 @@ activationcodes["PlatnumPLUS"] = "2p59HcUjmf2kMe"
 local tiers = {"Basic","Gold","Platnum","PlatnumPLUS"}
 local tier = 0
 Version = "d"
-Testing = true
+Testing = false
 local aapi = require("aapi_core")
 local disp = require("aapi_display")
 local audio = require("aapi_audio")
@@ -16,19 +16,143 @@ local channelmap = {"15 = Scram","14 = Power On","13 = Power Off","12 = Reset Al
 aapi.PeripheralSetup()
 function Startup()
     if fs.exists("/asreactor/settings.txt") then
-        while true do
-            Reactors = aapi.Pertype("fissionReactorLogicAdapter")
-            aapi.cprint(nil, "eve", "Launching AS Reactor...")
+        
+        aapi.cprint(nil, "eve", "Launching AS Reactor... Press any key in the next 8 seconds to enter Boot Menu...")
+        local override = false
+        local function reader()
+            local msg = read()
+            if msg then
+                override = true
+            end
+        end
+        local function timer()
+            aapi.timeout("boot",8)    
+        end
+        parallel.waitForAny(reader,timer)
+        if override == false then
             sleep(2)
-            shell.run("andysoftreactor.lua")
-            for i = 1, #Reactors do
-                local reactor = Reactors[i]
-                if reactor.getStatus() == true then
-                    reactor.scram()
+            while true do
+                Reactors = aapi.Pertype("fissionReactorLogicAdapter")
+                shell.run("andysoftreactor.lua")
+                for i = 1, #Reactors do
+                    local reactor = Reactors[i]
+                    if reactor.getStatus() == true then
+                        reactor.scram()
+                    end
+                end
+                sleep(20)
+            end
+        elseif override == true then
+            local function menu()
+                local sped = 45
+                local this = term.native()
+                term.clear()
+                disp.addWindow(this, "menu", "AS Boot Menu", 0, 0, 1, 1, colors.red, true)
+                this = w_menu
+                aapi.cprint(this, "eve", "Welcome to the boot menu, Please select an option from the list below:",nil,sped)
+                aapi.cprint(this, "eve", "1: Print Documentation")
+                aapi.cprint(this, "eve", "2: Reinstall AS Reactor")
+                aapi.cprint(this, "eve", "3: Restart Computer")
+                local msg = aapi.uinput(this, "eve", sped, { 1, 2, 3 })
+                if msg == 1 then
+                    aapi.cprint(this, "eve", "What file would you like to print?",nil, sped)
+                    aapi.cprint(this, "eve", "1: AS TOS")
+                    aapi.cprint(this, "eve", "2: AS Support TOS")
+                    aapi.cprint(this, "eve", "3: Channel Mapping")                    
+                    aapi.cprint(this, "eve", "4: Code Guide")
+                    aapi.cprint(this, "eve", "5: Command Logs")
+                    aapi.cprint(this, "eve", "6: Reboot")           
+                    local msg = aapi.uinput(this, "eve", sped, { 1, 2, 3, 4, 5, 6 })
+                    local PeripheralList = peripheral.getNames()
+                    local printerinst = false
+                    local function fail()
+                        aapi.cprint(this, "eve",
+                            "Failed to print the terms of service, please ensure there is enough paper and ink in the printer..", nil,
+                            sped)
+                        sleep(30)
+                    end
+                    for i = 1, #PeripheralList do
+                        if peripheral.getType(PeripheralList[i]) == "printer" then
+                            Main_printer = peripheral.wrap(PeripheralList[i])
+                            printerinst = true
+                        end
+                    end
+                    if msg == 1 then
+                        local success = aapi.printdocument(Main_printer,"github", "ASReactor TOS", {"docs/asreactortos.txt","asreactortos.txt"})
+                        if success == "Printed" then
+                            aapi.cprint(this, "eve",
+                                "Document printed.. Have a nice day!", nil,
+                                sped)
+                            os.reboot()
+                        else
+                            fail()
+                        end
+                    elseif msg == 2 then
+                        local success = aapi.printdocument(Main_printer,"github", "ASReactor Support TOS", {"docs/asreactorsupporttos.txt","asreactorsupporttos.txt"})
+                        if success == "Printed" then
+                            aapi.cprint(this, "eve",
+                                "Document printed.. Have a nice day!", nil,
+                                sped)
+                            os.reboot()
+                        else
+                            fail()
+                        end
+                    elseif msg == 3 then
+                        local success = aapi.printdocument(Main_printer,"table", "ASReactor RS Mapping", channelmap)
+                        if success == "Printed" then
+                            aapi.cprint(this, "eve",
+                                "Document printed.. Have a nice day!", nil,
+                                sped)
+                            os.reboot()
+                        else
+                            fail()
+                        end
+                    elseif msg == 4 then
+                        local success = aapi.printdocument(Main_printer,"github", "ASReactor Codex", {"docs/asreactorcodes.txt","asreactorcodes.txt"})
+                        if success == "Printed" then
+                            aapi.cprint(this, "eve",
+                                "Document printed.. Have a nice day!", nil,
+                                sped)
+                            os.reboot()
+                        else
+                            fail()
+                        end
+                    elseif msg == 5 then
+                        aapi.cprint(this, "eve",
+                        "What date would you like to print command logs for (FORMAT AS: yyyy-mm-dd)?", nil,
+                            sped)
+                        local msg = aapi.uinput(this, "eve", sped)
+                        local success = aapi.printdocument(Main_printer,"local", "Command Log Date: "..msg, "/asreactor/commandlogs/cmd-"..msg..".txt")
+                        if success == "Printed" then
+                            aapi.cprint(this, "eve",
+                                "Document printed.. Have a nice day!", nil,
+                                sped)
+                            os.reboot()
+                        else
+                            fail()
+                        end
+                    else
+                        aapi.cprint(this, "eve",
+                        "Rebooting! Have a nice day :)", nil,
+                        sped)
+                    os.reboot()
+                    end
+                elseif msg == 2 then
+                    aapi.cprint(this, "eve", "Are you sure you want to reinstall? This will wipe all save data?", sped)
+                    local msg = aapi.uinput(this, "eve", sped, "yn")
+                    if msg == "true" then
+                        aapi.cprint(this, "eve", "Deleting all userfiles and restarting... Bye!",sped)
+                        shell("delete /asreactor/")
+                        os.reboot()
+                    end
+                elseif msg == 3 then
+                    aapi.cprint(this, "eve", "Rebooting now...",sped)
+                    os.reboot()
                 end
             end
-            sleep(20)
+            menu()
         end
+        
     else
         Reactors = aapi.Pertype("fissionReactorLogicAdapter")
         --Reactors = {}
@@ -63,7 +187,7 @@ end
 
 function FSSetup()
 
-    local sped = 100
+    local sped = 45
     local this = term.native()
     term.clear()
     disp.addWindow(this, "setup", "AS Reactor Setup", 0, 0, 1, 1, colors.red, true)

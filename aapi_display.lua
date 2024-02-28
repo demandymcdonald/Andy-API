@@ -172,7 +172,7 @@ function aapi_display.addWindow(par, name, title, x, y, wid, hei, color, fs)
     --print("test test test")
     term.redirect(last)
 end
-function aapi_display.windowArray(parent,number,namet,titlet,bcolor,fs,startx,starty,endx,endy)
+function aapi_display.windowArray(parent, number, namet, titlet, bcolor, fs, startx, starty, endx, endy)
     local rows = 0
     local count = 0
     local xsize = 0
@@ -186,16 +186,16 @@ function aapi_display.windowArray(parent,number,namet,titlet,bcolor,fs,startx,st
     local xint = (endx - startx)
     local yint = (endy - starty)
     local startcount = 0
-    if (number % 2 == 0) and number >=4 then
+    if (number % 2 == 0) and number >= 4 then
         rows = number / 4
         count = 4
-        ysize = yint/rows
+        ysize = yint / rows
         startcount = 4
     elseif (number % 2 ~= 0) and number >= 3 then
         startcount = 3
         rows = number / 3
         count = 3
-        ysize = yint/rows
+        ysize = yint / rows
     else
         rows = 1
         count = number
@@ -235,12 +235,12 @@ function aapi_display.createWidget(tablee, type_, name, title, data, bgcolor, nc
     local sname = name
     local function colorcheck(color)
         local colour = nil
-        if color == nil then
-            colour = colors.lime
-            aapi.dbg("ERROR: Color error in "..sname.." Replaced with Lime")
-        else
-            colour = color
-        end
+        --if color == nil then
+        --    colour = colors.lime
+        --    aapi.dbg("ERROR: Color error in "..sname.." Replaced with Lime")
+        --else
+            colour = color or colors.lime
+        --end
         return(colour)
     end
     name = {}
@@ -650,15 +650,13 @@ function aapi_display.buildWidgets(id,parent,datatable,centered)
     end
     term.redirect(term.native())
 end
-function aapi_display.refreshWidget(id, data)
-    for key, value in pairs(data) do
+function aapi_display.refreshWidget(id, value)
         local c = _G[id][value["name"]]
         term.redirect(c["parent"])
         Widgets[value["type_"]](c["parent"], value["title"], value["data"], c["xpos"], c["ypos"], c["xend"],
             c["yend"], value["bgcolor"], value["ncolor"], value["dcolor"], value["ecolor"], value["fcolor"])
         term.redirect(term.native())
-    end
-    aapi.dbg("Widgets Refreshed")
+    aapi.dbg("Widget:"..value["name"].." Refreshed")
 end
 function aapi_display.textf(type_,text,convertto)
     local result = nil

@@ -56,19 +56,22 @@ function aapi_audio.newsound(name,chords,soundlength)
 end
 function aapi_audio.mediaplay(audiofile, speakerarray)
     local dfpwm = require("cc.audio.dfpwm")
-    local speaker = speakerarray[1]
+    --local speaker = speakerarray[1]
     local decoder = dfpwm.make_decoder()
-    for chunk in io.lines(audiofile, 16 * 1024) do
-        buffer = decoder(chunk)
-
-        while not speaker.playAudio(buffer, 3) do
-            os.pullEvent("speaker_audio_empty")
-        end
+    if speakerarray == nil then
+        speakerarray = Speakers
     end
-    for i = 1, #speakerarray, 1 do
-        speakerarray[i].playAudio(buffer, 3)
-        while not speaker.playAudio(buffer) do
-            os.pullEvent("speaker_audio_empty")
+    for chunk in io.lines(audiofile, 16 * 1024) do
+        for i = 1, #speakerarray, 1 do
+            local buffer = decoder(chunk)
+
+            while not speakerarray[i].playAudio(buffer, 3) do
+                os.pullEvent("speaker_audio_empty")
+            end
+            speakerarray[i].playAudio(buffer, 3)
+            -- while not speakerarray[i].playAudio(buffer) do
+            --     os.pullEvent("speaker_audio_empty")
+            -- end
         end
     end
 end
@@ -89,15 +92,22 @@ function aapi_audio.playGameSound(sound,speaker,repet)
     end
 end
 function aapi_audio.gitsound(soundname, soundpath, speaker, keep)
-    local loader = require("aapi_loader")
-    loader.custom(soundpath, soundname, false)
-    aapi_audio.mediaplay(soundpath .. soundname, speaker)
+    --local loader = require("aapi_loader")
+    --loader.custom(soundpath, soundname, false)
+    local git = require("gitapi")
+    if Version == "m" then
+        git.get("demandymcdonald", "Andy-API", "main", soundpath..soundname, "tmp/"..soundname)
+    elseif Version == "d" then
+        git.get("demandymcdonald", "Andy-API", "InDev", soundpath..soundname, "tmp/"..soundname)
+    end
+
+    aapi_audio.mediaplay("tmp/"..soundname, speaker)
     if keep == false then
-        shell.run("delete " .. soundpath .. soundname)
+        shell.run("delete /tmp/"..soundname)
     end
 end
-function aapi_audio.smcmd(command, soundname,soundpath, speaker)
-    os.queueEvent("sm",{command,soundname,soundpath,speaker})    
+function aapi_audio.smcmd(command, soundname, soundpath, speaker)
+    os.queueEvent("sm", { command, soundname, soundpath, speaker })
 end
 function aapi_audio.soundmanager()
     local sn = nil

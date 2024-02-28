@@ -1,12 +1,14 @@
 term.clear()
 local aapi = require("aapi_core")
-local DebugLogFiles = "asreactor/debuglogs/"
-aapi.initDebug(DebugLogFiles)
+--local DebugLogFiles = "asreactor/debuglogs/"
+--aapi.initDebug(DebugLogFiles)
 local disp = require("aapi_display")
 local audio = require("aapi_audio")
 aapi.dbg("hello world")
 local speakerenabled = false
 local firsttime = true
+local AReactorsOLD = {}
+Version = "d"
 function Startup()
     aapi.PeripheralSetup()
     Reactors = aapi.Pertype("fissionReactorLogicAdapter")
@@ -16,10 +18,12 @@ function Startup()
     Monitors = aapi.Pertype("monitor")
     Turbines = aapi.Pertype("turbineValve")
     Speakers = aapi.Pertype("speaker")
-    
-    if Speakers then
-        speakerenabled = true
-    end
+    AReactors = {}
+    --if #Speakers > 0 then
+        --aapi.dbg("Speakers Enabled...")
+        --sleep(1)
+        --speakerenabled = true
+    --end
     LastRS = 0
     SelectedReactor = 1
     local PeripheralList = peripheral.getNames()
@@ -38,10 +42,12 @@ function Startup()
     Alarm = false
     Cycle = 0
     Energyunit = "FE"
+    AutoStatus = 0
     ASTable = {}
     SodTable = {}
     BoiTable = {}
     ReactorList = {}
+
     -- SodTable = {R1 = {RC1, RC2, RC3, etc}}
     -- BoiTable = {R1 = {B1,B2,B3,etc.}}
     if fs.exists("/asreactor/settings.txt") then
@@ -56,15 +62,15 @@ function Startup()
             Gcycle = fs_.readLine()
             BRLimit = fs_.readLine()
             Energynit = fs_.readLine()
-            aapi.dbg("Energy set to: "..Energynit)           
+            aapi.dbg("Energy set to: " .. Energynit)
             Tempunit = fs_.readLine()
-            aapi.dbg("Temp set to: "..Tempunit)
-            AutoStatus = fs_.readLine()      
+            aapi.dbg("Temp set to: " .. Tempunit)
+            AutoStatus = fs_.readLine()
             fs_.close()
-            SodTable =  aapi.FM("load", "/asreactor/SodMAN1.txt")
+            SodTable = aapi.FM("load", "/asreactor/SodMAN1.txt")
             BoiTable = aapi.FM("load", "/asreactor/SodMAN2.txt")
             Batnames = aapi.FM("load", "/asreactor/batdata.txt")
-            ASTable = aapi.FM("load","/asreactor/APset.txt")
+            ASTable = aapi.FM("load", "/asreactor/APset.txt")
             disp.initDisplay(false, Displays, Monitors, Displaytypes, "/asreactor/monitorconfig.txt")
         else
             error("Error in settings file... Please delete the file and re-run launcher..")
@@ -73,9 +79,9 @@ function Startup()
         error("Settings file not found.. Please run launcher..")
     end
     -- avg output
-    for i=1,#Monitors do
+    for i = 1, #Monitors do
         Monitors[i].clear()
-        Monitors[i].setBackgroundColour(colors.black)   
+        Monitors[i].setBackgroundColour(colors.black)
     end
 end
 function SaveSettings()
@@ -108,17 +114,19 @@ function SaveSettings()
     end
 end    
 -----------------------------------------------------------------
-function Warning(type,value_,value2_)
+function Warning(type,value2,value)
     local bcolor = colors.lightGray
     local tcolor = colors.black
     local types = {
-        norm = function(value, value2,value2_)
+        norm = function()
             bcolor = value
             tcolor = value2
-            return({bcolor,tcolor})
-        end,    
-        grad = function(dir, value,value2_)
+        end,
+        grad = function()
+            local dir = value2
+            tcolor = colors.black
             if dir == "+" then
+                
                 if value >= .90 then
                     bcolor = colors.lime
                 elseif value >= .65 then
@@ -145,9 +153,10 @@ function Warning(type,value_,value2_)
                     bcolor = colors.lime
                 end
             end
-            return({bcolor,tcolor})
         end,
-        bool = function(dir,value,value2_)
+        bool = function()
+            local dir = value2
+            tcolor = colors.black
             if dir == "+" then
                 if value == true then
                     tcolor = colors.white
@@ -165,10 +174,11 @@ function Warning(type,value_,value2_)
                     bcolor = colors.red
                 end
             end
-            return({bcolor,tcolor})
         end
     }
-    local result = types[string.lower(type)](value_,value2_)
+    types[string.lower(type)]()
+    local result = { bcolor, tcolor }
+    aapi.dbg("Colors: "..bcolor..","..tcolor)
     return(result)
     --table.insert(Warnings,code,tcolor,bcolor)
 end
@@ -196,8 +206,8 @@ function Powermeter()
         for i = 1, #Batteries do
             local bat = Batteries[i]
             local batname = Batnames[i]
-            local output = bat.getLastOutput(), 1
-            local input = bat.getLastInput()
+            local output = bat.getLastOutput() or 1
+            local input = bat.getLastInput() or 0
             local fill = bat.getEnergy() / bat.getMaxEnergy()
             if fill == 0 then
                 output = 1000
@@ -254,6 +264,16 @@ function Powermeter()
         -- local metcap = meter.getCapacity()
         --  EnergyBalance = turout - metflow
     end
+    local numreactors
+    if #AReactors == 0 or #AReactors == nil then
+        if #AReactorsOLD == 0 or #AReactorsOLD == nil then
+            numreactors = 1
+        else
+            numreactors = #AReactorsOLD
+        end
+    else
+        numreactors = #AReactors
+    end
     local function powerstatistics()
         local cyclevel = { INP, OTP, EnergyBalance, Gcycle }
         table.insert(Powertable, cyclevel)
@@ -266,29 +286,39 @@ function Powermeter()
     local oldbr = nil
     local function powercalculate()
         for i = 1, #Reactors do
-            GlobalBR = GlobalBR + Reactors[i].getBurnRate()
+            local reactor = Reactors[i]
+            if reactor.getStatus() == true then
+                GlobalBR = GlobalBR + reactor.getBurnRate()
+            end
         end
         oldbr = GlobalBR
         local realmargin = OTP * Surmargin
         -- Reactor produces 200k sodium per mb fuel/tick
         local ucGlobalBR = nil
         if FillMode == true then
-            ucGlobalBR = (realmargin * 2.5) / BRproduce
+            ucGlobalBR = realmargin/ BRproduce
         else
             ucGlobalBR = realmargin / BRproduce
         end
         local roundfactor = string.len(math.floor(ucGlobalBR))
         GlobalBR = string.sub(ucGlobalBR, 1, (3 + roundfactor))
+        aapi.log(w_rlog, Commandlog, "GlobalBR for Cycle: "..Gcycle.." is "..GlobalBR..".. Old GBR: "..oldbr)
     end
     powerstatistics()
-    if AutoStatus == 0 then
+    if AutoStatus ~= 1 then
         powercalculate()
         if oldbr ~= GlobalBR then
+            local delta = GlobalBR / numreactors
             for i = 1, #Reactors do
-                local delta = GlobalBR / #Reactors
-                aapi.dbg("Delta Burn Rate for " .. #Reactors .. " Reactors is " .. delta .. " Each")
-                local reason = "AUTO-ADJUST-BR Reactor " .. i .. " | 'Adjusted BR to:" .. delta .. "'"
-                Commands(Reactors[i], "Burnrate", reason, delta)
+                local reactor = Reactors[i]
+                if reactor.getStatus() == true then
+                    aapi.dbg("Delta Burn Rate for " .. #AReactors .. " Reactors is " .. delta .. " Each")
+                    local reason = "AUTO-ADJUST-BR Reactor " .. i .. " | 'Adjusted BR to:" .. delta .. "'"
+                    Commands(Reactors[i], "Burnrate", reason, math.min(delta,175))
+                elseif reactor.getBurnRate() ~= 0.1 then
+                    local reason = "AUTO-ADJUST-BR Shutdown Reactor to 0.1"
+                    Commands(Reactors[i], "Burnrate", reason, .1)
+                end
             end
         end
     end
@@ -372,7 +402,7 @@ function Commands(object, input, reason, value1)
             local msg = "!!!SCRAM INITATED!!! - " .. reason
             aapi.log(w_rlog, Commandlog, msg)
             if Alarm == false then
-                Commands["alarmtoggle"]()
+                Commands(nil, "alarmtoggle", "SCRAM")
             end
         end,
         shutdown = function()
@@ -437,125 +467,14 @@ function Commands(object, input, reason, value1)
             elseif Alarm == false then
                 aapi.log(w_rlog, Commandlog, "!!!Facility Alarm Activated!!! -" .. reason)
             end
-            FacilityAlarm()
         end,
         togglefill = function()
         end,
     }
     command[string.lower(input)]()
 end
-
-function SYSstatus()
-    local function reactorstatus()
-        aapi.dbg("Checking Rstatus...")
-        local rcoolfull = false
-        local bcoolfull = false
-        local bwaterfull = false
-        local bwaterempty = false
-        for i = 1, #Reactors do
-            local reactor = Reactors[i]
-            if reactor == nil then
-                aapi.dbg("Reactor = nil")
-                break
-            end
-            local rstatus = nil
-            local rtemp = reactor.getTemperature()
-            local rdama = reactor.getDamagePercent()
-            local rcool = reactor.getCoolantFilledPercentage()
-            local rburn = reactor.getBurnRate()
-            local rwast = reactor.getWasteFilledPercentage()
-            local rfuel = reactor.getFuelFilledPercentage()
-            if reactor.getStatus() == true then
-                if rdama >= .1 then
-                    local reason = "Reactor " .. i .. "AUTO-SCRAM 'DAM'"
-                    Commands(reactor, "scram", reason)
-                    aapi.dbg("SCRAM REACTOR DAMAGE")
-                elseif rtemp >= 1000 then
-                    local reason = "Reactor " .. i .. "AUTO-SCRAM 'TEMP @" .. disp.textf("temp", rtemp, Tempunit) .. "'"
-                    Commands(reactor, "scram", reason)
-                    aapi.dbg("SCRAM HIGH REACTOR TEMP")
-                elseif rcool <= .40 then
-                    local reason = "Reactor " .. i .. "AUTO-SCRAM 'COOL @" .. disp.textf("per", rcool) .. "'"
-                    Commands(reactor, "scram", reason)
-                    aapi.dbg("SCRAM LOW REACTOR COOLANT")
-                elseif rfuel < 0.10 then
-                    local reason = "Reactor " .. i .. "AUTO-SD 'FUEL @" .. disp.textf("per", rfuel) .. "'"
-                    Commands(reactor, "shutdown", reason)
-                    aapi.dbg("SHUTDOWN LOW REACTOR FUEL")
-                elseif rwast >= 0.80 then
-                    local reason = "Reactor " .. i .. "AUTO-SD 'Waste @" .. disp.textf("per", rwast) .. "'"
-                    Commands(reactor, "shutdown", reason)
-                    aapi.dbg("SHUTDOWN HIGH REACTOR WASTE")
-                elseif rcool == 100 then
-                    rcoolfull = true
-                end
-                rstatus = "Active"
-            else
-                rstatus = "Inactive"
-            end
-            SodiumManagement("levelman",i)
-            ReactorList["reactor" .. i] = {}
-            ReactorList["reactor" .. i]["Status"] = rstatus
-            ReactorList["reactor"..i]["StatBool"] = Warning("bool", "+", rstatus)
-            ReactorList["reactor" .. i]["Temp"] = rtemp
-            ReactorList["reactor" .. i]["TempC"] = Warning("GRAD", "-", (rtemp / 1200))
-            ReactorList["reactor" .. i]["Dama"] = rdama
-            ReactorList["reactor"..i]["DamaC"] = Warning("GRAD", "-", rdama)
-            ReactorList["reactor" .. i]["Cool"] = rcool
-            ReactorList["reactor" .. i]["CoolC"] = Warning("GRAD", "+", rcool)
-            ReactorList["reactor" .. i]["Burn"] = rburn
-            ReactorList["reactor"..i]["Wast"] = rwast
-            ReactorList["reactor"..i]["Fuel"] = rfuel
-            Reactorwinwigtable = {}
-            
-            
-            aapi.dbg("Rtemp:" .. rtemp)
-            aapi.dbg("Rdama:" .. rdama)
-            aapi.dbg("Rcool:" .. rcool)
-            aapi.dbg("Rburn:" .. rburn)
-            aapi.dbg("Rwast:" .. rwast)
-            aapi.dbg("Rfuel:" .. rfuel)
-        end
-    end
-    local function boilerstatus()
-
-        for i = 1, #Boilers do
-            local boiler = Boilers[i]
-            local bwater = boiler.getWaterFilledPercentage()
-            local bcoola = boiler.getHeatedCoolantFilledPercentage()
-            local bsteam = boiler.getSteamFilledPercentage()
-            local bwaterlow = false
-            local bcoolfull = false
-            Warning("grad", "+", bwater)
-            Warning("grad", "-", bsteam)
-            Warning("grad", "-", bcoola)
-            if bwater < .25 then
-                local bwaterlow = true
-            else
-                local bwaterlow = false
-            end
-            if bcoola == 1 then
-                local bcoolfull = true
-            else
-                local bcoolfull = false
-            end
-        end
-        if bwaterlow == true then
-            for i = 1, #Reactors do
-                local reactor = Reactors[i]
-                local reason = "Reactor "..i.."AUTO-SCRAM 'BWATER @"..disp.textf("per",bwater).."'"
-                Commands(reactor, "SCRAM", reason)
-                aapi.dbg("SCRAM LOW BOILER WATER")
-            end
-        end
-    end
-    reactorstatus()
-    boilerstatus()
-
-end
---------------------------------------------------------------------------------------------------
 function Input()
-    local input = RS.getAnalogInput("left")
+    local input = RS.getAnalogInput("right")
     local channelmap = {
         one = function()
         end,
@@ -607,20 +526,147 @@ function Input()
         end,
         fifteen = function()
             Commands(Reactors[SelectedReactor],"scram","Manual Activation")
+            
         end
     }
+    local cdecode = {
+        "one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve","thirteen","fourteen","fifteen"
+    }
+
     if input ~= 0 or (LastRS ~= 0 and input == 0) then
         if input == LastRS then
             return
         elseif input == 0 then
             LastRS = 0
         else
-            audio.smcmd("playgamesound","mekanism:digital_beep",1,Speakers)
-            channelmap[input]()
+            if speakerenabled == true then
+                audio.smcmd("playgamesound", "mekanism:digital_beep", 1, Speakers)
+            end
+            aapi.dbg(input)
+            local cd = cdecode[input]
+            channelmap[cd]()
             LastRS = input
-        end            
+        end
     end
+    sleep(1.5)
 end
+function SYSstatus()
+    local function reactorstatus()
+        aapi.dbg("Checking Rstatus...")
+        AReactorsOLD = AReactors
+        AReactors = {}
+        local rcoolfull = false
+        local bcoolfull = false
+        local bwaterfull = false
+        local bwaterempty = false
+        for i = 1, #Reactors do
+            local reactor = Reactors[i]
+            if reactor == nil then
+                aapi.dbg("Reactor = nil")
+                break
+            end
+            local rstatus = nil
+            local rsbool = false
+            local rtemp = reactor.getTemperature()
+            local rdama = reactor.getDamagePercent()
+            local rcool = reactor.getCoolantFilledPercentage()
+            local rburn = reactor.getBurnRate()
+            local rwast = reactor.getWasteFilledPercentage()
+            local rfuel = reactor.getFuelFilledPercentage()
+            if reactor.getStatus() == true then
+                if rdama >= .1 then
+                    local reason = "Reactor " .. i .. "AUTO-SCRAM 'DAM'"
+                    Commands(reactor, "scram", reason)
+                    aapi.dbg("SCRAM REACTOR DAMAGE")
+                elseif rtemp >= 1000 then
+                    local reason = "Reactor " .. i .. "AUTO-SCRAM 'TEMP @" .. disp.textf("temp", rtemp, Tempunit) .. "'"
+                    Commands(reactor, "scram", reason)
+                    aapi.dbg("SCRAM HIGH REACTOR TEMP")
+                elseif rcool <= .40 then
+                    local reason = "Reactor " .. i .. "AUTO-SCRAM 'COOL @" .. disp.textf("per", rcool) .. "'"
+                    Commands(reactor, "scram", reason)
+                    aapi.dbg("SCRAM LOW REACTOR COOLANT")
+                elseif rfuel < 0.10 then
+                    local reason = "Reactor " .. i .. "AUTO-SD 'FUEL @" .. disp.textf("per", rfuel) .. "'"
+                    Commands(reactor, "shutdown", reason)
+                    aapi.dbg("SHUTDOWN LOW REACTOR FUEL")
+                elseif rwast >= 0.80 then
+                    local reason = "Reactor " .. i .. "AUTO-SD 'Waste @" .. disp.textf("per", rwast) .. "'"
+                    Commands(reactor, "shutdown", reason)
+                    aapi.dbg("SHUTDOWN HIGH REACTOR WASTE")
+                elseif rcool == 100 then
+                    rcoolfull = true
+                else
+                    rstatus = "Active"
+                    rsbool = true
+                    table.insert(AReactors,i)
+                end
+            else
+                rstatus = "Inactive"
+                rsbool = false
+            end
+            SodiumManagement("levelman",i)
+            ReactorList["reactor" .. i] = {}
+            ReactorList["reactor" .. i]["Status"] = rstatus
+            ReactorList["reactor" .. i]["StatBool"] = Warning("bool", "+", rsbool)
+            ReactorList["reactor" .. i]["Temp"] = rtemp
+            ReactorList["reactor" .. i]["TempC"] = Warning("GRAD", "-", (rtemp / 1200))
+            ReactorList["reactor" .. i]["Dama"] = rdama/100
+            ReactorList["reactor" .. i]["DamaC"] = Warning("GRAD", "-", rdama)
+            ReactorList["reactor" .. i]["Cool"] = rcool
+            ReactorList["reactor" .. i]["CoolC"] = Warning("GRAD", "+", rcool)
+            ReactorList["reactor" .. i]["Burn"] = rburn
+            ReactorList["reactor" .. i]["Wast"] = rwast
+            ReactorList["reactor" .. i]["Fuel"] = rfuel
+            Reactorwinwigtable = {}
+            
+            
+            aapi.dbg("Rtemp:" .. rtemp)
+            aapi.dbg("Rdama:" .. rdama)
+            aapi.dbg("Rcool:" .. rcool)
+            aapi.dbg("Rburn:" .. rburn)
+            aapi.dbg("Rwast:" .. rwast)
+            aapi.dbg("Rfuel:" .. rfuel)
+        end
+    end
+    local function boilerstatus()
+        local bwaterlow = false
+        local bcoolfull = false
+        for i = 1, #Boilers do
+            local boiler = Boilers[i]
+            local bwater = boiler.getWaterFilledPercentage()
+            local bcoola = boiler.getHeatedCoolantFilledPercentage()
+            local bsteam = boiler.getSteamFilledPercentage()
+
+            Warning("grad", "+", bwater)
+            Warning("grad", "-", bsteam)
+            Warning("grad", "-", bcoola)
+            if bwater < .25 then
+                bwaterlow = true
+            else
+                bwaterlow = false
+            end
+            if bcoola == 1 then
+                bcoolfull = true
+            else
+                bcoolfull = false
+            end
+        end
+        if bwaterlow == true then
+            for i = 1, #Reactors do
+
+                local reason = "Reactor "..i.."AUTO-SCRAM 'BWATER @"..disp.textf("per",bwater).."'"
+                Commands(reactor, "SCRAM", reason)
+                aapi.dbg("SCRAM LOW BOILER WATER")
+            end
+        end
+    end
+    reactorstatus()
+    boilerstatus()
+
+end
+--------------------------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------------------------
 function BuildDisplays()
     local function CustomReactorInterface()
@@ -673,21 +719,19 @@ local function convertenergy(data)
 end
 function SYSstatusWidgets()
     Rwidget = {}
-    disp.createWidget(Rwidget, "display", ("Selected Reactor"),
-    ("SELR"), SelectedReactor, colors.yellow,
-    colors.black, colors.white)
+    disp.createWidget(Rwidget, "display", "SelectReact",
+        ("SELR"), SelectedReactor, colors.yellow,
+        colors.black, colors.white)
     --for key, data in pairs(Reactors) do
-    for i=1,#Reactors do
+    for i = 1, #Reactors do
         local name = ReactorList["reactor" .. i]
-        
         disp.createWidget(Rwidget, "display", ("reactor" .. i .. "status"),
             ("R" .. i .. "STAT"), name["Status"], name["StatBool"][1],
             name["StatBool"][2], colors.white)
         disp.createWidget(Rwidget, "display", ("reactor" .. i .. "dama"),
             ("R" .. i .. "DAMA"), disp.textf("per", name["Dama"]), name["DamaC"][1],
             name["DamaC"][2], colors.white)
-            aapi.dbg(Tempunit)
-            sleep(5)
+        aapi.dbg(Tempunit)
         disp.createWidget(Rwidget, "display", ("reactor" .. i .. "temp"),
 
             ("R" .. i .. "TEMP"), disp.textf("temp", name["Temp"], Tempunit), name["TempC"][1],
@@ -704,10 +748,8 @@ function SYSstatusWidgets()
         disp.createWidget(Rwidget, "display", ("reactor" .. i .. "waste"),
             ("R" .. i .. "WAST"), disp.textf("per", name["Wast"]), colors.gray,
             colors.white, colors.white)
-        i = i + 1
     end
 end
-
 function POWmainstatWidgets()
     -- Powertable{INP OTP ENBAL}
     local dname = {}
@@ -760,27 +802,138 @@ function POWmainstatWidgets()
         POWstatusWidgets(i)
     end
 end
+local function wformat(type, name, title, data, bgcolor, ncolor, dcolor, ecolor, fcolor)
+    local tab = {}
+    tab["name"] = name
+    tab["type_"] = type
+    tab["title"] = title
+    tab["data"] = data
+    tab["bgcolor"] = bgcolor or colors.black
+    tab["ncolor"] = ncolor or colors.black
+    tab["dcolor"] = dcolor or colors.black
+    tab["ecolor"] = ecolor or colors.black
+    tab["fcolor"] = fcolor or colors.black
+    return (tab)
+end
+function RefreshSW()
+    local rs_sel = wformat("display","SelectReact", "SELR", SelectedReactor, colors.yellow,colors.black, colors.white)
+    disp.refreshWidget("Rwidgets", rs_sel)
+    for i = 1, #Reactors do
+        local name = ReactorList["reactor" .. i]
+        local rs_stat = wformat("display", ("reactor" .. i .. "status"),("R" .. i .. "STAT"), name["Status"],
+            name["StatBool"][1],
+            name["StatBool"][2], colors.white)
+        local rs_dama = wformat("display",("reactor" .. i .. "dama"),
+            ("R" .. i .. "DAMA"), disp.textf("per", name["Dama"]), name["DamaC"][1],
+            name["DamaC"][2], colors.white)
+        local rs_temp = wformat("display",("reactor" .. i .. "temp"),
+            ("R" .. i .. "TEMP"), disp.textf("temp", name["Temp"], Tempunit), name["TempC"][1],
+            name["TempC"][2], colors.white)
+        local rs_cool = wformat( "display",("reactor" .. i .. "cool"), ("R" .. i .. "COOL"),
+            disp.textf("per", name["Cool"]), name["CoolC"][1],
+            name["CoolC"][2], colors.white)
+        local rs_burn = wformat("display",("reactor" .. i .. "br"),  ("R" .. i .. "BURN"), name["Burn"], colors.gray,
+            colors.white, colors.white)
+        local rs_fuel = wformat( "display", ("reactor" .. i .. "fuel"),("R" .. i .. "FUEL"),
+            disp.textf("per", name["Fuel"]), colors.gray,
+            colors.white, colors.white)
+        local rs_waste = wformat("display", ("reactor" .. i .. "waste"), ("R" .. i .. "WAST"),
+            disp.textf("per", name["Wast"]), colors.gray,
+            colors.white, colors.white)
+
+
+        disp.refreshWidget("Rwidgets", rs_stat)
+        disp.refreshWidget("Rwidgets", rs_dama)
+        disp.refreshWidget("Rwidgets", rs_temp)
+        disp.refreshWidget("Rwidgets", rs_cool)
+        disp.refreshWidget("Rwidgets", rs_burn)
+        disp.refreshWidget("Rwidgets", rs_fuel)
+        disp.refreshWidget("Rwidgets", rs_waste)
+    end
+end
+function RefreshBW()
+    local dname = {}
+    local aiop = {}
+    local aotp = {}
+    local aenb = {}
+    local aiopd = {}
+    local aotpd = {}
+    local aenbd = {}
+    for key, value in pairs(Powertable) do
+        table.insert(dname, value[4])
+        table.insert(aiop, value[1])
+        table.insert(aotp, value[2])
+        table.insert(aenb, value[3])
+        table.insert(aiopd, disp.textf("energy", value[1], Energyunit))
+        table.insert(aotpd, disp.textf("energy", value[2], Energyunit))
+        table.insert(aenbd, disp.textf("energy", value[3], Energyunit))
+    end
+    local aenb_ = disp.createDataTable(dname, aenb, aenbd)
+    local aiop_ = disp.createDataTable(dname, aiop, aiopd)
+    local aotp_ = disp.createDataTable(dname, aotp, aotpd)
+    local w1 = wformat( "smallbargraph", "EnergyBalanceG", "Energy Balance", aenb_, colors
+        .gray, colors.white, colors.black, colors.black, { colors.blue, colors.lightBlue })
+    local w2 = wformat("smallbargraph", "AIOPG", "Generating:", aiop_, colors
+        .gray, colors.white, colors.black, colors.black, { colors.blue, colors.lightBlue })
+    local w3 = wformat("smallbargraph", "AOTPG", "Using:", aotp_, colors
+        .gray, colors.white, colors.black, colors.black, { colors.blue, colors.lightBlue })
+    local w4 = wformat("display", "EnergyBalanceD", "Energy Balance",
+        disp.textf("energy", convertenergy(EnergyBalance), Energyunit), colors.gray, colors.white, colors.white)
+    local w5 = wformat("display", "AIOPD", "Generating:", disp.textf("energy", convertenergy(INP), Energyunit),
+        colors.green, colors.white, colors.white)
+    local w6 = wformat("display", "AOTPD", "Using:", disp.textf("energy", convertenergy(OTP), Energyunit), colors
+        .red, colors.white, colors.white)
+    
+    
+    disp.refreshWidget("Pwidgets", w1)
+    disp.refreshWidget("Pwidgets", w2)
+    disp.refreshWidget("Pwidgets", w3)
+    disp.refreshWidget("Pwidgets", w4)
+    disp.refreshWidget("Pwidgets", w5)
+    disp.refreshWidget("Pwidgets", w6)
+    local function POWstatusWidgets(i)
+        local name = Batdata[Batnames[i]][Cycle]
+        
+        local wtname = _G["Awidgetlist" .. i]
+        local wt1 = wformat("smallbarmeter", ("Bat" .. i .. "Fill"), ("B" .. i .. "FIL"), { name["Fill"], 1 },
+            colors.gray, colors.white, colors.black, colors.green, colors.white)
+        local wt2 = wformat("display", ("Bat" .. i .. "Input"), ("B" .. i .. "IN"),
+            disp.textf("energy", convertenergy(name["Input"]), Energyunit), colors.gray, colors.white, colors.green)
+        local wt3 = wformat("display", ("Bat" .. i .. "Output"), ("B" .. i .. "OUT"),
+            disp.textf("energy", convertenergy(name["Output"]), Energyunit), colors.gray, colors.white, colors.red)
+        disp.refreshWidget("Awidgets" .. i, wt1)
+        disp.refreshWidget("Awidgets" .. i, wt2)
+        disp.refreshWidget("Awidgets" .. i, wt3)
+    end
+    for i = 1, #Batteries do
+        POWstatusWidgets(i)
+    end
+end
 Startup()
 
 local function thread1()
     if speakerenabled == true then
-        audio.smcmd("playmedia", "startup.dfpwm", "products/asreactorsounds/", Speakers)
+        audio.smcmd("playmedia", "startup.dfpwm", "products/asreactorsounds/", Speakers)    
     end
     while true do
+        aapi.dbg("[THREAD] T1 Running...")
         SYSstatus()
-        SYSstatusWidgets()
+        RefreshSW()
         sleep(5)
     end
 end
 local function thread2()
     while true do
+        aapi.dbg("[THREAD] T2 Running...")
         Powermeter()
-        POWmainstatWidgets()
+        RefreshBW()
         sleep(20)
     end
 end
 local function thread3()
+    aapi.dbg("Input monitoring...")
     while true do
+        aapi.dbg("[THREAD] T3 Running...")
         Input()
     end
 end
@@ -808,13 +961,14 @@ elseif Tier == 3 then
         Powermeter()
         BuildDisplays()
     end
+    aapi.cprint(nil,"eve","Startup Complete! Manual Inputs now accepted..")
     if speakerenabled == true then
         while true do
             parallel.waitForAll(thread1, thread2, thread3,audio.soundmanager,FacilityAlarm)
         end
     else
         while true do        
-            parallel.waitForAll(thread1, thread2, thread3)   
+            parallel.waitForAll(thread1, thread2, thread3,FacilityAlarm)   
         end     
     end
 elseif Tier == 4 then
@@ -824,13 +978,14 @@ elseif Tier == 4 then
         Powermeter()
         BuildDisplays()
     end
+    aapi.cprint(nil,"eve","Startup Complete! Manual Inputs now accepted..")
     if speakerenabled == true then
         while true do    
             parallel.waitForAll(thread1, thread2, thread3,audio.soundmanager,FacilityAlarm)
         end
     else
         while true do    
-            parallel.waitForAll(thread1, thread2, thread3)      
+            parallel.waitForAll(thread1, thread2, thread3,FacilityAlarm)      
         end  
     end
 end

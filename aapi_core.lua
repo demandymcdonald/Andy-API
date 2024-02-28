@@ -27,7 +27,7 @@ end
 -- Used to create a directory for logging specific messages. Path: Path to create a  log file
 function aapi.initLogs(path)
     local CmdInstance = math.random(10000, 99999)
-    local filename = "cmd-" .. os.date("%F") .. "-" .. CmdInstance .. ".txt"
+    local filename = "cmd-" .. os.date("%F") .. ".txt"
     fs.makeDir(path)
     sleep(1)
     return (textutils.serialize(path .. filename))
@@ -36,6 +36,7 @@ end
 function aapi.dbg(msg)
     if Debugmode == true then
         local window = dbgwindow or term.native()
+        window.setBackgroundColor(colors.black)
         aapi.cprint(window, "Dbg", msg, DebugLogFiles)
     end
 end
@@ -46,6 +47,21 @@ end
 -- Allows for custom user input with validation. Win: window to display, defaults to the terminal | sender: who you want confirmation messages to come from (see cprint) | speed: speed at which you want confirmation messages to be sent | Allow: (see below) | confirm: true or false allows for confirmation of input prior to returning it | autocomplete: see cc:complete | password: true or false, allows for hiding of inputs
 -- Allow accepts the following: A table with alllowed inputs, num (numeric inputs only), abc (string only, no number only entries), yn (allows yes, y, n, or no. Returns true or false based on yes or no)
 -- NOTE: as a protective measure, uinput returns everything (including numbers and ints) as a string, use textutils.unserialise() to revert any output to its variable,int, or number form
+function aapi.colors(color)
+    local colorz = {
+        white = colors.white,
+        black = colors.black,
+        red = colors.red,
+        green = colors.green,
+        blue = colors.blue,
+        lime = colors.lime,
+        yellow = colors.yellow,
+        orange = colors.orange,
+        lgray = colors.lightGray,
+        dgray = colors.gray,
+    }
+    return(colorz[color])    
+end
 function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password)
     if window == nil then
         window = term.native()
@@ -386,7 +402,7 @@ function aapi.cprint(window, sender, msg, log, speed)
     else
 		window.setCursorPos(1, y + 1)
 	end
-	sleep(.1)
+	sleep(.05)
 end
 function aapi.PeripheralSetup()
     AttachedPer = {}
@@ -401,11 +417,11 @@ function aapi.PeripheralSetup()
 
         aapi.dbg("Peripheral class " .. peripheral.getType(PeripheralList[i]) .. " Found..")
         aapi.dbg("Variable " .. dbgname .. " Created..")
-        sleep(0.1)
+        --sleep(0.1)
     end
     --print("-----")
     PeripheralList = peripheral.getNames()
-    sleep(2)
+    --sleep(2)
     for i = 1, #PeripheralList do
         local type = peripheral.getType(PeripheralList[i])
         local count = #AttachedPer[type] + 1
