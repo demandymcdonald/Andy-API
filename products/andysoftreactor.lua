@@ -60,7 +60,7 @@ function Startup()
             --Batnames = textutils.unserialize(fs_.readLine())
             BRproduce = fs_.readLine()
             Gcycle = fs_.readLine()
-            BRLimit = fs_.readLine()
+            BRLimit = fs_.readLine() or 1
             Energynit = fs_.readLine()
             aapi.dbg("Energy set to: " .. Energynit)
             Tempunit = fs_.readLine()
@@ -302,7 +302,7 @@ function Powermeter()
         end
         local roundfactor = string.len(math.floor(ucGlobalBR))
         local pgr = tonumber(string.sub(ucGlobalBR, 1, (3 + roundfactor))) or 0
-        GlobalBR = math.min(pgr,tonumber(BRLimit) or 1)
+        GlobalBR = math.min(pgr,tonumber(BRLimit * numreactors))
         aapi.log(w_rlog, Commandlog, "GlobalBR for Cycle: "..Gcycle.." is "..GlobalBR..".. Old GBR: "..oldbr)
     end
     powerstatistics()
