@@ -44,7 +44,7 @@ function Startup()
             end
         elseif override == true then
             local function menu()
-                local sped = 45
+                local sped = 30
                 local this = term.native()
                 term.clear()
                 disp.addWindow(this, "menu", "AS Boot Menu", 0, 0, 1, 1, colors.red, true)
@@ -187,7 +187,7 @@ end
 
 function FSSetup()
 
-    local sped = 45
+    local sped = 30
     local this = term.native()
     term.clear()
     disp.addWindow(this, "setup", "AS Reactor Setup", 0, 0, 1, 1, colors.red, true)
