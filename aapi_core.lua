@@ -2,6 +2,7 @@
 local aapi = {}
 local aapi_core = aapi
 local dbgwindow = nil
+
 local gitbeenrun = false
 --DebugLogFiles = "/"
 --DebugInstance = "nullnullnull"
@@ -24,6 +25,7 @@ function aapi.initDebug(path, win)
     end
     sleep(1)
 end
+
 -- Used to create a directory for logging specific messages. Path: Path to create a  log file
 function aapi.initLogs(path)
     local CmdInstance = math.random(10000, 99999)
@@ -120,11 +122,13 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
                 aapi.cprint(window,sender,"Invalid entry.. Please only use letters",nil,speed)
                 sleep(1)
                 pass = false
+
             end
         end,
         none = function()
             confo(msg)
         end,
+
         tallow = function()
             local t = allow
             for i = 1, #t do
@@ -196,6 +200,7 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
             while cpass == false do
                 confo(passval)
             end
+
         else
             return
         end
@@ -422,6 +427,7 @@ function aapi.PeripheralSetup()
     --print("-----")
     PeripheralList = peripheral.getNames()
     --sleep(2)
+
     for i = 1, #PeripheralList do
         local type = peripheral.getType(PeripheralList[i])
         local count = #AttachedPer[type] + 1
