@@ -87,19 +87,19 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
     end
     local cpass = false
     local function confo(msg_)
-        if confirm == true then
-            aapi.cprint(window, sender, "Please retype your entry to confirm..", nil, speed)
-            local confi = read()
-            if confi == msg_ then
-                cpass = true
-            else
-                aapi.cprint(window, sender, "Entries do not match.. Try again", nil, speed)
-                sleep(1)
-            end
-        else
+        -- if confirm == true then
+        --     aapi.cprint(window, sender, "Please retype your entry to confirm..", nil, speed)
+        --     local confi = read()
+        --     if confi == msg_ then
+        --         cpass = true
+        --     else
+        --         aapi.cprint(window, sender, "Entries do not match.. Try again", nil, speed)
+        --         sleep(1)
+        --     end
+        -- else
 			aapi.dbg("Confo OPT: "..msg_)
             cpass = true
-        end
+        -- end
     end
     local pass = false
     local passval = "nil"    
