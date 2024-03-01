@@ -825,6 +825,9 @@ function FSSetup()
         end
     end
     local fs_ = fs.open("/asreactor/settings.txt", "w")
+    if fs_ == nil then
+        error("No file detected")
+    end
     fs_.writeLine(tier)
     fs_.writeLine(SM)
     fs_.writeLine(0)   

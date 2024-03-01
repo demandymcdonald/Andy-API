@@ -332,12 +332,12 @@ local function sell()
 
     ---@diagnostic disable-next-line: param-type-mismatch
         if rtm == false then
-            movemoney("i", total)
             for slot, item in pairs(Inv.list()) do
                 if item then
                     Inv.pushItems(peripheral.getName(Dispose), slot)
                 end
             end
+            movemoney("i", total)
             for key, value in pairs(ufo) do
                 for name, data in pairs(PriceList) do
                     aapi.dbg("Checking " .. data["Dname"] .. "/" .. value["Name"])
