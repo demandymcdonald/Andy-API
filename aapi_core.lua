@@ -90,7 +90,7 @@ function aapi.uinput(window, sender, speed, allow, confirm,autocomplete,password
         if confirm == true then
             aapi.cprint(window, sender, "Please retype your entry to confirm..", nil, speed)
             local confi = read()
-            if confi == msg_ then
+            if confi == textutils.unserialize(msg_) then
                 cpass = true
             else
                 aapi.cprint(window, sender, "Entries do not match.. Try again", nil, speed)
