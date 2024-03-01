@@ -377,7 +377,7 @@ local function buy()
             aapi.cprint(nil, "Shop", i .. " | " .. GlobalPlayers[i])
         end
         local passs = false
-        local msg = aapi.uinput(nil, "Shop", nil, "num", true)
+        local msg = aapi.uinput(nil, "Shop", nil, "num")
         for i = 1, #GlobalPlayers do
             if i == textutils.unserialize(msg) then
                 passs = true
