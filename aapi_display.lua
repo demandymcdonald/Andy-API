@@ -667,8 +667,12 @@ function aapi_display.textf(type_,text,convertto)
      
     local types = {
         per = function()
-            result = math.floor(text * 100) .. "%"
-            aapi.dbg("[textf]   "..text.." converted to "..result)
+            local text_ = text or 0
+            if type(text) == "string" then
+                text_ = 0
+            end
+            result = math.floor(text_ * 100) .. "%"
+            aapi.dbg("[textf]   "..text_.." converted to "..result)
         end,
         temp = function()
             local units = {
