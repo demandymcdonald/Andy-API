@@ -399,9 +399,10 @@ end
 function Commands(object, input, reason, value1)
     local command = {
         scram = function()
-            object.scram()
+
             local msg = "!!!SCRAM INITATED!!! - " .. reason
             aapi.log(w_rlog, Commandlog, msg)
+            object.scram()
             if Alarm == false then
                 Commands(nil, "alarmtoggle", "SCRAM")
             end
@@ -564,7 +565,8 @@ function SYSstatus()
             local reactor = Reactors[i]
             if reactor == nil then
                 aapi.dbg("Reactor = nil")
-                break
+                aapi.log("[ERROR] Reactor is NIL")
+                return
             end
             local rstatus = nil
             local rsbool = false
@@ -655,7 +657,7 @@ function SYSstatus()
         end
         if bwaterlow == true then
             for i = 1, #Reactors do
-
+                local reactor = Reactors[i]
                 local reason = "Reactor "..i.."AUTO-SCRAM 'BWATER @"..disp.textf("per",bwater).."'"
                 Commands(reactor, "SCRAM", reason)
                 aapi.dbg("SCRAM LOW BOILER WATER")
