@@ -602,11 +602,14 @@ function SYSstatus()
                 else
                     rstatus = "Active"
                     rsbool = true
-                    table.insert(AReactors,i)
+                    table.insert(AReactors, i)
                 end
             else
                 rstatus = "Inactive"
                 rsbool = false
+            end
+            if rdama == 0 and rcool > .95 and reactor.getStatus() == false then
+                reactor.activate()
             end
             SodiumManagement("levelman",i)
             ReactorList["reactor" .. i] = {}
