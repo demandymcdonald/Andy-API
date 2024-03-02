@@ -379,7 +379,7 @@ local function buy()
         local passs = false
         local msg = read()
         for i = 1, #GlobalPlayers do
-            if i == msg then
+            if i == textutils.unserialize(msg) then
                 passs = true
                 un = GlobalPlayers[i]
             end
